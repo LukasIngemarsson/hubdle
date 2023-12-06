@@ -20,5 +20,11 @@ for (let i = 0; i < gameNames.length; i++){
   game.target = '_blank'
   game.href = gameHrefs[i]
   game.innerHTML = gameNames[i].toUpperCase()
+
+  let checkbox = document.createElement('input')
+  checkbox.type = 'checkbox'
+  checkbox.className = 'grid-container__item__checkbox'
+  
+  game.appendChild(checkbox)
   gridContainer.appendChild(game)
 }
