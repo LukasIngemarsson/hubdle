@@ -50,7 +50,7 @@
     right:5%;
     width: 20%;
     height: 50%;
-    background-color: rgba(0,0,0,0.2);
+    background-color: rgba(0,0,0,0.05);
     border-radius: 10px;
     display: flex;
     flex-direction: column;
@@ -67,6 +67,7 @@
     color: white;
     font-size: 30px;
     padding: 10px;
+    word-wrap: break-word;
 }
 
 .leaderboard-container__item {
