@@ -1,0 +1,38 @@
+@import "style.css";
+
+.leaderboard-container {
+    position: absolute;
+    top: 10%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40%;
+    height: 80%;
+    background-color: rgba(0,0,0,0.05);
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 
+    0 0 7px white,
+    0 0 10px white,
+    0 0 21px var(--logo__purple),
+    0 0 42px var(--logo__purple),
+    0 0 57px var(--logo__purple);
+}
+
+.leaderboard-container__title {
+    text-align: center;
+    color: white;
+    font-size: 40px;
+    padding: 10px;
+    word-wrap: break-word;
+}
+
+.leaderboard-container__item {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    color: white;
+    border-bottom: 1px solid white;
+}
