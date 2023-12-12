@@ -1,17 +1,39 @@
-/** USERNAME INIT */
-const username = document.getElementById('username')
-username.addEventListener('focus', () => {
-  username.placeholder = ''
+const usernameInput = document.getElementById('username')
+usernameInput.addEventListener('focus', () => {
+  usernameInput.placeholder = ''
 });
-username.addEventListener('blur', () => {
-  username.placeholder = 'Username'
+usernameInput.addEventListener('blur', () => {
+  usernameInput.placeholder = 'Username'
 });
 
-/** PASSWORD INIT */
-const password = document.getElementById('password')
-password.addEventListener('focus', () => {
-  password.placeholder = ''
+const passwordInput = document.getElementById('password')
+passwordInput.addEventListener('focus', () => {
+  passwordInput.placeholder = ''
 });
-password.addEventListener('blur', () => {
-  password.placeholder = 'Password'
+passwordInput.addEventListener('blur', () => {
+  passwordInput.placeholder = 'Password'
+});
+
+$.ajax({
+  url: '//localhost:3000/php/login.php',
+  method: 'POST',
+  dataType: 'json',
+  success: function (data) {
+      alert(data);
+  },
+  error: function (jqXHRException, textStatus, errorThrown) {
+      console.log('errorThrown: ' + errorThrown);
+  }
+});
+
+$.ajax({
+  url: '//localhost:3000/php/signup.php',
+  method: 'POST',
+  dataType: 'json',
+  success: function (data) {
+      alert(data);
+  }, 
+  error: function (jqXHRException, textStatus, errorThrown) {
+    console.log('errorThrown: ' + errorThrown);
+}
 });

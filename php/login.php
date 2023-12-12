@@ -8,16 +8,22 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         if ($username == "" or $password == "") {
             die("Username or password cannot be empty.");
         }
-        $query = "SELECT * FROM leaderboard WHERE username = :username AND password = :password;";
+        $query = "SELECT * FROM leaderboard WHERE username =
+        (SELECT username FROM user WHERE username = :username AND password = :password);";
         $stmt = $pdo->prepare($query);
         $stmt->bindParam(':username', $username);
         $stmt->bindParam(':password', $password);
         $stmt->execute();
         $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        echo json_decode($results); // TODO: fix error here
-        # free up resources
+        if (count($results) == 0) {
+            die("No match found for the entered username and password. Please try again.");
+        }
+        echo json_encode($results);
+
+        session_start();
+        $_SESSION['username'] = $username;
+
         $pdo = null;
-        $stmt = null;
         header("Location: ../index.html");
         die();
     } catch (PDOException $e) {

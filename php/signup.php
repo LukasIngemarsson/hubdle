@@ -8,15 +8,28 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         if ($username == "" or $password == "") {
             die("Username or password cannot be empty.");
         }
-        $query = "INSERT INTO leaderboard (username, password) VALUES (:username, :password);";
+        else if (strlen($username) > 20) {
+            die("Username cannot be longer than 20 characters.");
+        }
+        else if (strlen($password) > 20) {
+            die("Password cannot be longer than 20 characters.");
+        }
+        else if (strlen($username) < 6) {
+            die("Username has to contain at least 6 characters.");
+        }
+        else if (strlen($password) < 6) {
+            die("Password has to contain at least 6 characters.");
+        }
+        $query = "INSERT INTO user (username, password) VALUES (:username, :password);";
         $stmt = $pdo->prepare($query);
         $stmt->bindParam(':username', $username);
         $stmt->bindParam(':password', $password);
         $stmt->execute();
 
-        # free up resources
+        session_start();
+        $_SESSION['username'] = $username;
+
         $pdo = null;
-        $stmt = null;
         header("Location: ../index.html");
         die();
     } catch (PDOException $e) {

@@ -11,12 +11,6 @@
     border-radius: 10px;
     display: flex;
     flex-direction: column;
-    box-shadow: 
-    0 0 7px white,
-    0 0 10px white,
-    0 0 21px var(--logo__purple),
-    0 0 42px var(--logo__purple),
-    0 0 57px var(--logo__purple);
     align-items: center;
     align-content: center;
     justify-content: flex-start;
@@ -56,7 +50,6 @@ button.signup-container__form__item {
 button.signup-container__form__item:hover {
     background-color: rgba(0, 0, 0, 0.7);
 }
-
 
 input.signup-container__form__item:focus {
     outline: none;
