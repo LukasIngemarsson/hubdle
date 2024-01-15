@@ -26,8 +26,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $stmt->bindParam(':password', $password);
         $stmt->execute();
 
-        session_start();
-        $_SESSION['username'] = $username;
+        $query = "INSERT INTO leaderboard (username, wins) VALUES (:username, 0);";
+        $stmt = $pdo->prepare($query);
+        $stmt->bindParam(':username', $username);
+        $stmt->execute();
 
         $pdo = null;
         header("Location: ../index.html");
