@@ -18,7 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         if (count($results) == 0) {
             die("No match found for the entered username and password. Please try again.");
         }
-        echo json_encode($results);
+        // echo json_encode($results);
 
         session_start();
         $_SESSION['username'] = $username;
