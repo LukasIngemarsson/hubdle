@@ -1,4 +1,5 @@
 <?php
+session_start();
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $username = $_POST['username'];
@@ -8,6 +9,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         if ($username == "" or $password == "") {
             die("Username or password cannot be empty.");
         }
+        $_SESSION['username'] = $username;
+        $_SESSION['password'] = $password;
         $query = "SELECT * FROM user WHERE username = :username AND password = :password;";
         $stmt = $pdo->prepare($query);
         $stmt->bindParam(':username', $username);
@@ -27,4 +30,5 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 }
 else {
     header("Location: ../index.html");
+    die();
 }

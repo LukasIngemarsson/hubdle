@@ -8,12 +8,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
         $stmt->execute();
         $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
         echo json_encode($results);
-        
-        # free up resources
         $pdo = null;
-        $query = null;
-        $stmt = null;
-        $results = null;
     } catch (PDOException $e) {
         die("Query failed: " . $e->getMessage() . "<br/>");
     }

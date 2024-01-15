@@ -1,5 +1,5 @@
 <?php
-
+session_start();
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $username = $_POST['username'];
     $password = $_POST['password'];
@@ -20,6 +20,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         else if (strlen($password) < 6) {
             die("Password has to contain at least 6 characters.");
         }
+        $_SESSION['username'] = $username;
+        $_SESSION['password'] = $password;
         $query = "INSERT INTO user (username, password) VALUES (:username, :password);";
         $stmt = $pdo->prepare($query);
         $stmt->bindParam(':username', $username);
@@ -40,4 +42,5 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 }
 else {
     header("Location: ../index.html");
+    die();
 }
