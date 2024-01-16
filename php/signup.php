@@ -8,8 +8,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         if ($username == "" or $password == "") {
             die("Username or password cannot be empty.");
         }
-        else if (strlen($username) > 20) {
-            die("Username cannot be longer than 20 characters.");
+        else if (strlen($username) > 13) {
+            die("Username cannot be longer than 13 characters.");
         }
         else if (strlen($password) > 20) {
             die("Password cannot be longer than 20 characters.");
