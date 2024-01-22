@@ -7,7 +7,7 @@ let gameNames = ['wordle',
                 'globle',
                 'wordless',
                 'tetris',
-                '2048',
+                'nerdle',
                 ]
 let gameHrefs = ['https://www.nytimes.com/games/wordle/index.html', 
                 'https://ordel.se/',
@@ -17,12 +17,12 @@ let gameHrefs = ['https://www.nytimes.com/games/wordle/index.html',
                 'https://globle-game.com/',
                 'https://lessgames.com/wordless/',
                 'https://tetris.com/play-tetris',
-                'https://play2048.co/',
+                'https://nerdlegame.com/',
                 ]
 
 for (let i = 0; i < gameNames.length; i++) {
   let game = document.createElement('a');
-  game.className = 'grid-container__item';
+  game.className = 'button';
   game.target = '_blank';
   game.href = gameHrefs[i];
   game.innerHTML = gameNames[i].toUpperCase();
@@ -31,7 +31,7 @@ for (let i = 0; i < gameNames.length; i++) {
   checkboxForm.method = 'post';
   let checkbox = document.createElement('input');
   checkbox.type = 'checkbox';
-  checkbox.className = 'grid-container__item__checkbox';
+  checkbox.className = 'button__checkbox';
   checkbox.addEventListener('click', (event) => {
     event.target.checked = true;
   });

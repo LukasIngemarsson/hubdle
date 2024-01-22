@@ -22,13 +22,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
 
         $pdo = null;
-        header("Location: ../index.html");
+        header("Location: ../home.html");
         die();
     } catch (PDOException $e) {
         die("Query failed: " . $e->getMessage() . "<br/>");
     }
 }
 else {
-    header("Location: ../index.html");
+    header("Location: ../home.html");
     die();
 }

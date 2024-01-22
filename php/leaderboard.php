@@ -14,5 +14,5 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     }
 }
 else {
-    header("Location: ../index.html");
+    header("Location: ../home.html");
 }
