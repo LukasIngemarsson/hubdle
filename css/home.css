@@ -1,67 +1,30 @@
 @import "style.css";
 
-.logo {
-    cursor: pointer;
-    color: white;
-    position: absolute;
-    left: 50%;
-    top: 25%;
-    transform: translateX(-50%);
-    font-size: 70px;
-    transition: 0.5s;
-}
-
-.logo:hover .vaporwave-text-glow {
-    text-shadow:
-    0 0 7px #fff,
-    0 0 10px #fff,
-    0 0 21px #fff,
-    0 0 42px var(--logo__blue),
-    0 0 82px var(--logo__blue),
-    0 0 92px var(--logo__blue),
-    0 0 102px var(--logo__blue),
-    0 0 151px var(--logo__blue);
-}
-
 .grid-container {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     grid-gap: 17px;
+    text-align: center;
+}
+
+.button__checkbox {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 25px;
+    height: 25px;
+    margin: 2px;
+}
+
+.container {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    text-align: center;
-    padding-top: 50px;
-}
-
-.grid-container__item {
-    position: relative;
-    font-weight: bold;
-    text-decoration: none;
-    color: white;
-    padding: 25px;
-    border-radius: 5px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.2);
-    width: 150px;
-    margin: 0 auto;
-    background: transparent;
-    border: 2px solid white;
-    transition: 0.5s;
-}
-
-.grid-container__item__checkbox {
-    position: absolute;
-    left: 1%;
-    top: 5.5%;
-    transform: translate(-1%, -5%);
-    width: 20px;
-    height: 20px;
-
-}
-
-.grid-container__item:hover {
-    background-color: white;
-    color: black;
-    box-shadow: 0 0 20px rgba(0,0,0,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 25px;
+    width: 100%;
 }

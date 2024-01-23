@@ -15,7 +15,7 @@ $.ajax({
         }
         table.appendChild(row);
 
-        for (let i = 0; i < data.length; i++) {
+        for (let i = 0; i < 10; i++) {
             row = document.createElement('tr');
             for (let j = 0; j < columnTitles.length; j++) {
                 let item = document.createElement('td');

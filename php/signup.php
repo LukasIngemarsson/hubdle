@@ -22,6 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
         $_SESSION['username'] = $username;
         $_SESSION['password'] = $password;
+        
         $query = "INSERT INTO user (username, password) VALUES (:username, :password);";
         $stmt = $pdo->prepare($query);
         $stmt->bindParam(':username', $username);
@@ -34,13 +35,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $stmt->execute();
 
         $pdo = null;
-        header("Location: ../index.html");
+        header("Location: ../home.html");
         die();
     } catch (PDOException $e) {
         die("Query failed: " . $e->getMessage() . "<br/>");
     }
 }
 else {
-    header("Location: ../index.html");
+    header("Location: ../home.html");
     die();
 }
