@@ -14,8 +14,11 @@ $.ajax({
             row.appendChild(item);
         }
         table.appendChild(row);
-
-        for (let i = 0; i < 10; i++) {
+        length = data.length;
+        if (length > 10) {
+            length = 10;
+        }
+        for (let i = 0; i < length; i++) {
             row = document.createElement('tr');
             for (let j = 0; j < columnTitles.length; j++) {
                 let item = document.createElement('td');
