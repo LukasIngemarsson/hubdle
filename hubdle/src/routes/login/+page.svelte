@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { PageData } from './$types';
+	import { ensureProfile } from '$lib/auth';
 
 	let { data }: { data: PageData } = $props();
 
@@ -37,11 +38,7 @@
 				error = err.message;
 			} else {
 				if (signInData.user) {
-					const username = signInData.user.email?.split('@')[0] ?? `user-${signInData.user.id.slice(0, 8)}`;
-					await supabase.from('profiles').upsert(
-						{ id: signInData.user.id, username },
-						{ onConflict: 'id', ignoreDuplicates: true }
-					);
+					await ensureProfile(supabase, signInData.user);
 				}
 				window.location.href = '/';
 			}

@@ -1,4 +1,5 @@
 import { redirect } from '@sveltejs/kit';
+import { ensureProfile } from '$lib/auth';
 import type { RequestHandler } from './$types';
 
 export const GET: RequestHandler = async ({ url, locals }) => {
@@ -13,11 +14,7 @@ export const GET: RequestHandler = async ({ url, locals }) => {
 	} = await locals.supabase.auth.getUser();
 
 	if (user) {
-		const username = user.email?.split('@')[0] ?? `user-${user.id.slice(0, 8)}`;
-		await locals.supabase.from('profiles').upsert(
-			{ id: user.id, username },
-			{ onConflict: 'id' }
-		);
+		await ensureProfile(locals.supabase, user);
 	}
 
 	redirect(303, '/');
