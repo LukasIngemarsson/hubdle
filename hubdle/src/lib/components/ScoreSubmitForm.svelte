@@ -13,11 +13,12 @@
 	const SubmitMode = { Paste: 'paste', Manual: 'manual' } as const;
 	type SubmitMode = (typeof SubmitMode)[keyof typeof SubmitMode];
 
-	let mode = $state<SubmitMode>(SubmitMode.Paste);
+	let mode = $state<SubmitMode>(SubmitMode.Manual);
 	let rawText = $state('');
 	let gameId = $state('');
 	let score = $state('');
-	let gameDate = $state(new Date().toISOString().slice(0, 10));
+	const today = new Date().toISOString().slice(0, 10);
+	let gameDate = $state(today);
 
 	let selectedRules = $derived(gameId ? GAME_RULES[gameId] : null);
 
@@ -79,6 +80,7 @@
 					type="date"
 					class="input input-bordered w-full"
 					required
+					max={today}
 					bind:value={gameDate}
 				/>
 				<button class="btn btn-primary w-fit">Submit</button>

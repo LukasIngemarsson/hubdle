@@ -47,6 +47,9 @@ export const actions: Actions = {
 		const scoreError = validateScore(parsed.gameId, parsed.score);
 		if (scoreError) return fail(400, { error: scoreError });
 
+		const today = new Date().toISOString().slice(0, 10);
+		if (parsed.gameDate > today) return fail(400, { error: 'Cannot submit a score for a future date.' });
+
 		const { error: insertError } = await locals.supabase.from('submissions').insert({
 			user_id: user.id,
 			group_id: params.id,
@@ -81,6 +84,9 @@ export const actions: Actions = {
 
 		const scoreError = validateScore(gameId, score);
 		if (scoreError) return fail(400, { error: scoreError });
+
+		const today = new Date().toISOString().slice(0, 10);
+		if (gameDate > today) return fail(400, { error: 'Cannot submit a score for a future date.' });
 
 		const { error: insertError } = await locals.supabase.from('submissions').insert({
 			user_id: user.id,
