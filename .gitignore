@@ -9,6 +9,12 @@ Thumbs.db
 # Claude Code (track rules, ignore local settings)
 .claude/settings.local.json
 
+# Local planning notes
+plans/
+
+# Playwright MCP screenshots
+.playwright-mcp/
+
 # Node (root level safety)
 node_modules
 
