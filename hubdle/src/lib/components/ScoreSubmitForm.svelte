@@ -10,7 +10,10 @@
 		games
 	}: { form: { error?: string; success?: boolean } | null; games: Game[] } = $props();
 
-	let mode = $state<'paste' | 'manual'>('paste');
+	const SubmitMode = { Paste: 'paste', Manual: 'manual' } as const;
+	type SubmitMode = (typeof SubmitMode)[keyof typeof SubmitMode];
+
+	let mode = $state<SubmitMode>(SubmitMode.Paste);
 	let rawText = $state('');
 	let gameId = $state('');
 	let score = $state('');
@@ -32,13 +35,13 @@
 			<h2 class="card-title text-base">Submit Score</h2>
 			<button
 				class="btn btn-ghost btn-xs"
-				onclick={() => (mode = mode === 'paste' ? 'manual' : 'paste')}
+				onclick={() => (mode = mode === SubmitMode.Paste ? SubmitMode.Manual : SubmitMode.Paste)}
 			>
-				{mode === 'paste' ? 'Enter manually' : 'Paste share text'}
+				{mode === SubmitMode.Paste ? 'Enter manually' : 'Paste share text'}
 			</button>
 		</div>
 
-		{#if mode === 'paste'}
+		{#if mode === SubmitMode.Paste}
 			<form method="POST" action="?/submit" use:enhance class="flex flex-col gap-3">
 				<textarea
 					name="raw_text"
