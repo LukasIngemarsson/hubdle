@@ -46,7 +46,7 @@
 								<input
 									type="text"
 									name="username"
-									class="input input-bordered input-sm w-40"
+									class="input input-bordered input-sm w-48"
 									bind:value={username}
 									maxlength="30"
 									required
