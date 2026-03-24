@@ -12,12 +12,12 @@
 >
 	{label}
 	<span
-		class="absolute bottom-0 left-1/2 h-px -translate-x-1/2 bg-current opacity-50 transition-all duration-300 ease-out {isActive ? 'w-3/4' : 'w-0'}"
+		class="absolute bottom-0 left-1/2 h-px -translate-x-1/2 bg-current opacity-50 transition-all duration-300 ease-out {isActive ? 'w-[88%]' : 'w-0'}"
 	></span>
 </a>
 
 <style>
 	.nav-link:hover span {
-		width: 75%;
+		width: 88%;
 	}
 </style>
