@@ -50,7 +50,10 @@
 			{#each data.groups as group}
 				<a href="/groups/{group.id}" class="card bg-base-200 shadow transition hover:shadow-lg">
 					<div class="card-body flex-row items-center justify-between">
-						<h2 class="card-title">{group.name}</h2>
+						<div>
+							<h2 class="card-title">{group.name}</h2>
+							<p class="text-sm opacity-50">{group.member_count} {group.member_count === 1 ? 'member' : 'members'}</p>
+						</div>
 						<CopyBadge
 							text={group.invite_code}
 							onclick={(e) => { e.preventDefault(); e.stopPropagation(); }}
