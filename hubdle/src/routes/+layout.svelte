@@ -23,7 +23,7 @@
 
 <div class="grid h-screen grid-rows-[auto_1fr]">
 	<nav class="navbar bg-base-200 px-4">
-		<div class="flex-1 items-center gap-6">
+		<div class="flex flex-1 items-center gap-6">
 			<a href="/" class="text-xl font-bold">Hubdle</a>
 			{#if data.user}
 				<div class="hidden items-center gap-4 sm:flex">

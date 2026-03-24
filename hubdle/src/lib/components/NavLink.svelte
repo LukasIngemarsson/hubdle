@@ -12,7 +12,7 @@
 >
 	{label}
 	<span
-		class="absolute bottom-0 left-0 h-0.5 bg-current transition-all duration-300 ease-out {isActive ? 'w-full' : 'w-0 group-hover:w-full'}"
+		class="absolute bottom-0 left-0 h-px bg-current opacity-60 transition-all duration-300 ease-out {isActive ? 'w-full' : 'w-0 group-hover:w-full'}"
 	></span>
 </a>
 
