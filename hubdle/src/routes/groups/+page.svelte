@@ -1,17 +1,17 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import type { ActionData, PageData } from './$types';
+	import PageContainer from '$lib/components/PageContainer.svelte';
+	import Alert from '$lib/components/Alert.svelte';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 </script>
 
-<div class="mx-auto max-w-2xl p-6">
+<PageContainer>
 	<h1 class="text-2xl font-bold">Your Groups</h1>
 
 	{#if form?.error}
-		<div class="alert alert-error mt-4">
-			<span>{form.error}</span>
-		</div>
+		<Alert type="error" message={form.error} />
 	{/if}
 
 	<div class="mt-6 flex gap-4">
@@ -52,4 +52,4 @@
 			{/each}
 		</div>
 	{/if}
-</div>
+</PageContainer>
