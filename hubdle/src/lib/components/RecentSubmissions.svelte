@@ -15,7 +15,7 @@
 	<div class="card-body">
 		<h2 class="card-title text-base">Recent Submissions</h2>
 		{#if submissions.length === 0}
-			<p class="opacity-70">No submissions yet.</p>
+			<p class="opacity-70">No submissions yet — paste a share text above to submit your first score.</p>
 		{:else}
 			<div class="overflow-x-auto">
 				<table class="table">
