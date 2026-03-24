@@ -1,6 +1,7 @@
 <script lang="ts">
 	import favicon from '$lib/assets/favicon.svg';
 	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
 	import '../app.css';
 
 	import type { LayoutData } from './$types';
@@ -22,7 +23,7 @@
 		<div class="flex-1 gap-4">
 			<a href="/" class="text-xl font-bold">Hubdle</a>
 			{#if data.user}
-				<a href="/groups" class="btn btn-ghost btn-sm">Groups</a>
+				<a href="/groups" class="btn btn-ghost btn-sm {$page.url.pathname.startsWith('/groups') ? 'btn-active' : ''}">Groups</a>
 			{/if}
 		</div>
 		<div class="flex-none">
