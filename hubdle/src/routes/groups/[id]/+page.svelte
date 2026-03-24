@@ -171,7 +171,7 @@
 					triggerClass="btn-error btn-outline btn-sm"
 					confirmLabel="Delete"
 					confirmClass="btn-error"
-					onConfirm={() => deleteForm?.requestSubmit()}
+					onConfirm={() => { unsubscribeRealtime(); deleteForm?.requestSubmit(); }}
 				/>
 			{/if}
 		</div>
