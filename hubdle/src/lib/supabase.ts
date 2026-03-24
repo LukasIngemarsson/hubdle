@@ -1,5 +1,5 @@
 import { createBrowserClient, createServerClient, isBrowser } from '@supabase/ssr';
-import { PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY } from '$env/static/public';
+import { PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_PUBLISHABLE_KEY } from '$env/static/public';
 import type { Database } from '$lib/types/database';
 
 export function createSupabaseClient(
@@ -10,7 +10,7 @@ export function createSupabaseClient(
 	}
 ) {
 	if (isBrowser()) {
-		return createBrowserClient<Database>(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY, {
+		return createBrowserClient<Database>(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_PUBLISHABLE_KEY, {
 			global: { fetch }
 		});
 	}
@@ -19,7 +19,7 @@ export function createSupabaseClient(
 		throw new Error('cookies must be provided on the server');
 	}
 
-	return createServerClient<Database>(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY, {
+	return createServerClient<Database>(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_PUBLISHABLE_KEY, {
 		global: { fetch },
 		cookies: {
 			getAll: () => cookies.getAll(),
