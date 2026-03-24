@@ -23,6 +23,15 @@ export const actions: Actions = {
 
 		if (!name?.trim()) return fail(400, { error: 'Group name is required.' });
 
+		// Ensure profile exists before creating group (FK constraint)
+		const { data: { user } } = await locals.supabase.auth.getUser();
+		if (!user) redirect(303, '/login');
+
+		const username = user.email?.split('@')[0] ?? `user-${user.id.slice(0, 8)}`;
+		await locals.supabase
+			.from('profiles')
+			.upsert({ id: user.id, username }, { onConflict: 'id', ignoreDuplicates: true });
+
 		const inviteCode = crypto.randomUUID().slice(0, 8);
 
 		const { data: group, error: groupError } = await locals.supabase
@@ -31,7 +40,7 @@ export const actions: Actions = {
 			.select('id')
 			.single();
 
-		if (groupError || !group) return fail(500, { error: 'Failed to create group.' });
+		if (groupError || !group) return fail(500, { error: `Failed to create group: ${groupError?.message}` });
 
 		const { error: memberError } = await locals.supabase
 			.from('group_members')
