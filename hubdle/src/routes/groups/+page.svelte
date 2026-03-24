@@ -15,27 +15,33 @@
 		<Alert type="error" message={form.error} />
 	{/if}
 
-	<div class="mt-6 flex flex-col gap-4 sm:flex-row">
-		<form method="POST" action="?/create" use:enhance class="flex flex-1 gap-2">
-			<input
-				type="text"
-				name="name"
-				placeholder="Group name"
-				class="input input-bordered min-w-0 flex-1"
-				required
-			/>
-			<button class="btn btn-primary">Create</button>
+	<div class="mt-6 grid gap-4 sm:grid-cols-2">
+		<form method="POST" action="?/create" use:enhance class="card bg-base-200">
+			<div class="card-body gap-3">
+				<h2 class="card-title text-sm">Create a group</h2>
+				<input
+					type="text"
+					name="name"
+					placeholder="Group name"
+					class="input input-bordered w-full"
+					required
+				/>
+				<button class="btn btn-primary w-full">Create</button>
+			</div>
 		</form>
 
-		<form method="POST" action="?/join" use:enhance class="flex flex-1 gap-2">
-			<input
-				type="text"
-				name="code"
-				placeholder="Invite code"
-				class="input input-bordered min-w-0 flex-1"
-				required
-			/>
-			<button class="btn btn-secondary">Join</button>
+		<form method="POST" action="?/join" use:enhance class="card bg-base-200">
+			<div class="card-body gap-3">
+				<h2 class="card-title text-sm">Join a group</h2>
+				<input
+					type="text"
+					name="code"
+					placeholder="Invite code"
+					class="input input-bordered w-full"
+					required
+				/>
+				<button class="btn btn-primary btn-outline w-full">Join</button>
+			</div>
 		</form>
 	</div>
 
@@ -43,15 +49,15 @@
 		<div class="mt-12 flex flex-col items-center gap-3 text-center opacity-60">
 			<p class="text-4xl">🏆</p>
 			<p class="font-medium">No groups yet</p>
-			<p class="text-sm">Create a group to get started, or join one with an invite code above.</p>
+			<p class="text-sm">Create a group or join one with an invite code above.</p>
 		</div>
 	{:else}
-		<div class="mt-8 grid gap-4">
+		<div class="mt-8 grid gap-3">
 			{#each data.groups as group}
-				<a href="/groups/{group.id}" class="card bg-base-200 shadow transition hover:shadow-lg">
-					<div class="card-body flex-row items-center justify-between">
+				<a href="/groups/{group.id}" class="card bg-base-200 shadow-sm transition hover:shadow-md">
+					<div class="card-body flex-row items-center justify-between py-4">
 						<div>
-							<h2 class="card-title">{group.name}</h2>
+							<h2 class="text-lg font-semibold">{group.name}</h2>
 							<p class="text-sm opacity-50">{group.member_count} {group.member_count === 1 ? 'member' : 'members'}</p>
 						</div>
 						<CopyBadge
