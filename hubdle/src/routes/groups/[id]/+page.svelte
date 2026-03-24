@@ -26,7 +26,7 @@
 		</div>
 	</div>
 
-	<ScoreSubmitForm {form} />
+	<ScoreSubmitForm {form} games={data.games} />
 	<Leaderboard games={data.games} submissions={data.submissions} members={data.members} />
 	<RecentSubmissions submissions={data.submissions} members={data.members} />
 

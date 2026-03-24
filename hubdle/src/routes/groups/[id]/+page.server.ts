@@ -1,5 +1,6 @@
 import { error, fail, redirect } from '@sveltejs/kit';
 import { parseShareText } from '$lib/parsers';
+import { validateScore } from '$lib/game-rules';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
@@ -43,6 +44,9 @@ export const actions: Actions = {
 		const parsed = parseShareText(rawText);
 		if (!parsed) return fail(400, { error: 'Could not parse that share text. Supported games: Wordle, Bandle, Connections, Contexto.' });
 
+		const scoreError = validateScore(parsed.gameId, parsed.score);
+		if (scoreError) return fail(400, { error: scoreError });
+
 		const { error: insertError } = await locals.supabase.from('submissions').insert({
 			user_id: user.id,
 			group_id: params.id,
@@ -55,6 +59,41 @@ export const actions: Actions = {
 		if (insertError) {
 			if (insertError.code === '23505')
 				return fail(409, { error: 'You already submitted a score for this game today.' });
+			return fail(500, { error: `Failed to submit: ${insertError.message}` });
+		}
+
+		return { success: true };
+	},
+
+	submitManual: async ({ request, params, locals }) => {
+		const { user } = await locals.safeGetSession();
+		if (!user) redirect(303, '/login');
+
+		const formData = await request.formData();
+		const gameId = (formData.get('game_id') as string)?.trim();
+		const scoreStr = (formData.get('score') as string)?.trim();
+		const gameDate = (formData.get('game_date') as string)?.trim();
+
+		if (!gameId || !scoreStr || !gameDate) return fail(400, { error: 'All fields are required.' });
+
+		const score = parseInt(scoreStr, 10);
+		if (isNaN(score)) return fail(400, { error: 'Score must be a number.' });
+
+		const scoreError = validateScore(gameId, score);
+		if (scoreError) return fail(400, { error: scoreError });
+
+		const { error: insertError } = await locals.supabase.from('submissions').insert({
+			user_id: user.id,
+			group_id: params.id,
+			game_id: gameId,
+			score,
+			raw_text: `Manual: ${gameId} ${score}`,
+			game_date: gameDate
+		});
+
+		if (insertError) {
+			if (insertError.code === '23505')
+				return fail(409, { error: 'You already submitted a score for this game on that date.' });
 			return fail(500, { error: `Failed to submit: ${insertError.message}` });
 		}
 

@@ -1,30 +1,86 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import Alert from './Alert.svelte';
+	import { GAME_RULES } from '$lib/game-rules';
 
-	let { form }: { form: { error?: string; success?: boolean } | null } = $props();
+	type Game = { id: string; name: string };
 
+	let {
+		form,
+		games
+	}: { form: { error?: string; success?: boolean } | null; games: Game[] } = $props();
+
+	let mode = $state<'paste' | 'manual'>('paste');
 	let rawText = $state('');
+	let gameId = $state('');
+	let score = $state('');
+	let gameDate = $state(new Date().toISOString().slice(0, 10));
+
+	let selectedRules = $derived(gameId ? GAME_RULES[gameId] : null);
 
 	$effect(() => {
-		if (form?.success) rawText = '';
+		if (form?.success) {
+			rawText = '';
+			score = '';
+		}
 	});
 </script>
 
 <section class="card mt-6 bg-base-200">
 	<div class="card-body">
-		<h2 class="card-title text-base">Submit Score</h2>
-		<form method="POST" action="?/submit" use:enhance class="flex flex-col gap-3">
-			<textarea
-				name="raw_text"
-				placeholder="Paste your share text here (e.g. Wordle 1,234 3/6)"
-				class="textarea textarea-bordered w-full"
-				rows="3"
-				required
-				bind:value={rawText}
-			></textarea>
-			<button class="btn btn-primary w-fit">Submit</button>
-		</form>
+		<div class="flex items-center justify-between">
+			<h2 class="card-title text-base">Submit Score</h2>
+			<button
+				class="btn btn-ghost btn-xs"
+				onclick={() => (mode = mode === 'paste' ? 'manual' : 'paste')}
+			>
+				{mode === 'paste' ? 'Enter manually' : 'Paste share text'}
+			</button>
+		</div>
+
+		{#if mode === 'paste'}
+			<form method="POST" action="?/submit" use:enhance class="flex flex-col gap-3">
+				<textarea
+					name="raw_text"
+					placeholder="Paste your share text here (e.g. Wordle 1,234 3/6)"
+					class="textarea textarea-bordered w-full"
+					rows="3"
+					required
+					bind:value={rawText}
+				></textarea>
+				<button class="btn btn-primary w-fit">Submit</button>
+			</form>
+		{:else}
+			<form method="POST" action="?/submitManual" use:enhance class="flex flex-col gap-3">
+				<select name="game_id" class="select select-bordered w-full" required bind:value={gameId}>
+					<option value="" disabled>Select a game</option>
+					{#each games as game}
+						<option value={game.id}>{game.name}</option>
+					{/each}
+				</select>
+				{#if selectedRules}
+					<div class="text-xs opacity-60">{selectedRules.hint}</div>
+				{/if}
+				<input
+					name="score"
+					type="number"
+					placeholder={selectedRules?.scoreLabel ?? 'Score'}
+					class="input input-bordered w-full"
+					required
+					min={selectedRules?.minScore}
+					max={selectedRules?.maxScore}
+					bind:value={score}
+				/>
+				<input
+					name="game_date"
+					type="date"
+					class="input input-bordered w-full"
+					required
+					bind:value={gameDate}
+				/>
+				<button class="btn btn-primary w-fit">Submit</button>
+			</form>
+		{/if}
 
 		{#if form?.error}
 			<Alert type="error" message={form.error} />
