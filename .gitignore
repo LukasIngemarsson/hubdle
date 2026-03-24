@@ -4,6 +4,8 @@ Thumbs.db
 
 # IDE
 .idea/
+.vscode/
+
 
 # Node (root level safety)
 node_modules
