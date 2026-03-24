@@ -1,7 +1,8 @@
 <script lang="ts">
-	import type { PageData } from './$types';
+	import { enhance } from '$app/forms';
+	import type { ActionData, PageData } from './$types';
 
-	let { data }: { data: PageData } = $props();
+	let { data, form }: { data: PageData; form: ActionData } = $props();
 </script>
 
 <div class="mx-auto max-w-2xl p-6">
@@ -15,6 +16,32 @@
 			<span class="badge badge-ghost font-mono text-lg">{data.group.invite_code}</span>
 		</div>
 	</div>
+
+	<section class="mt-8">
+		<h2 class="text-lg font-semibold">Submit Score</h2>
+		<form method="POST" action="?/submit" use:enhance class="mt-3 flex flex-col gap-3">
+			<textarea
+				name="raw_text"
+				placeholder="Paste your share text here (e.g. Wordle 1,234 3/6)"
+				class="textarea textarea-bordered w-full"
+				rows="3"
+				required
+			></textarea>
+			<button class="btn btn-primary w-fit">Submit</button>
+		</form>
+
+		{#if form?.error}
+			<div class="alert alert-error mt-3">
+				<span>{form.error}</span>
+			</div>
+		{/if}
+
+		{#if form?.success}
+			<div class="alert alert-success mt-3">
+				<span>Score submitted!</span>
+			</div>
+		{/if}
+	</section>
 
 	<section class="mt-8">
 		<h2 class="text-lg font-semibold">Leaderboard</h2>
@@ -39,6 +66,37 @@
 								<td>{entry.username}</td>
 								<td>{entry.games}</td>
 								<td>{entry.total}</td>
+							</tr>
+						{/each}
+					</tbody>
+				</table>
+			</div>
+		{/if}
+	</section>
+
+	<section class="mt-8">
+		<h2 class="text-lg font-semibold">Recent Submissions</h2>
+		{#if data.submissions.length === 0}
+			<p class="mt-2 opacity-70">No submissions yet.</p>
+		{:else}
+			<div class="mt-4 overflow-x-auto">
+				<table class="table">
+					<thead>
+						<tr>
+							<th>Player</th>
+							<th>Game</th>
+							<th>Score</th>
+							<th>Date</th>
+						</tr>
+					</thead>
+					<tbody>
+						{#each data.submissions as sub}
+							{@const member = data.members.find((m) => m.user_id === sub.user_id)}
+							<tr>
+								<td>{member?.profiles?.username ?? 'Unknown'}</td>
+								<td>{sub.games?.name ?? sub.game_id}</td>
+								<td>{sub.score}</td>
+								<td>{sub.game_date}</td>
 							</tr>
 						{/each}
 					</tbody>
