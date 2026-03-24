@@ -12,12 +12,12 @@
 >
 	{label}
 	<span
-		class="absolute bottom-0 left-0 h-px bg-current opacity-60 transition-all duration-300 ease-out {isActive ? 'w-full' : 'w-0 group-hover:w-full'}"
+		class="absolute bottom-0 left-1/2 h-px -translate-x-1/2 bg-current opacity-50 transition-all duration-300 ease-out {isActive ? 'w-3/4' : 'w-0'}"
 	></span>
 </a>
 
 <style>
 	.nav-link:hover span {
-		width: 100%;
+		width: 75%;
 	}
 </style>

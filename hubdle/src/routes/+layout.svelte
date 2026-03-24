@@ -28,15 +28,15 @@
 			{#if data.user}
 				<div class="hidden items-center gap-4 sm:flex">
 					<NavLink href="/groups" label="Groups" />
-					<NavLink href="/profile" label="Profile" />
 				</div>
 			{/if}
 		</div>
 
 		<div class="flex-none">
 			{#if data.user}
-				<div class="hidden sm:block">
-					<button class="nav-link text-sm opacity-70 transition-colors hover:opacity-100" onclick={handleLogout}>
+				<div class="hidden items-center gap-4 sm:flex">
+					<NavLink href="/profile" label="Profile" />
+					<button class="text-sm opacity-70 transition-colors hover:opacity-100" onclick={handleLogout}>
 						Log Out
 					</button>
 				</div>
