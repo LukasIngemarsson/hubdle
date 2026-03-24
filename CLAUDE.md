@@ -5,7 +5,6 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Project — Hubdle
 
 A social competition app where you and your friends compete at daily games or create/track custom challenges.
-Portfolio project now, with intent to ship for real users later.
 
 ## MVP Scope
 
