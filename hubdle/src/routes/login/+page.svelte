@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import { ensureProfile } from '$lib/auth';
+	import Alert from '$lib/components/Alert.svelte';
 
 	let { data }: { data: PageData } = $props();
 
@@ -80,10 +81,10 @@
 				</label>
 
 				{#if error}
-					<p class="text-error text-sm">{error}</p>
+					<Alert type="error" message={error} />
 				{/if}
 				{#if signUpSuccess}
-					<p class="text-success text-sm">Check your email for a confirmation link.</p>
+					<Alert type="success" message="Check your email for a confirmation link." />
 				{/if}
 
 				<button class="btn btn-primary w-full" disabled={loading}>
