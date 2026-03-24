@@ -56,42 +56,38 @@
 	<div class="card-body">
 	<h2 class="card-title text-base">Leaderboard</h2>
 
-	<div class="mt-2 overflow-x-auto">
-	<div role="tablist" class="tabs tabs-bordered">
+	<div class="mt-2 flex flex-wrap gap-1">
 		<button
-			role="tab"
-			class="tab {selectedGame === 'all' ? 'tab-active' : ''}"
+			class="btn btn-sm {selectedGame === 'all' ? 'btn-active' : 'btn-ghost'}"
 			onclick={() => (selectedGame = 'all')}
 		>
 			All Games
 		</button>
 		{#each games as game}
 			<button
-				role="tab"
-				class="tab {selectedGame === game.id ? 'tab-active' : ''}"
+				class="btn btn-sm {selectedGame === game.id ? 'btn-active' : 'btn-ghost'}"
 				onclick={() => (selectedGame = game.id)}
 			>
 				{game.name}
 			</button>
 		{/each}
 	</div>
-	</div>
 
-	<div class="mt-3 flex gap-1">
+	<div class="flex gap-1">
 		<button
-			class="btn btn-sm {selectedTime === 'all' ? 'btn-active' : 'btn-ghost'}"
+			class="btn btn-xs {selectedTime === 'all' ? 'btn-active' : 'btn-ghost'}"
 			onclick={() => (selectedTime = 'all')}
 		>
 			All Time
 		</button>
 		<button
-			class="btn btn-sm {selectedTime === 'weekly' ? 'btn-active' : 'btn-ghost'}"
+			class="btn btn-xs {selectedTime === 'weekly' ? 'btn-active' : 'btn-ghost'}"
 			onclick={() => (selectedTime = 'weekly')}
 		>
 			Weekly
 		</button>
 		<button
-			class="btn btn-sm {selectedTime === 'daily' ? 'btn-active' : 'btn-ghost'}"
+			class="btn btn-xs {selectedTime === 'daily' ? 'btn-active' : 'btn-ghost'}"
 			onclick={() => (selectedTime = 'daily')}
 		>
 			Today
