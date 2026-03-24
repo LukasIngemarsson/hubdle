@@ -25,4 +25,4 @@ node_modules
 !.env.test
 
 # Local test results
-test-results/
+test-results
