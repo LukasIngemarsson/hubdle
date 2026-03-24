@@ -42,11 +42,11 @@
 					<div>
 						<p class="text-xs opacity-50">Username</p>
 						{#if editing}
-							<form method="POST" action="?/updateUsername" use:enhance class="mt-1 flex items-center gap-2">
+							<form method="POST" action="?/updateUsername" use:enhance class="mt-1 inline-flex items-center gap-2">
 								<input
 									type="text"
 									name="username"
-									class="input input-bordered input-sm"
+									class="input input-bordered input-sm w-40"
 									bind:value={username}
 									maxlength="30"
 									required
