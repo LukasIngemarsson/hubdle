@@ -30,8 +30,11 @@
 
 <div class="flex min-h-screen flex-col">
 	<nav class="navbar bg-base-200 px-4">
-		<div class="flex-1">
+		<div class="flex-1 gap-4">
 			<a href="/" class="text-xl font-bold">Hubdle</a>
+			{#if data.user}
+				<a href="/groups" class="btn btn-ghost btn-sm">Groups</a>
+			{/if}
 		</div>
 		<div class="flex-none">
 			{#if data.user}
