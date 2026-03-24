@@ -2,7 +2,18 @@
 	type Game = { id: string; name: string; url: string; score_direction: string };
 	type Submission = { user_id: string; score: number; game_id: string; game_date: string };
 	type Member = { user_id: string; profiles: { username: string } | null };
-	type TimeFilter = 'all' | 'weekly' | 'daily';
+
+	const TimeFilter = {
+		All: 'all',
+		Monthly: 'monthly',
+		Weekly: 'weekly',
+		Daily: 'daily'
+	} as const;
+	type TimeFilter = (typeof TimeFilter)[keyof typeof TimeFilter];
+
+	const GameFilter = {
+		All: 'all'
+	} as const;
 
 	let {
 		games,
@@ -10,8 +21,19 @@
 		members
 	}: { games: Game[]; submissions: Submission[]; members: Member[] } = $props();
 
-	let selectedGame = $state<string>('all');
-	let selectedTime = $state<TimeFilter>('all');
+	let selectedGame = $state<string>(GameFilter.All);
+	let selectedTime = $state<TimeFilter>(TimeFilter.All);
+
+	const timeOptions: { value: TimeFilter; label: string }[] = [
+		{ value: TimeFilter.All, label: 'All Time' },
+		{ value: TimeFilter.Monthly, label: 'Month' },
+		{ value: TimeFilter.Weekly, label: 'Week' },
+		{ value: TimeFilter.Daily, label: 'Today' }
+	];
+
+	let gameOptions = $derived(
+		[{ value: GameFilter.All, label: 'All' }, ...games.map((g) => ({ value: g.id, label: g.name }))]
+	);
 
 	let filteredLeaderboard = $derived.by(() => {
 		const now = new Date();
@@ -19,11 +41,15 @@
 		const weekAgo = new Date(now);
 		weekAgo.setDate(weekAgo.getDate() - 7);
 		const weekAgoStr = weekAgo.toISOString().slice(0, 10);
+		const monthAgo = new Date(now);
+		monthAgo.setDate(monthAgo.getDate() - 30);
+		const monthAgoStr = monthAgo.toISOString().slice(0, 10);
 
 		const filtered = submissions.filter((sub) => {
-			if (selectedGame !== 'all' && sub.game_id !== selectedGame) return false;
-			if (selectedTime === 'daily' && sub.game_date !== todayStr) return false;
-			if (selectedTime === 'weekly' && sub.game_date < weekAgoStr) return false;
+			if (selectedGame !== GameFilter.All && sub.game_id !== selectedGame) return false;
+			if (selectedTime === TimeFilter.Daily && sub.game_date !== todayStr) return false;
+			if (selectedTime === TimeFilter.Weekly && sub.game_date < weekAgoStr) return false;
+			if (selectedTime === TimeFilter.Monthly && sub.game_date < monthAgoStr) return false;
 			return true;
 		});
 
@@ -52,55 +78,40 @@
 	});
 </script>
 
-<section class="card mt-6 bg-base-200">
+{#snippet filterGroup(label: string, options: { value: string; label: string }[], selected: string, onSelect: (value: string) => void)}
+	<div>
+		<p class="mb-1 text-xs font-medium opacity-50">{label}</p>
+		<div class="flex flex-wrap gap-1">
+			{#each options as opt}
+				<button
+					class="btn btn-sm {selected === opt.value ? 'btn-active' : 'btn-ghost'}"
+					onclick={() => onSelect(opt.value)}
+				>
+					{opt.label}
+				</button>
+			{/each}
+		</div>
+	</div>
+{/snippet}
+
+<section class="card mt-6 border border-base-300">
 	<div class="card-body">
 	<h2 class="card-title text-base">Leaderboard</h2>
 
-	<div class="mt-2 overflow-x-auto">
-	<div role="tablist" class="tabs tabs-bordered">
-		<button
-			role="tab"
-			class="tab {selectedGame === 'all' ? 'tab-active' : ''}"
-			onclick={() => (selectedGame = 'all')}
-		>
-			All Games
-		</button>
-		{#each games as game}
-			<button
-				role="tab"
-				class="tab {selectedGame === game.id ? 'tab-active' : ''}"
-				onclick={() => (selectedGame = game.id)}
-			>
-				{game.name}
-			</button>
-		{/each}
-	</div>
-	</div>
+	<div class="mt-2 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-6">
+		{@render filterGroup('Game', gameOptions, selectedGame, (v) => (selectedGame = v))}
 
-	<div class="mt-3 flex gap-1">
-		<button
-			class="btn btn-sm {selectedTime === 'all' ? 'btn-active' : 'btn-ghost'}"
-			onclick={() => (selectedTime = 'all')}
-		>
-			All Time
-		</button>
-		<button
-			class="btn btn-sm {selectedTime === 'weekly' ? 'btn-active' : 'btn-ghost'}"
-			onclick={() => (selectedTime = 'weekly')}
-		>
-			Weekly
-		</button>
-		<button
-			class="btn btn-sm {selectedTime === 'daily' ? 'btn-active' : 'btn-ghost'}"
-			onclick={() => (selectedTime = 'daily')}
-		>
-			Today
-		</button>
+		<div class="hidden sm:block sm:self-stretch">
+			<div class="h-full w-px bg-base-300"></div>
+		</div>
+		<hr class="border-base-300 sm:hidden" />
+
+		{@render filterGroup('Period', timeOptions, selectedTime, (v) => (selectedTime = v as TimeFilter))}
 	</div>
 
 	{#if filteredLeaderboard.length === 0}
 		<p class="mt-4 opacity-70">
-			{selectedGame === 'all' && selectedTime === 'all'
+			{selectedGame === GameFilter.All && selectedTime === TimeFilter.All
 				? 'No scores yet — submit one above to get started!'
 				: 'No scores for this selection.'}
 		</p>
