@@ -13,6 +13,17 @@
 	let selectedGame = $state<string>('all');
 	let selectedTime = $state<TimeFilter>('all');
 
+	const timeOptions: { value: TimeFilter; label: string }[] = [
+		{ value: 'all', label: 'All Time' },
+		{ value: 'monthly', label: 'Month' },
+		{ value: 'weekly', label: 'Week' },
+		{ value: 'daily', label: 'Today' }
+	];
+
+	let gameOptions = $derived(
+		[{ value: 'all', label: 'All' }, ...games.map((g) => ({ value: g.id, label: g.name }))]
+	);
+
 	let filteredLeaderboard = $derived.by(() => {
 		const now = new Date();
 		const todayStr = now.toISOString().slice(0, 10);
@@ -56,65 +67,35 @@
 	});
 </script>
 
+{#snippet filterGroup(label: string, options: { value: string; label: string }[], selected: string, onSelect: (value: string) => void)}
+	<div>
+		<p class="mb-1 text-xs font-medium opacity-50">{label}</p>
+		<div class="flex flex-wrap gap-1">
+			{#each options as opt}
+				<button
+					class="btn btn-sm {selected === opt.value ? 'btn-active' : 'btn-ghost'}"
+					onclick={() => onSelect(opt.value)}
+				>
+					{opt.label}
+				</button>
+			{/each}
+		</div>
+	</div>
+{/snippet}
+
 <section class="card mt-6 border border-base-300">
 	<div class="card-body">
 	<h2 class="card-title text-base">Leaderboard</h2>
 
 	<div class="mt-2 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-6">
-		<div>
-			<p class="mb-1 text-xs font-medium opacity-50">Game</p>
-			<div class="flex flex-wrap gap-1">
-				<button
-					class="btn btn-sm {selectedGame === 'all' ? 'btn-active' : 'btn-ghost'}"
-					onclick={() => (selectedGame = 'all')}
-				>
-					All
-				</button>
-				{#each games as game}
-					<button
-						class="btn btn-sm {selectedGame === game.id ? 'btn-active' : 'btn-ghost'}"
-						onclick={() => (selectedGame = game.id)}
-					>
-						{game.name}
-					</button>
-				{/each}
-			</div>
-		</div>
+		{@render filterGroup('Game', gameOptions, selectedGame, (v) => (selectedGame = v))}
 
 		<div class="hidden sm:block sm:self-stretch">
 			<div class="h-full w-px bg-base-300"></div>
 		</div>
 		<hr class="border-base-300 sm:hidden" />
 
-		<div>
-			<p class="mb-1 text-xs font-medium opacity-50">Period</p>
-			<div class="flex flex-wrap gap-1">
-				<button
-					class="btn btn-sm {selectedTime === 'all' ? 'btn-active' : 'btn-ghost'}"
-					onclick={() => (selectedTime = 'all')}
-				>
-					All Time
-				</button>
-				<button
-					class="btn btn-sm {selectedTime === 'monthly' ? 'btn-active' : 'btn-ghost'}"
-					onclick={() => (selectedTime = 'monthly')}
-				>
-					Month
-				</button>
-				<button
-					class="btn btn-sm {selectedTime === 'weekly' ? 'btn-active' : 'btn-ghost'}"
-					onclick={() => (selectedTime = 'weekly')}
-				>
-					Week
-				</button>
-				<button
-					class="btn btn-sm {selectedTime === 'daily' ? 'btn-active' : 'btn-ghost'}"
-					onclick={() => (selectedTime = 'daily')}
-				>
-					Today
-				</button>
-			</div>
-		</div>
+		{@render filterGroup('Period', timeOptions, selectedTime, (v) => (selectedTime = v as TimeFilter))}
 	</div>
 
 	{#if filteredLeaderboard.length === 0}
