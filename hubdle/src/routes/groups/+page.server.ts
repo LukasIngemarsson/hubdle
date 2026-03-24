@@ -8,14 +8,20 @@ export const load: PageServerLoad = async ({ locals }) => {
 
 	const { data: memberships } = await locals.supabase
 		.from('group_members')
-		.select('group_id, groups(id, name, invite_code, created_at, group_members(count))')
-		.eq('user_id', user.id);
+		.select('group_id, groups(id, name, invite_code, created_at)')
+		.eq('user_id', user.id)
+		.is('left_at', null);
 
-	const groups = memberships?.map((gm) => {
-		const group = gm.groups;
-		const memberCount = group?.group_members?.[0]?.count ?? 0;
-		return { ...group, member_count: memberCount };
-	}) ?? [];
+	const groups = await Promise.all(
+		(memberships ?? []).map(async (gm) => {
+			const { count } = await locals.supabase
+				.from('group_members')
+				.select('user_id', { count: 'exact', head: true })
+				.eq('group_id', gm.group_id)
+				.is('left_at', null);
+			return { ...gm.groups, member_count: count ?? 0 };
+		})
+	);
 
 	return { groups };
 };
@@ -75,8 +81,23 @@ export const actions: Actions = {
 			.insert({ group_id: group.id, user_id: user.id });
 
 		if (error) {
-			if (error.code === '23505') return fail(409, { error: 'You are already in this group.' });
-			return fail(500, { error: 'Failed to join group.' });
+			if (error.code === '23505') {
+				// Row exists — either active member or soft-deleted (rejoin)
+				const { data: updated, error: updateError } = await locals.supabase
+					.from('group_members')
+					.update({ left_at: null, joined_at: new Date().toISOString() })
+					.eq('group_id', group.id)
+					.eq('user_id', user.id)
+					.not('left_at', 'is', null)
+					.select();
+
+				if (updateError) return fail(500, { error: 'Failed to join group.' });
+				if (!updated || updated.length === 0) {
+					return fail(409, { error: 'You are already in this group.' });
+				}
+			} else {
+				return fail(500, { error: 'Failed to join group.' });
+			}
 		}
 
 		redirect(303, `/groups/${group.id}`);
