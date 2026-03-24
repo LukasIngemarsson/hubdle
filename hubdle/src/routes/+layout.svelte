@@ -3,9 +3,12 @@
 	import { goto } from '$app/navigation';
 	import '../app.css';
 	import NavLink from '$lib/components/NavLink.svelte';
-
+	import { dev } from '$app/environment';
+	import { injectAnalytics } from '@vercel/analytics/sveltekit';
 	import type { LayoutData } from './$types';
 
+	injectAnalytics({ mode: dev ? 'development' : 'production' });
+	
 	let { data, children }: { data: LayoutData; children: any } = $props();
 
 	let menuOpen = $state(false);
