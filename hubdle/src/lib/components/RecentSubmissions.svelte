@@ -11,7 +11,7 @@
 	let { submissions, members }: { submissions: Submission[]; members: Member[] } = $props();
 </script>
 
-<section class="card mt-6 bg-base-200">
+<section class="card mt-6 border border-base-300">
 	<div class="card-body">
 		<h2 class="card-title text-base">Recent Submissions</h2>
 		{#if submissions.length === 0}

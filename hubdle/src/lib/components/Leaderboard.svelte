@@ -52,7 +52,7 @@
 	});
 </script>
 
-<section class="card mt-6 bg-base-200">
+<section class="card mt-6 border border-base-300">
 	<div class="card-body">
 	<h2 class="card-title text-base">Leaderboard</h2>
 
