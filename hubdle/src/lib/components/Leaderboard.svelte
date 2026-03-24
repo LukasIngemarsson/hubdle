@@ -94,7 +94,11 @@
 	</div>
 
 	{#if filteredLeaderboard.length === 0}
-		<p class="mt-4 opacity-70">No scores yet for this selection.</p>
+		<p class="mt-4 opacity-70">
+			{selectedGame === 'all' && selectedTime === 'all'
+				? 'No scores yet — submit one above to get started!'
+				: 'No scores for this selection.'}
+		</p>
 	{:else}
 		<div class="mt-4 overflow-x-auto">
 			<table class="table">

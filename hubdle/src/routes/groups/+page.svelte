@@ -49,7 +49,11 @@
 	</div>
 
 	{#if data.groups.length === 0}
-		<p class="mt-8 opacity-70">You're not in any groups yet. Create one or join with an invite code.</p>
+		<div class="mt-12 flex flex-col items-center gap-3 text-center opacity-60">
+			<p class="text-4xl">🏆</p>
+			<p class="font-medium">No groups yet</p>
+			<p class="text-sm">Create a group to get started, or join one with an invite code above.</p>
+		</div>
 	{:else}
 		<div class="mt-8 grid gap-4">
 			{#each data.groups as group}
