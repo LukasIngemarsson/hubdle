@@ -1,5 +1,6 @@
-import { error, redirect } from '@sveltejs/kit';
-import type { PageServerLoad } from './$types';
+import { error, fail, redirect } from '@sveltejs/kit';
+import { parseShareText } from '$lib/parsers';
+import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
 	const { user } = await locals.safeGetSession();
@@ -46,5 +47,39 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		.map(([userId, data]) => ({ userId, ...data }))
 		.sort((a, b) => a.total - b.total);
 
-	return { group, members: members ?? [], leaderboard, submissions: submissions ?? [] };
+	const { data: games } = await locals.supabase.from('games').select('id, name, url');
+
+	return { group, members: members ?? [], leaderboard, submissions: submissions ?? [], games: games ?? [] };
+};
+
+export const actions: Actions = {
+	submit: async ({ request, params, locals }) => {
+		const { user } = await locals.safeGetSession();
+		if (!user) redirect(303, '/login');
+
+		const formData = await request.formData();
+		const rawText = (formData.get('raw_text') as string)?.trim();
+
+		if (!rawText) return fail(400, { error: 'Paste your share text.' });
+
+		const parsed = parseShareText(rawText);
+		if (!parsed) return fail(400, { error: 'Could not parse that share text. Supported games: Wordle, Bandle.' });
+
+		const { error: insertError } = await locals.supabase.from('submissions').insert({
+			user_id: user.id,
+			group_id: params.id,
+			game_id: parsed.gameId,
+			score: parsed.score,
+			raw_text: rawText,
+			game_date: parsed.gameDate
+		});
+
+		if (insertError) {
+			if (insertError.code === '23505')
+				return fail(409, { error: 'You already submitted a score for this game today.' });
+			return fail(500, { error: `Failed to submit: ${insertError.message}` });
+		}
+
+		return { success: true };
+	}
 };
