@@ -2,7 +2,18 @@
 	type Game = { id: string; name: string; url: string; score_direction: string };
 	type Submission = { user_id: string; score: number; game_id: string; game_date: string };
 	type Member = { user_id: string; profiles: { username: string } | null };
-	type TimeFilter = 'all' | 'monthly' | 'weekly' | 'daily';
+
+	const TimeFilter = {
+		All: 'all',
+		Monthly: 'monthly',
+		Weekly: 'weekly',
+		Daily: 'daily'
+	} as const;
+	type TimeFilter = (typeof TimeFilter)[keyof typeof TimeFilter];
+
+	const GameFilter = {
+		All: 'all'
+	} as const;
 
 	let {
 		games,
@@ -10,24 +21,18 @@
 		members
 	}: { games: Game[]; submissions: Submission[]; members: Member[] } = $props();
 
-	let selectedGame = $state<string>('all');
-	let selectedTime = $state<TimeFilter>('all');
-
-	const TIME_FILTERS = ['all', 'monthly', 'weekly', 'daily'] as const satisfies readonly TimeFilter[];
+	let selectedGame = $state<string>(GameFilter.All);
+	let selectedTime = $state<TimeFilter>(TimeFilter.All);
 
 	const timeOptions: { value: TimeFilter; label: string }[] = [
-		{ value: 'all', label: 'All Time' },
-		{ value: 'monthly', label: 'Month' },
-		{ value: 'weekly', label: 'Week' },
-		{ value: 'daily', label: 'Today' }
+		{ value: TimeFilter.All, label: 'All Time' },
+		{ value: TimeFilter.Monthly, label: 'Month' },
+		{ value: TimeFilter.Weekly, label: 'Week' },
+		{ value: TimeFilter.Daily, label: 'Today' }
 	];
 
-	function isTimeFilter(v: string): v is TimeFilter {
-		return (TIME_FILTERS as readonly string[]).includes(v);
-	}
-
 	let gameOptions = $derived(
-		[{ value: 'all', label: 'All' }, ...games.map((g) => ({ value: g.id, label: g.name }))]
+		[{ value: GameFilter.All, label: 'All' }, ...games.map((g) => ({ value: g.id, label: g.name }))]
 	);
 
 	let filteredLeaderboard = $derived.by(() => {
@@ -41,10 +46,10 @@
 		const monthAgoStr = monthAgo.toISOString().slice(0, 10);
 
 		const filtered = submissions.filter((sub) => {
-			if (selectedGame !== 'all' && sub.game_id !== selectedGame) return false;
-			if (selectedTime === 'daily' && sub.game_date !== todayStr) return false;
-			if (selectedTime === 'weekly' && sub.game_date < weekAgoStr) return false;
-			if (selectedTime === 'monthly' && sub.game_date < monthAgoStr) return false;
+			if (selectedGame !== GameFilter.All && sub.game_id !== selectedGame) return false;
+			if (selectedTime === TimeFilter.Daily && sub.game_date !== todayStr) return false;
+			if (selectedTime === TimeFilter.Weekly && sub.game_date < weekAgoStr) return false;
+			if (selectedTime === TimeFilter.Monthly && sub.game_date < monthAgoStr) return false;
 			return true;
 		});
 
@@ -101,12 +106,12 @@
 		</div>
 		<hr class="border-base-300 sm:hidden" />
 
-		{@render filterGroup('Period', timeOptions, selectedTime, (v) => { if (isTimeFilter(v)) selectedTime = v; })}
+		{@render filterGroup('Period', timeOptions, selectedTime, (v) => (selectedTime = v as TimeFilter))}
 	</div>
 
 	{#if filteredLeaderboard.length === 0}
 		<p class="mt-4 opacity-70">
-			{selectedGame === 'all' && selectedTime === 'all'
+			{selectedGame === GameFilter.All && selectedTime === TimeFilter.All
 				? 'No scores yet — submit one above to get started!'
 				: 'No scores for this selection.'}
 		</p>
