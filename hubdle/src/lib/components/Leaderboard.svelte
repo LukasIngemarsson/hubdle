@@ -53,28 +53,61 @@
 			return true;
 		});
 
-		const scores = new Map<string, { username: string; left: boolean; total: number; games: number }>();
+		const userInfo = new Map<string, { username: string; left: boolean }>();
 		for (const member of members) {
 			if (member.profiles) {
-				scores.set(member.user_id, { username: member.profiles.username, left: member.left_at !== null, total: 0, games: 0 });
+				userInfo.set(member.user_id, { username: member.profiles.username, left: member.left_at !== null });
 			}
 		}
 
-		for (const sub of filtered) {
-			const entry = scores.get(sub.user_id);
-			if (entry) {
+		if (selectedGame !== GameFilter.All) {
+			// Single game: sum raw scores
+			const scores = new Map<string, { total: number; games: number }>();
+			for (const sub of filtered) {
+				const entry = scores.get(sub.user_id) ?? { total: 0, games: 0 };
 				entry.total += sub.score;
 				entry.games += 1;
+				scores.set(sub.user_id, entry);
+			}
+
+			const gameData = games.find((g) => g.id === selectedGame);
+			const ascending = gameData ? gameData.score_direction === 'asc' : true;
+
+			return [...scores.entries()]
+				.map(([userId, d]) => ({ userId, ...userInfo.get(userId)!, ...d }))
+				.filter((e) => e.games > 0)
+				.sort((a, b) => ascending ? a.total - b.total : b.total - a.total);
+		}
+
+		// All games: rank players per game, then sum ranks
+		const byGame = new Map<string, Map<string, number>>();
+		for (const sub of filtered) {
+			if (!byGame.has(sub.game_id)) byGame.set(sub.game_id, new Map());
+			const gameScores = byGame.get(sub.game_id)!;
+			gameScores.set(sub.user_id, (gameScores.get(sub.user_id) ?? 0) + sub.score);
+		}
+
+		const rankSums = new Map<string, { total: number; games: number }>();
+		for (const [gameId, gameScores] of byGame) {
+			const gameData = games.find((g) => g.id === gameId);
+			const ascending = gameData ? gameData.score_direction === 'asc' : true;
+
+			const sorted = [...gameScores.entries()]
+				.sort(([, a], [, b]) => ascending ? a - b : b - a);
+
+			for (let i = 0; i < sorted.length; i++) {
+				const [userId] = sorted[i];
+				const entry = rankSums.get(userId) ?? { total: 0, games: 0 };
+				entry.total += i + 1;
+				entry.games += 1;
+				rankSums.set(userId, entry);
 			}
 		}
 
-		const selectedGameData = games.find((g) => g.id === selectedGame);
-		const ascending = selectedGameData ? selectedGameData.score_direction === 'asc' : true;
-
-		return [...scores.entries()]
-			.map(([userId, d]) => ({ userId, ...d }))
+		return [...rankSums.entries()]
+			.map(([userId, d]) => ({ userId, ...userInfo.get(userId)!, ...d }))
 			.filter((e) => e.games > 0)
-			.sort((a, b) => ascending ? a.total - b.total : b.total - a.total);
+			.sort((a, b) => a.total - b.total);
 	});
 </script>
 
@@ -123,8 +156,8 @@
 						<th>#</th>
 						<th>Player</th>
 						<th>Games</th>
-						<th>Total</th>
-						<th>Avg</th>
+						<th>{selectedGame === GameFilter.All ? 'Rank Sum' : 'Total'}</th>
+						<th>{selectedGame === GameFilter.All ? 'Avg Rank' : 'Avg'}</th>
 					</tr>
 				</thead>
 				<tbody>
