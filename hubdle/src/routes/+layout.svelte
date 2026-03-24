@@ -17,7 +17,7 @@
 	<link rel="icon" href={favicon} />
 </svelte:head>
 
-<div class="flex min-h-screen flex-col">
+<div class="grid h-screen grid-rows-[auto_1fr]">
 	<nav class="navbar bg-base-200 px-4">
 		<div class="flex-1 gap-4">
 			<a href="/" class="text-xl font-bold">Hubdle</a>
@@ -35,7 +35,7 @@
 		</div>
 	</nav>
 
-	<main class="flex-1">
+	<main class="h-full overflow-y-auto">
 		{@render children()}
 	</main>
 </div>
