@@ -27,7 +27,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 
 	const { data: games } = await locals.supabase.from('games').select('id, name, url');
 
-	return { group, members: members ?? [], submissions: submissions ?? [], games: games ?? [] };
+	return { group, members: members ?? [], submissions: submissions ?? [], games: games ?? [], userId: user.id };
 };
 
 export const actions: Actions = {
@@ -59,5 +59,45 @@ export const actions: Actions = {
 		}
 
 		return { success: true };
+	},
+
+	leave: async ({ params, locals }) => {
+		const { user } = await locals.safeGetSession();
+		if (!user) redirect(303, '/login');
+
+		const { error: deleteError } = await locals.supabase
+			.from('group_members')
+			.delete()
+			.eq('group_id', params.id)
+			.eq('user_id', user.id);
+
+		if (deleteError) return fail(500, { error: `Failed to leave group: ${deleteError.message}` });
+
+		redirect(303, '/groups');
+	},
+
+	delete: async ({ params, locals }) => {
+		const { user } = await locals.safeGetSession();
+		if (!user) redirect(303, '/login');
+
+		// Verify the user is the creator
+		const { data: group } = await locals.supabase
+			.from('groups')
+			.select('created_by')
+			.eq('id', params.id)
+			.single();
+
+		if (!group || group.created_by !== user.id) {
+			return fail(403, { error: 'Only the group creator can delete this group.' });
+		}
+
+		const { error: deleteError } = await locals.supabase
+			.from('groups')
+			.delete()
+			.eq('id', params.id);
+
+		if (deleteError) return fail(500, { error: `Failed to delete group: ${deleteError.message}` });
+
+		redirect(303, '/groups');
 	}
 };

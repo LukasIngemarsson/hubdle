@@ -198,4 +198,33 @@
 			{/each}
 		</div>
 	</section>
+
+	<section class="mt-12 flex gap-3 border-t border-base-300 pt-6">
+		<form method="POST" action="?/leave" use:enhance>
+			<button
+				type="submit"
+				class="btn btn-ghost"
+				onclick={(e) => {
+					if (!confirm('Are you sure you want to leave this group?')) e.preventDefault();
+				}}
+			>
+				Leave Group
+			</button>
+		</form>
+
+		{#if data.userId === data.group.created_by}
+			<form method="POST" action="?/delete" use:enhance>
+				<button
+					type="submit"
+					class="btn btn-error"
+					onclick={(e) => {
+						if (!confirm('Are you sure you want to delete this group? This cannot be undone.'))
+							e.preventDefault();
+					}}
+				>
+					Delete Group
+				</button>
+			</form>
+		{/if}
+	</section>
 </div>
