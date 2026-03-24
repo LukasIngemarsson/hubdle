@@ -67,16 +67,19 @@ export type Database = {
 					group_id: string;
 					user_id: string;
 					joined_at: string;
+					left_at: string | null;
 				};
 				Insert: {
 					group_id: string;
 					user_id: string;
 					joined_at?: string;
+					left_at?: string | null;
 				};
 				Update: {
 					group_id?: string;
 					user_id?: string;
 					joined_at?: string;
+					left_at?: string | null;
 				};
 				Relationships: [
 					{

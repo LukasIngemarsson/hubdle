@@ -19,7 +19,8 @@ export const load: PageServerLoad = async ({ locals }) => {
 	const { count: totalGroups } = await locals.supabase
 		.from('group_members')
 		.select('group_id', { count: 'exact', head: true })
-		.eq('user_id', user.id);
+		.eq('user_id', user.id)
+		.is('left_at', null);
 
 	return {
 		email: user.email ?? '',
