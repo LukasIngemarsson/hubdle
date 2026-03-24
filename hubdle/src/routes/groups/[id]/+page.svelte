@@ -6,8 +6,12 @@
 	import Leaderboard from '$lib/components/Leaderboard.svelte';
 	import RecentSubmissions from '$lib/components/RecentSubmissions.svelte';
 	import CopyBadge from '$lib/components/CopyBadge.svelte';
+	import ConfirmModal from '$lib/components/ConfirmModal.svelte';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
+
+	let leaveForm = $state<HTMLFormElement>();
+	let deleteForm = $state<HTMLFormElement>();
 </script>
 
 <PageContainer>
@@ -36,31 +40,29 @@
 	</section>
 
 	<section class="mt-12 flex gap-3 border-t border-base-300 pt-6">
-		<form method="POST" action="?/leave" use:enhance>
-			<button
-				type="submit"
-				class="btn btn-ghost"
-				onclick={(e) => {
-					if (!confirm('Are you sure you want to leave this group?')) e.preventDefault();
-				}}
-			>
-				Leave Group
-			</button>
-		</form>
+		<form method="POST" action="?/leave" use:enhance bind:this={leaveForm} class="hidden"></form>
+		<ConfirmModal
+			id="leave-modal"
+			title="Leave Group"
+			message="Are you sure you want to leave this group?"
+			triggerLabel="Leave Group"
+			confirmLabel="Leave"
+			confirmClass="btn-ghost"
+			onConfirm={() => leaveForm?.requestSubmit()}
+		/>
 
 		{#if data.userId === data.group.created_by}
-			<form method="POST" action="?/delete" use:enhance>
-				<button
-					type="submit"
-					class="btn btn-error"
-					onclick={(e) => {
-						if (!confirm('Are you sure you want to delete this group? This cannot be undone.'))
-							e.preventDefault();
-					}}
-				>
-					Delete Group
-				</button>
-			</form>
+			<form method="POST" action="?/delete" use:enhance bind:this={deleteForm} class="hidden"></form>
+			<ConfirmModal
+				id="delete-modal"
+				title="Delete Group"
+				message="Are you sure you want to delete this group? This cannot be undone."
+				triggerLabel="Delete Group"
+				triggerClass="btn-error"
+				confirmLabel="Delete"
+				confirmClass="btn-error"
+				onConfirm={() => deleteForm?.requestSubmit()}
+			/>
 		{/if}
 	</section>
 </PageContainer>
