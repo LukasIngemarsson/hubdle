@@ -2,7 +2,7 @@
 	type Game = { id: string; name: string; url: string; score_direction: string };
 	type Submission = { user_id: string; score: number; game_id: string; game_date: string };
 	type Member = { user_id: string; profiles: { username: string } | null };
-	type TimeFilter = 'all' | 'weekly' | 'daily';
+	type TimeFilter = 'all' | 'monthly' | 'weekly' | 'daily';
 
 	let {
 		games,
@@ -19,11 +19,15 @@
 		const weekAgo = new Date(now);
 		weekAgo.setDate(weekAgo.getDate() - 7);
 		const weekAgoStr = weekAgo.toISOString().slice(0, 10);
+		const monthAgo = new Date(now);
+		monthAgo.setDate(monthAgo.getDate() - 30);
+		const monthAgoStr = monthAgo.toISOString().slice(0, 10);
 
 		const filtered = submissions.filter((sub) => {
 			if (selectedGame !== 'all' && sub.game_id !== selectedGame) return false;
 			if (selectedTime === 'daily' && sub.game_date !== todayStr) return false;
 			if (selectedTime === 'weekly' && sub.game_date < weekAgoStr) return false;
+			if (selectedTime === 'monthly' && sub.game_date < monthAgoStr) return false;
 			return true;
 		});
 
@@ -56,42 +60,61 @@
 	<div class="card-body">
 	<h2 class="card-title text-base">Leaderboard</h2>
 
-	<div class="mt-2 flex flex-wrap gap-1">
-		<button
-			class="btn btn-sm {selectedGame === 'all' ? 'btn-active' : 'btn-ghost'}"
-			onclick={() => (selectedGame = 'all')}
-		>
-			All Games
-		</button>
-		{#each games as game}
-			<button
-				class="btn btn-sm {selectedGame === game.id ? 'btn-active' : 'btn-ghost'}"
-				onclick={() => (selectedGame = game.id)}
-			>
-				{game.name}
-			</button>
-		{/each}
-	</div>
+	<div class="mt-2 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-6">
+		<div>
+			<p class="mb-1 text-xs font-medium opacity-50">Game</p>
+			<div class="flex flex-wrap gap-1">
+				<button
+					class="btn btn-sm {selectedGame === 'all' ? 'btn-active' : 'btn-ghost'}"
+					onclick={() => (selectedGame = 'all')}
+				>
+					All
+				</button>
+				{#each games as game}
+					<button
+						class="btn btn-sm {selectedGame === game.id ? 'btn-active' : 'btn-ghost'}"
+						onclick={() => (selectedGame = game.id)}
+					>
+						{game.name}
+					</button>
+				{/each}
+			</div>
+		</div>
 
-	<div class="flex gap-1">
-		<button
-			class="btn btn-xs {selectedTime === 'all' ? 'btn-active' : 'btn-ghost'}"
-			onclick={() => (selectedTime = 'all')}
-		>
-			All Time
-		</button>
-		<button
-			class="btn btn-xs {selectedTime === 'weekly' ? 'btn-active' : 'btn-ghost'}"
-			onclick={() => (selectedTime = 'weekly')}
-		>
-			Weekly
-		</button>
-		<button
-			class="btn btn-xs {selectedTime === 'daily' ? 'btn-active' : 'btn-ghost'}"
-			onclick={() => (selectedTime = 'daily')}
-		>
-			Today
-		</button>
+		<div class="hidden sm:block sm:self-stretch">
+			<div class="h-full w-px bg-base-300"></div>
+		</div>
+		<hr class="border-base-300 sm:hidden" />
+
+		<div>
+			<p class="mb-1 text-xs font-medium opacity-50">Period</p>
+			<div class="flex flex-wrap gap-1">
+				<button
+					class="btn btn-sm {selectedTime === 'all' ? 'btn-active' : 'btn-ghost'}"
+					onclick={() => (selectedTime = 'all')}
+				>
+					All Time
+				</button>
+				<button
+					class="btn btn-sm {selectedTime === 'monthly' ? 'btn-active' : 'btn-ghost'}"
+					onclick={() => (selectedTime = 'monthly')}
+				>
+					Month
+				</button>
+				<button
+					class="btn btn-sm {selectedTime === 'weekly' ? 'btn-active' : 'btn-ghost'}"
+					onclick={() => (selectedTime = 'weekly')}
+				>
+					Week
+				</button>
+				<button
+					class="btn btn-sm {selectedTime === 'daily' ? 'btn-active' : 'btn-ghost'}"
+					onclick={() => (selectedTime = 'daily')}
+				>
+					Today
+				</button>
+			</div>
+		</div>
 	</div>
 
 	{#if filteredLeaderboard.length === 0}
