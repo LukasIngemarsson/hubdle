@@ -3,6 +3,12 @@
 	import Alert from './Alert.svelte';
 
 	let { form }: { form: { error?: string; success?: boolean } | null } = $props();
+
+	let rawText = $state('');
+
+	$effect(() => {
+		if (form?.success) rawText = '';
+	});
 </script>
 
 <section class="mt-8">
@@ -14,6 +20,7 @@
 			class="textarea textarea-bordered w-full"
 			rows="3"
 			required
+			bind:value={rawText}
 		></textarea>
 		<button class="btn btn-primary w-fit">Submit</button>
 	</form>
