@@ -13,12 +13,18 @@
 	let selectedGame = $state<string>('all');
 	let selectedTime = $state<TimeFilter>('all');
 
+	const TIME_FILTERS = ['all', 'monthly', 'weekly', 'daily'] as const satisfies readonly TimeFilter[];
+
 	const timeOptions: { value: TimeFilter; label: string }[] = [
 		{ value: 'all', label: 'All Time' },
 		{ value: 'monthly', label: 'Month' },
 		{ value: 'weekly', label: 'Week' },
 		{ value: 'daily', label: 'Today' }
 	];
+
+	function isTimeFilter(v: string): v is TimeFilter {
+		return (TIME_FILTERS as readonly string[]).includes(v);
+	}
 
 	let gameOptions = $derived(
 		[{ value: 'all', label: 'All' }, ...games.map((g) => ({ value: g.id, label: g.name }))]
@@ -95,7 +101,7 @@
 		</div>
 		<hr class="border-base-300 sm:hidden" />
 
-		{@render filterGroup('Period', timeOptions, selectedTime, (v) => (selectedTime = v as TimeFilter))}
+		{@render filterGroup('Period', timeOptions, selectedTime, (v) => { if (isTimeFilter(v)) selectedTime = v; })}
 	</div>
 
 	{#if filteredLeaderboard.length === 0}
