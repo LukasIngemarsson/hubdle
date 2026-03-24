@@ -6,6 +6,8 @@ Thumbs.db
 .idea/
 .vscode/
 
+# Claude Code (track rules, ignore local settings)
+.claude/settings.local.json
 
 # Node (root level safety)
 node_modules
