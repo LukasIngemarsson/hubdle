@@ -89,9 +89,9 @@ create policy "Users can insert own profile"
   with check (auth.uid() = id);
 
 -- Groups policies
-create policy "Members can view their groups"
+create policy "Authenticated users can view groups"
   on public.groups for select
-  using (public.is_group_member(id));
+  using (auth.uid() is not null);
 
 create policy "Authenticated users can create groups"
   on public.groups for insert

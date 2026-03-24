@@ -36,7 +36,7 @@ export const actions: Actions = {
 
 		const { data: group, error: groupError } = await locals.supabase
 			.from('groups')
-			.insert({ name: name.trim(), invite_code: inviteCode, created_by: session.user.id })
+			.insert({ name: name.trim(), invite_code: inviteCode, created_by: user.id })
 			.select('id')
 			.single();
 
@@ -44,7 +44,7 @@ export const actions: Actions = {
 
 		const { error: memberError } = await locals.supabase
 			.from('group_members')
-			.insert({ group_id: group.id, user_id: session.user.id });
+			.insert({ group_id: group.id, user_id: user.id });
 
 		if (memberError) return fail(500, { error: 'Failed to join group.' });
 
@@ -52,13 +52,19 @@ export const actions: Actions = {
 	},
 
 	join: async ({ request, locals }) => {
-		const { session } = await locals.safeGetSession();
-		if (!session) redirect(303, '/login');
+		const { data: { user } } = await locals.supabase.auth.getUser();
+		if (!user) redirect(303, '/login');
 
 		const formData = await request.formData();
 		const code = (formData.get('code') as string)?.trim();
 
 		if (!code) return fail(400, { error: 'Invite code is required.' });
+
+		// Ensure profile exists
+		const username = user.email?.split('@')[0] ?? `user-${user.id.slice(0, 8)}`;
+		await locals.supabase
+			.from('profiles')
+			.upsert({ id: user.id, username }, { onConflict: 'id', ignoreDuplicates: true });
 
 		const { data: group } = await locals.supabase
 			.from('groups')
@@ -70,7 +76,7 @@ export const actions: Actions = {
 
 		const { error } = await locals.supabase
 			.from('group_members')
-			.insert({ group_id: group.id, user_id: session.user.id });
+			.insert({ group_id: group.id, user_id: user.id });
 
 		if (error) {
 			if (error.code === '23505') return fail(409, { error: 'You are already in this group.' });
