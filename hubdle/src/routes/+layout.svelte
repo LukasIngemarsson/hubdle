@@ -1,26 +1,15 @@
 <script lang="ts">
 	import favicon from '$lib/assets/favicon.svg';
-	import { goto, invalidate } from '$app/navigation';
-	import { onMount } from 'svelte';
+	import { goto } from '$app/navigation';
 	import '../app.css';
 
 	import type { LayoutData } from './$types';
 
 	let { data, children }: { data: LayoutData; children: any } = $props();
 
-	onMount(() => {
-		const {
-			data: { subscription }
-		} = data.supabase.auth.onAuthStateChange((_, session) => {
-			invalidate('supabase:auth');
-		});
-
-		return () => subscription.unsubscribe();
-	});
-
 	async function handleLogout() {
 		await data.supabase.auth.signOut();
-		goto('/login');
+		goto('/login', { invalidateAll: true });
 	}
 </script>
 
