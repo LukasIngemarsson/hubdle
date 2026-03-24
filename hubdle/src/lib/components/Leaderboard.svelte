@@ -1,7 +1,7 @@
 <script lang="ts">
 	type Game = { id: string; name: string; url: string; score_direction: string };
 	type Submission = { user_id: string; score: number; game_id: string; game_date: string };
-	type Member = { user_id: string; profiles: { username: string } | null };
+	type Member = { user_id: string; left_at: string | null; profiles: { username: string } | null };
 
 	const TimeFilter = {
 		All: 'all',
@@ -53,10 +53,10 @@
 			return true;
 		});
 
-		const scores = new Map<string, { username: string; total: number; games: number }>();
+		const scores = new Map<string, { username: string; left: boolean; total: number; games: number }>();
 		for (const member of members) {
 			if (member.profiles) {
-				scores.set(member.user_id, { username: member.profiles.username, total: 0, games: 0 });
+				scores.set(member.user_id, { username: member.profiles.username, left: member.left_at !== null, total: 0, games: 0 });
 			}
 		}
 
@@ -131,7 +131,7 @@
 					{#each filteredLeaderboard as entry, i}
 						<tr class={i === 0 ? 'bg-base-300 font-semibold' : ''}>
 							<td>{i + 1}</td>
-							<td>{entry.username}</td>
+							<td>{entry.username}{#if entry.left} <span class="opacity-40 text-xs">(left)</span>{/if}</td>
 							<td>{entry.games}</td>
 							<td>{entry.total}</td>
 							<td>{(entry.total / entry.games).toFixed(1)}</td>

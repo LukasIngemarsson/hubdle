@@ -23,3 +23,9 @@ CREATE POLICY "Members can update own membership"
   ON public.group_members FOR UPDATE
   USING (auth.uid() = user_id)
   WITH CHECK (auth.uid() = user_id);
+
+-- Allow users to see their own membership rows (including soft-deleted)
+-- so the rejoin UPDATE can find the row to clear left_at
+CREATE POLICY "Users can view own memberships"
+  ON public.group_members FOR SELECT
+  USING (auth.uid() = user_id);

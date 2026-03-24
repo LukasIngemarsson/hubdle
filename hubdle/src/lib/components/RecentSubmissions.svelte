@@ -6,7 +6,7 @@
 		game_date: string;
 		games: { name: string } | null;
 	};
-	type Member = { user_id: string; profiles: { username: string } | null };
+	type Member = { user_id: string; left_at: string | null; profiles: { username: string } | null };
 
 	let { submissions, members }: { submissions: Submission[]; members: Member[] } = $props();
 </script>
@@ -31,7 +31,7 @@
 						{#each submissions as sub}
 							{@const member = members.find((m) => m.user_id === sub.user_id)}
 							<tr>
-								<td>{member?.profiles?.username ?? 'Unknown'}</td>
+								<td>{member?.profiles?.username ?? 'Unknown'}{#if member?.left_at} <span class="opacity-40 text-xs">(left)</span>{/if}</td>
 								<td>{sub.games?.name ?? sub.game_id}</td>
 								<td>{sub.score}</td>
 								<td>{sub.game_date}</td>
