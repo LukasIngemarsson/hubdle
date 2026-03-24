@@ -25,31 +25,9 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		.eq('group_id', params.id)
 		.order('game_date', { ascending: false });
 
-	// Build leaderboard: total score per user across all games
-	const scores = new Map<string, { username: string; total: number; games: number }>();
-
-	for (const member of members ?? []) {
-		const profile = member.profiles;
-		if (profile) {
-			scores.set(member.user_id, { username: profile.username, total: 0, games: 0 });
-		}
-	}
-
-	for (const sub of submissions ?? []) {
-		const entry = scores.get(sub.user_id);
-		if (entry) {
-			entry.total += sub.score;
-			entry.games += 1;
-		}
-	}
-
-	const leaderboard = [...scores.entries()]
-		.map(([userId, data]) => ({ userId, ...data }))
-		.sort((a, b) => a.total - b.total);
-
 	const { data: games } = await locals.supabase.from('games').select('id, name, url');
 
-	return { group, members: members ?? [], leaderboard, submissions: submissions ?? [], games: games ?? [] };
+	return { group, members: members ?? [], submissions: submissions ?? [], games: games ?? [] };
 };
 
 export const actions: Actions = {

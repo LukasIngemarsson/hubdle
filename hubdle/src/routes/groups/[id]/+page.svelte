@@ -3,6 +3,49 @@
 	import type { ActionData, PageData } from './$types';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
+
+	type TimeFilter = 'all' | 'weekly' | 'daily';
+
+	let selectedGame = $state<string>('all');
+	let selectedTime = $state<TimeFilter>('all');
+
+	let filteredLeaderboard = $derived.by(() => {
+		const now = new Date();
+		const todayStr = now.toISOString().slice(0, 10);
+		const weekAgo = new Date(now);
+		weekAgo.setDate(weekAgo.getDate() - 7);
+		const weekAgoStr = weekAgo.toISOString().slice(0, 10);
+
+		// Filter submissions by game and time
+		const filtered = (data.submissions ?? []).filter((sub) => {
+			if (selectedGame !== 'all' && sub.game_id !== selectedGame) return false;
+			if (selectedTime === 'daily' && sub.game_date !== todayStr) return false;
+			if (selectedTime === 'weekly' && sub.game_date < weekAgoStr) return false;
+			return true;
+		});
+
+		// Build scores map from members
+		const scores = new Map<string, { username: string; total: number; games: number }>();
+		for (const member of data.members ?? []) {
+			const profile = member.profiles;
+			if (profile) {
+				scores.set(member.user_id, { username: profile.username, total: 0, games: 0 });
+			}
+		}
+
+		for (const sub of filtered) {
+			const entry = scores.get(sub.user_id);
+			if (entry) {
+				entry.total += sub.score;
+				entry.games += 1;
+			}
+		}
+
+		return [...scores.entries()]
+			.map(([userId, d]) => ({ userId, ...d }))
+			.filter((e) => e.games > 0)
+			.sort((a, b) => a.total - b.total);
+	});
 </script>
 
 <div class="mx-auto max-w-2xl p-6">
@@ -46,8 +89,50 @@
 	<section class="mt-8">
 		<h2 class="text-lg font-semibold">Leaderboard</h2>
 
-		{#if data.leaderboard.length === 0}
-			<p class="mt-2 opacity-70">No scores yet.</p>
+		<!-- Game filter tabs -->
+		<div role="tablist" class="tabs tabs-bordered mt-4">
+			<button
+				role="tab"
+				class="tab {selectedGame === 'all' ? 'tab-active' : ''}"
+				onclick={() => (selectedGame = 'all')}
+			>
+				All Games
+			</button>
+			{#each data.games as game}
+				<button
+					role="tab"
+					class="tab {selectedGame === game.id ? 'tab-active' : ''}"
+					onclick={() => (selectedGame = game.id)}
+				>
+					{game.name}
+				</button>
+			{/each}
+		</div>
+
+		<!-- Time filter -->
+		<div class="mt-3 flex gap-1">
+			<button
+				class="btn btn-sm {selectedTime === 'all' ? 'btn-active' : 'btn-ghost'}"
+				onclick={() => (selectedTime = 'all')}
+			>
+				All Time
+			</button>
+			<button
+				class="btn btn-sm {selectedTime === 'weekly' ? 'btn-active' : 'btn-ghost'}"
+				onclick={() => (selectedTime = 'weekly')}
+			>
+				Weekly
+			</button>
+			<button
+				class="btn btn-sm {selectedTime === 'daily' ? 'btn-active' : 'btn-ghost'}"
+				onclick={() => (selectedTime = 'daily')}
+			>
+				Today
+			</button>
+		</div>
+
+		{#if filteredLeaderboard.length === 0}
+			<p class="mt-4 opacity-70">No scores yet for this selection.</p>
 		{:else}
 			<div class="mt-4 overflow-x-auto">
 				<table class="table">
@@ -60,7 +145,7 @@
 						</tr>
 					</thead>
 					<tbody>
-						{#each data.leaderboard as entry, i}
+						{#each filteredLeaderboard as entry, i}
 							<tr class={i === 0 ? 'bg-base-200 font-semibold' : ''}>
 								<td>{i + 1}</td>
 								<td>{entry.username}</td>
