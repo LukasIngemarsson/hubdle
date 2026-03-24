@@ -1,4 +1,5 @@
 import { fail, redirect } from '@sveltejs/kit';
+import { ensureProfile } from '$lib/auth';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ locals }) => {
@@ -23,10 +24,7 @@ export const actions: Actions = {
 
 		if (!name?.trim()) return fail(400, { error: 'Group name is required.' });
 
-		const username = user.email?.split('@')[0] ?? `user-${user.id.slice(0, 8)}`;
-		await locals.supabase
-			.from('profiles')
-			.upsert({ id: user.id, username }, { onConflict: 'id', ignoreDuplicates: true });
+		await ensureProfile(locals.supabase, user);
 
 		const inviteCode = crypto.randomUUID().slice(0, 8);
 
@@ -56,11 +54,7 @@ export const actions: Actions = {
 
 		if (!code) return fail(400, { error: 'Invite code is required.' });
 
-		// Ensure profile exists
-		const username = user.email?.split('@')[0] ?? `user-${user.id.slice(0, 8)}`;
-		await locals.supabase
-			.from('profiles')
-			.upsert({ id: user.id, username }, { onConflict: 'id', ignoreDuplicates: true });
+		await ensureProfile(locals.supabase, user);
 
 		const { data: group } = await locals.supabase
 			.from('groups')
