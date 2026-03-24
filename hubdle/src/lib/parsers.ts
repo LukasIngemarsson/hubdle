@@ -5,7 +5,7 @@ type ParseResult = {
 } | null;
 
 export function parseShareText(text: string): ParseResult {
-	return parseWordle(text) ?? parseBandle(text);
+	return parseWordle(text) ?? parseBandle(text) ?? parseConnections(text) ?? parseContexto(text);
 }
 
 function parseWordle(text: string): ParseResult {
@@ -40,4 +40,41 @@ function parseBandle(text: string): ParseResult {
 	const gameDate = epoch.toISOString().slice(0, 10);
 
 	return { gameId: 'bandle', score, gameDate };
+}
+
+function parseConnections(text: string): ParseResult {
+	// "Connections\nPuzzle #412\n🟨🟨🟨🟨\n..."
+	const headerMatch = text.match(/Connections\s+Puzzle\s+#(\d+)/i);
+	if (!headerMatch) return null;
+
+	const puzzleNumber = parseInt(headerMatch[1], 10);
+
+	// Count emoji rows — each row is 4 coloured squares
+	const emojiRows = (text.match(/[🟨🟩🟪🟦]{4}/g) ?? []);
+	const totalRows = emojiRows.length;
+	if (totalRows < 4) return null;
+	const score = totalRows - 4; // mistakes
+
+	// Connections puzzle #1 launched 2023-08-12
+	const epoch = new Date('2023-08-11');
+	epoch.setDate(epoch.getDate() + puzzleNumber);
+	const gameDate = epoch.toISOString().slice(0, 10);
+
+	return { gameId: 'connections', score, gameDate };
+}
+
+function parseContexto(text: string): ParseResult {
+	// "I solved Contexto #342 in 23 guesses."
+	const match = text.match(/Contexto\s+#(\d+)\D+?(\d+)\s+guess/i);
+	if (!match) return null;
+
+	const puzzleNumber = parseInt(match[1], 10);
+	const score = parseInt(match[2], 10);
+
+	// Contexto #1 launched 2022-09-19
+	const epoch = new Date('2022-09-18');
+	epoch.setDate(epoch.getDate() + puzzleNumber);
+	const gameDate = epoch.toISOString().slice(0, 10);
+
+	return { gameId: 'contexto', score, gameDate };
 }
