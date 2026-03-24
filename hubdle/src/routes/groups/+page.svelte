@@ -5,6 +5,16 @@
 	import Alert from '$lib/components/Alert.svelte';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
+
+	let copiedId = $state<string | null>(null);
+
+	async function copyCode(e: MouseEvent, code: string, id: string) {
+		e.preventDefault();
+		e.stopPropagation();
+		await navigator.clipboard.writeText(code);
+		copiedId = id;
+		setTimeout(() => (copiedId = null), 1500);
+	}
 </script>
 
 <PageContainer>
@@ -46,7 +56,13 @@
 				<a href="/groups/{group.id}" class="card bg-base-200 shadow transition hover:shadow-lg">
 					<div class="card-body flex-row items-center justify-between">
 						<h2 class="card-title">{group.name}</h2>
-						<span class="badge badge-ghost font-mono">{group.invite_code}</span>
+						<button
+							class="flex items-center gap-1 font-mono text-sm opacity-70 hover:opacity-100"
+							onclick={(e) => copyCode(e, group.invite_code, group.id)}
+						>
+							<span class="badge badge-ghost font-mono">{group.invite_code}</span>
+							<span class="text-xs">{copiedId === group.id ? 'Copied!' : 'Copy'}</span>
+						</button>
 					</div>
 				</a>
 			{/each}
