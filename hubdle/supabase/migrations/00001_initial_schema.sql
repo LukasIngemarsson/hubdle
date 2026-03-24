@@ -1,3 +1,7 @@
+-- ============================================
+-- Tables
+-- ============================================
+
 -- Profiles (extends auth.users)
 create table public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
@@ -5,20 +9,6 @@ create table public.profiles (
   avatar_url text,
   created_at timestamptz default now() not null
 );
-
-alter table public.profiles enable row level security;
-
-create policy "Anyone can view profiles"
-  on public.profiles for select
-  using (true);
-
-create policy "Users can update own profile"
-  on public.profiles for update
-  using (auth.uid() = id);
-
-create policy "Users can insert own profile"
-  on public.profiles for insert
-  with check (auth.uid() = id);
 
 -- Groups
 create table public.groups (
@@ -29,22 +19,6 @@ create table public.groups (
   created_at timestamptz default now() not null
 );
 
-alter table public.groups enable row level security;
-
-create policy "Members can view their groups"
-  on public.groups for select
-  using (
-    exists (
-      select 1 from public.group_members
-      where group_members.group_id = groups.id
-        and group_members.user_id = auth.uid()
-    )
-  );
-
-create policy "Authenticated users can create groups"
-  on public.groups for insert
-  with check (auth.uid() = created_by);
-
 -- Group members
 create table public.group_members (
   group_id uuid not null references public.groups(id) on delete cascade,
@@ -53,22 +27,6 @@ create table public.group_members (
   primary key (group_id, user_id)
 );
 
-alter table public.group_members enable row level security;
-
-create policy "Members can view group members"
-  on public.group_members for select
-  using (
-    exists (
-      select 1 from public.group_members gm
-      where gm.group_id = group_members.group_id
-        and gm.user_id = auth.uid()
-    )
-  );
-
-create policy "Authenticated users can join groups"
-  on public.group_members for insert
-  with check (auth.uid() = user_id);
-
 -- Games registry
 create table public.games (
   id text primary key,
@@ -76,17 +34,6 @@ create table public.games (
   url text not null,
   score_direction text not null check (score_direction in ('asc', 'desc'))
 );
-
-alter table public.games enable row level security;
-
-create policy "Anyone can view games"
-  on public.games for select
-  using (true);
-
--- Seed games
-insert into public.games (id, name, url, score_direction) values
-  ('wordle', 'Wordle', 'https://www.nytimes.com/games/wordle', 'asc'),
-  ('bandle', 'Bandle', 'https://bandle.app', 'asc');
 
 -- Submissions
 create table public.submissions (
@@ -101,18 +48,82 @@ create table public.submissions (
   unique (user_id, group_id, game_id, game_date)
 );
 
+-- ============================================
+-- Helper function (security definer to bypass RLS)
+-- ============================================
+
+create or replace function public.is_group_member(gid uuid)
+returns boolean
+language sql
+security definer
+set search_path = ''
+as $$
+  select exists (
+    select 1 from public.group_members
+    where group_id = gid
+      and user_id = auth.uid()
+  );
+$$;
+
+-- ============================================
+-- Row Level Security
+-- ============================================
+
+alter table public.profiles enable row level security;
+alter table public.groups enable row level security;
+alter table public.group_members enable row level security;
+alter table public.games enable row level security;
 alter table public.submissions enable row level security;
 
+-- Profiles policies
+create policy "Anyone can view profiles"
+  on public.profiles for select
+  using (true);
+
+create policy "Users can update own profile"
+  on public.profiles for update
+  using (auth.uid() = id);
+
+create policy "Users can insert own profile"
+  on public.profiles for insert
+  with check (auth.uid() = id);
+
+-- Groups policies
+create policy "Authenticated users can view groups"
+  on public.groups for select
+  using (auth.uid() is not null);
+
+create policy "Authenticated users can create groups"
+  on public.groups for insert
+  with check (auth.uid() = created_by);
+
+-- Group members policies
+create policy "Members can view group members"
+  on public.group_members for select
+  using (public.is_group_member(group_id));
+
+create policy "Authenticated users can join groups"
+  on public.group_members for insert
+  with check (auth.uid() = user_id);
+
+-- Games policies
+create policy "Anyone can view games"
+  on public.games for select
+  using (true);
+
+-- Submissions policies
 create policy "Group members can view submissions"
   on public.submissions for select
-  using (
-    exists (
-      select 1 from public.group_members
-      where group_members.group_id = submissions.group_id
-        and group_members.user_id = auth.uid()
-    )
-  );
+  using (public.is_group_member(group_id));
 
 create policy "Users can insert own submissions"
   on public.submissions for insert
   with check (auth.uid() = user_id);
+
+-- ============================================
+-- Seed data
+-- ============================================
+
+insert into public.games (id, name, url, score_direction) values
+  ('wordle', 'Wordle', 'https://www.nytimes.com/games/wordle', 'asc'),
+  ('bandle', 'Bandle', 'https://bandle.app', 'asc');

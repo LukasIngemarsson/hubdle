@@ -28,13 +28,20 @@
 				alert('Check your email for a confirmation link.');
 			}
 		} else {
-			const { error: err } = await supabase.auth.signInWithPassword({
+			const { error: err, data: signInData } = await supabase.auth.signInWithPassword({
 				email,
 				password
 			});
 			if (err) {
 				error = err.message;
 			} else {
+				if (signInData.user) {
+					const username = signInData.user.email?.split('@')[0] ?? `user-${signInData.user.id.slice(0, 8)}`;
+					await supabase.from('profiles').upsert(
+						{ id: signInData.user.id, username },
+						{ onConflict: 'id', ignoreDuplicates: true }
+					);
+				}
 				window.location.href = '/';
 			}
 		}

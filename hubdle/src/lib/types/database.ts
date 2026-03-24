@@ -20,6 +20,15 @@ export type Database = {
 					avatar_url?: string | null;
 					created_at?: string;
 				};
+				Relationships: [
+					{
+						foreignKeyName: 'profiles_id_fkey';
+						columns: ['id'];
+						isOneToOne: true;
+						referencedRelation: 'users';
+						referencedColumns: ['id'];
+					}
+				];
 			};
 			groups: {
 				Row: {
@@ -43,6 +52,15 @@ export type Database = {
 					created_by?: string;
 					created_at?: string;
 				};
+				Relationships: [
+					{
+						foreignKeyName: 'groups_created_by_fkey';
+						columns: ['created_by'];
+						isOneToOne: false;
+						referencedRelation: 'profiles';
+						referencedColumns: ['id'];
+					}
+				];
 			};
 			group_members: {
 				Row: {
@@ -60,6 +78,22 @@ export type Database = {
 					user_id?: string;
 					joined_at?: string;
 				};
+				Relationships: [
+					{
+						foreignKeyName: 'group_members_group_id_fkey';
+						columns: ['group_id'];
+						isOneToOne: false;
+						referencedRelation: 'groups';
+						referencedColumns: ['id'];
+					},
+					{
+						foreignKeyName: 'group_members_user_id_fkey';
+						columns: ['user_id'];
+						isOneToOne: false;
+						referencedRelation: 'profiles';
+						referencedColumns: ['id'];
+					}
+				];
 			};
 			games: {
 				Row: {
@@ -80,6 +114,7 @@ export type Database = {
 					url?: string;
 					score_direction?: string;
 				};
+				Relationships: [];
 			};
 			submissions: {
 				Row: {
@@ -112,7 +147,34 @@ export type Database = {
 					game_date?: string;
 					created_at?: string;
 				};
+				Relationships: [
+					{
+						foreignKeyName: 'submissions_user_id_fkey';
+						columns: ['user_id'];
+						isOneToOne: false;
+						referencedRelation: 'profiles';
+						referencedColumns: ['id'];
+					},
+					{
+						foreignKeyName: 'submissions_group_id_fkey';
+						columns: ['group_id'];
+						isOneToOne: false;
+						referencedRelation: 'groups';
+						referencedColumns: ['id'];
+					},
+					{
+						foreignKeyName: 'submissions_game_id_fkey';
+						columns: ['game_id'];
+						isOneToOne: false;
+						referencedRelation: 'games';
+						referencedColumns: ['id'];
+					}
+				];
 			};
 		};
+		Views: Record<string, never>;
+		Functions: Record<string, never>;
+		Enums: Record<string, never>;
+		CompositeTypes: Record<string, never>;
 	};
 };
