@@ -25,7 +25,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		.eq('group_id', params.id)
 		.order('game_date', { ascending: false });
 
-	const { data: games } = await locals.supabase.from('games').select('id, name, url');
+	const { data: games } = await locals.supabase.from('games').select('id, name, url, score_direction');
 
 	return { group, members: members ?? [], submissions: submissions ?? [], games: games ?? [], userId: user.id };
 };

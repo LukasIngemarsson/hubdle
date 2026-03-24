@@ -1,5 +1,5 @@
 <script lang="ts">
-	type Game = { id: string; name: string; url: string };
+	type Game = { id: string; name: string; url: string; score_direction: string };
 	type Submission = { user_id: string; score: number; game_id: string; game_date: string };
 	type Member = { user_id: string; profiles: { username: string } | null };
 	type TimeFilter = 'all' | 'weekly' | 'daily';
@@ -42,10 +42,13 @@
 			}
 		}
 
+		const selectedGameData = games.find((g) => g.id === selectedGame);
+		const ascending = selectedGameData ? selectedGameData.score_direction === 'asc' : true;
+
 		return [...scores.entries()]
 			.map(([userId, d]) => ({ userId, ...d }))
 			.filter((e) => e.games > 0)
-			.sort((a, b) => a.total - b.total);
+			.sort((a, b) => ascending ? a.total - b.total : b.total - a.total);
 	});
 </script>
 
