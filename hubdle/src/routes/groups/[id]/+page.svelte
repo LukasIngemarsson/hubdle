@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import { invalidateAll } from '$app/navigation';
+	import { onDestroy, onMount } from 'svelte';
 	import type { ActionData, PageData } from './$types';
 	import PageContainer from '$lib/components/PageContainer.svelte';
 	import ScoreSubmitForm from '$lib/components/ScoreSubmitForm.svelte';
@@ -12,6 +14,60 @@
 
 	let leaveForm = $state<HTMLFormElement>();
 	let deleteForm = $state<HTMLFormElement>();
+	let transferForm = $state<HTMLFormElement>();
+	let newOwnerId = $state('');
+
+	// Subscribe to realtime changes on group_members for this group
+	let channel: ReturnType<typeof data.supabase.channel>;
+
+	onMount(() => {
+		channel = data.supabase
+			.channel(`group-members-${data.group.id}`)
+			.on(
+				'postgres_changes',
+				{
+					event: '*',
+					schema: 'public',
+					table: 'group_members',
+					filter: `group_id=eq.${data.group.id}`
+				},
+				() => invalidateAll()
+			)
+			.subscribe();
+	});
+
+	onDestroy(() => {
+		if (channel) data.supabase.removeChannel(channel);
+	});
+
+	let isOwner = $derived(data.userId === data.group.created_by);
+	let otherMembers = $derived(data.members.filter((m) => m.user_id !== data.userId));
+	let isOnlyMember = $derived(otherMembers.length === 0);
+
+	function openTransferModal() {
+		(document.getElementById('transfer-modal') as HTMLDialogElement)?.showModal();
+	}
+
+	function closeTransferModal() {
+		(document.getElementById('transfer-modal') as HTMLDialogElement)?.close();
+	}
+
+	function unsubscribeRealtime() {
+		if (channel) {
+			data.supabase.removeChannel(channel);
+		}
+	}
+
+	function handleLeave() {
+		unsubscribeRealtime();
+		leaveForm?.requestSubmit();
+	}
+
+	function handleTransferAndLeave() {
+		closeTransferModal();
+		unsubscribeRealtime();
+		transferForm?.requestSubmit();
+	}
 </script>
 
 <PageContainer>
@@ -40,18 +96,60 @@
 	</section>
 
 	<section class="mt-12 flex gap-3 border-t border-base-300 pt-6">
-		<form method="POST" action="?/leave" use:enhance bind:this={leaveForm} class="hidden"></form>
-		<ConfirmModal
-			id="leave-modal"
-			title="Leave Group"
-			message="Are you sure you want to leave this group?"
-			triggerLabel="Leave Group"
-			confirmLabel="Leave"
-			confirmClass="btn-ghost"
-			onConfirm={() => leaveForm?.requestSubmit()}
-		/>
+		{#if !isOwner}
+			<form method="POST" action="?/leave" use:enhance bind:this={leaveForm} class="hidden"></form>
+			<ConfirmModal
+				id="leave-modal"
+				title="Leave Group"
+				message="Are you sure you want to leave this group?"
+				triggerLabel="Leave Group"
+				confirmLabel="Leave"
+				confirmClass="btn-ghost"
+				onConfirm={handleLeave}
+			/>
+		{:else if isOnlyMember}
+			<form method="POST" action="?/leaveAndDelete" use:enhance bind:this={leaveForm} class="hidden"></form>
+			<ConfirmModal
+				id="leave-modal"
+				title="Leave Group"
+				message="You are the only member. Leaving will permanently delete this group and all its data."
+				triggerLabel="Leave Group"
+				confirmLabel="Leave & Delete"
+				confirmClass="btn-error"
+				onConfirm={handleLeave}
+			/>
+		{:else}
+			<form method="POST" action="?/transferAndLeave" use:enhance bind:this={transferForm} class="hidden">
+				<input type="hidden" name="new_owner_id" value={newOwnerId} />
+			</form>
+			<button type="button" class="btn btn-ghost" onclick={openTransferModal}>
+				Leave Group
+			</button>
 
-		{#if data.userId === data.group.created_by}
+			<dialog id="transfer-modal" class="modal">
+				<div class="modal-box">
+					<h3 class="text-lg font-bold">Transfer Ownership & Leave</h3>
+					<p class="py-4">You are the group owner. Choose a new owner before leaving.</p>
+					<select class="select select-bordered w-full" bind:value={newOwnerId}>
+						<option value="" disabled>Select new owner</option>
+						{#each otherMembers as member}
+							<option value={member.user_id}>{member.profiles?.username ?? 'Unknown'}</option>
+						{/each}
+					</select>
+					<div class="modal-action">
+						<button class="btn btn-ghost" onclick={closeTransferModal}>Cancel</button>
+						<button class="btn btn-primary" disabled={!newOwnerId} onclick={handleTransferAndLeave}>
+							Transfer & Leave
+						</button>
+					</div>
+				</div>
+				<form method="dialog" class="modal-backdrop">
+					<button>close</button>
+				</form>
+			</dialog>
+		{/if}
+
+		{#if isOwner}
 			<form method="POST" action="?/delete" use:enhance bind:this={deleteForm} class="hidden"></form>
 			<ConfirmModal
 				id="delete-modal"

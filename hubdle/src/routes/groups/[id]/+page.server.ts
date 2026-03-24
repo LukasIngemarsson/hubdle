@@ -104,6 +104,17 @@ export const actions: Actions = {
 		const { user } = await locals.safeGetSession();
 		if (!user) redirect(303, '/login');
 
+		// Prevent owner from using the plain leave action
+		const { data: group } = await locals.supabase
+			.from('groups')
+			.select('created_by')
+			.eq('id', params.id)
+			.single();
+
+		if (group?.created_by === user.id) {
+			return fail(400, { error: 'As the group owner, you must transfer ownership or delete the group.' });
+		}
+
 		const { error: deleteError } = await locals.supabase
 			.from('group_members')
 			.delete()
@@ -111,6 +122,91 @@ export const actions: Actions = {
 			.eq('user_id', user.id);
 
 		if (deleteError) return fail(500, { error: `Failed to leave group: ${deleteError.message}` });
+
+		redirect(303, '/groups');
+	},
+
+	transferAndLeave: async ({ request, params, locals }) => {
+		const { user } = await locals.safeGetSession();
+		if (!user) redirect(303, '/login');
+
+		const formData = await request.formData();
+		const newOwnerId = (formData.get('new_owner_id') as string)?.trim();
+		if (!newOwnerId) return fail(400, { error: 'Please select a new owner.' });
+
+		// Verify current user is the owner
+		const { data: group } = await locals.supabase
+			.from('groups')
+			.select('created_by')
+			.eq('id', params.id)
+			.single();
+
+		if (!group || group.created_by !== user.id) {
+			return fail(403, { error: 'Only the group owner can transfer ownership.' });
+		}
+
+		// Verify new owner is a member
+		const { data: membership } = await locals.supabase
+			.from('group_members')
+			.select('user_id')
+			.eq('group_id', params.id)
+			.eq('user_id', newOwnerId)
+			.single();
+
+		if (!membership) return fail(400, { error: 'Selected user is not a member of this group.' });
+
+		// Transfer ownership
+		const { error: updateError } = await locals.supabase
+			.from('groups')
+			.update({ created_by: newOwnerId })
+			.eq('id', params.id);
+
+		if (updateError) return fail(500, { error: `Failed to transfer ownership: ${updateError.message}` });
+
+		// Remove the old owner from the group
+		const { error: leaveError } = await locals.supabase
+			.from('group_members')
+			.delete()
+			.eq('group_id', params.id)
+			.eq('user_id', user.id);
+
+		if (leaveError) return fail(500, { error: `Ownership transferred but failed to leave: ${leaveError.message}` });
+
+		redirect(303, '/groups');
+	},
+
+	leaveAndDelete: async ({ params, locals }) => {
+		const { user } = await locals.safeGetSession();
+		if (!user) redirect(303, '/login');
+
+		// Verify current user is the owner
+		const { data: group } = await locals.supabase
+			.from('groups')
+			.select('created_by')
+			.eq('id', params.id)
+			.single();
+
+		if (!group || group.created_by !== user.id) {
+			return fail(403, { error: 'Only the group owner can delete the group.' });
+		}
+
+		// Verify no other members exist
+		const { data: members } = await locals.supabase
+			.from('group_members')
+			.select('user_id')
+			.eq('group_id', params.id)
+			.neq('user_id', user.id);
+
+		if (members && members.length > 0) {
+			return fail(400, { error: 'Cannot delete a group with other members. Transfer ownership first.' });
+		}
+
+		const { error: deleteError } = await locals.supabase
+			.from('groups')
+			.delete()
+			.eq('id', params.id);
+
+		if (deleteError) return fail(500, { error: `Failed to delete group: ${deleteError.message}` });
 
 		redirect(303, '/groups');
 	},
