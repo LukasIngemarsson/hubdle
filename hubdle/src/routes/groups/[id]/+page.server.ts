@@ -41,7 +41,7 @@ export const actions: Actions = {
 		if (!rawText) return fail(400, { error: 'Paste your share text.' });
 
 		const parsed = parseShareText(rawText);
-		if (!parsed) return fail(400, { error: 'Could not parse that share text. Supported games: Wordle, Bandle.' });
+		if (!parsed) return fail(400, { error: 'Could not parse that share text. Supported games: Wordle, Bandle, Connections, Contexto.' });
 
 		const { error: insertError } = await locals.supabase.from('submissions').insert({
 			user_id: user.id,
