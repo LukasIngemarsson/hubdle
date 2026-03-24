@@ -2,8 +2,8 @@ import { error, redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
-	const { session } = await locals.safeGetSession();
-	if (!session) redirect(303, '/login');
+	const { user } = await locals.safeGetSession();
+	if (!user) redirect(303, '/login');
 
 	const { data: group } = await locals.supabase
 		.from('groups')

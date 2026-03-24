@@ -2,30 +2,26 @@ import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ locals }) => {
-	const { session } = await locals.safeGetSession();
-	if (!session) redirect(303, '/login');
+	const { user } = await locals.safeGetSession();
+	if (!user) redirect(303, '/login');
 
 	const { data: groups } = await locals.supabase
 		.from('group_members')
 		.select('group_id, groups(id, name, invite_code, created_at)')
-		.eq('user_id', session.user.id);
+		.eq('user_id', user.id);
 
 	return { groups: groups?.map((gm) => gm.groups) ?? [] };
 };
 
 export const actions: Actions = {
 	create: async ({ request, locals }) => {
-		const { session } = await locals.safeGetSession();
-		if (!session) redirect(303, '/login');
+		const { user } = await locals.safeGetSession();
+		if (!user) redirect(303, '/login');
 
 		const formData = await request.formData();
 		const name = formData.get('name') as string;
 
 		if (!name?.trim()) return fail(400, { error: 'Group name is required.' });
-
-		// Ensure profile exists before creating group (FK constraint)
-		const { data: { user } } = await locals.supabase.auth.getUser();
-		if (!user) redirect(303, '/login');
 
 		const username = user.email?.split('@')[0] ?? `user-${user.id.slice(0, 8)}`;
 		await locals.supabase
