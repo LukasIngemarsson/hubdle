@@ -120,10 +120,4 @@ create policy "Users can insert own submissions"
   on public.submissions for insert
   with check (auth.uid() = user_id);
 
--- ============================================
--- Seed data
--- ============================================
-
-insert into public.games (id, name, url, score_direction) values
-  ('wordle', 'Wordle', 'https://www.nytimes.com/games/wordle', 'asc'),
-  ('bandle', 'Bandle', 'https://bandle.app', 'asc');
+-- Game seed data is in 00005_add_games.sql

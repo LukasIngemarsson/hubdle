@@ -29,6 +29,12 @@ export const GAME_RULES: Record<string, GameRules> = {
 		maxScore: 500,
 		scoreLabel: 'Guesses (1–500)',
 		hint: 'Total number of guesses to find the secret word.'
+	},
+	scrandle: {
+		minScore: 0,
+		maxScore: 10,
+		scoreLabel: 'Correct guesses (0–10)',
+		hint: 'Number of rounds where you picked the more popular food.'
 	}
 };
 

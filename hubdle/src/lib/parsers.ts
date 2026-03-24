@@ -5,7 +5,13 @@ type ParseResult = {
 } | null;
 
 export function parseShareText(text: string): ParseResult {
-	return parseWordle(text) ?? parseBandle(text) ?? parseConnections(text) ?? parseContexto(text);
+	return (
+		parseWordle(text) ??
+		parseBandle(text) ??
+		parseConnections(text) ??
+		parseContexto(text) ??
+		parseScrandle(text)
+	);
 }
 
 function parseWordle(text: string): ParseResult {
@@ -77,4 +83,15 @@ function parseContexto(text: string): ParseResult {
 	const gameDate = epoch.toISOString().slice(0, 10);
 
 	return { gameId: 'contexto', score, gameDate };
+}
+
+function parseScrandle(text: string): ParseResult {
+	// "🟩🟥🟩🟩🟩🟥🟥🟩🟩🟩 7/10 | 2026-03-24 | https://scrandle.com"
+	const match = text.match(/(\d{1,2})\/10\s*\|\s*(\d{4}-\d{2}-\d{2})\s*\|\s*https?:\/\/scrandle\.com/);
+	if (!match) return null;
+
+	const score = parseInt(match[1], 10);
+	const gameDate = match[2];
+
+	return { gameId: 'scrandle', score, gameDate };
 }
