@@ -52,8 +52,20 @@
 		(document.getElementById('transfer-modal') as HTMLDialogElement)?.close();
 	}
 
+	function unsubscribeRealtime() {
+		if (channel) {
+			data.supabase.removeChannel(channel);
+		}
+	}
+
+	function handleLeave() {
+		unsubscribeRealtime();
+		leaveForm?.requestSubmit();
+	}
+
 	function handleTransferAndLeave() {
 		closeTransferModal();
+		unsubscribeRealtime();
 		transferForm?.requestSubmit();
 	}
 </script>
@@ -93,7 +105,7 @@
 				triggerLabel="Leave Group"
 				confirmLabel="Leave"
 				confirmClass="btn-ghost"
-				onConfirm={() => leaveForm?.requestSubmit()}
+				onConfirm={handleLeave}
 			/>
 		{:else if isOnlyMember}
 			<form method="POST" action="?/leaveAndDelete" use:enhance bind:this={leaveForm} class="hidden"></form>
@@ -104,7 +116,7 @@
 				triggerLabel="Leave Group"
 				confirmLabel="Leave & Delete"
 				confirmClass="btn-error"
-				onConfirm={() => leaveForm?.requestSubmit()}
+				onConfirm={handleLeave}
 			/>
 		{:else}
 			<form method="POST" action="?/transferAndLeave" use:enhance bind:this={transferForm} class="hidden">
