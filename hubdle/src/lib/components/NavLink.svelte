@@ -4,6 +4,6 @@
 	let { href, label }: { href: string; label: string } = $props();
 </script>
 
-<a {href} class="btn btn-ghost btn-sm {$page.url.pathname.startsWith(href) ? 'btn-active' : ''}">
+<a {href} class="btn btn-sm {$page.url.pathname.startsWith(href) ? 'btn-neutral' : 'btn-ghost'}">
 	{label}
 </a>
