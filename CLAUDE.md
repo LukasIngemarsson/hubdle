@@ -31,6 +31,7 @@ npm run build        # production build
 npm run preview      # preview production build
 npm run check        # svelte-check type checking
 npm run check:watch  # type checking in watch mode
+npm run db:types     # regenerate database types from Supabase schema
 ```
 
 There are no test or lint scripts configured.
@@ -47,12 +48,12 @@ The SvelteKit app lives in `hubdle/` (not the repo root). The repo root contains
 - **Layout data flow**: `+layout.server.ts` calls `safeGetSession()` and passes `user` + `cookies` to the client. `+layout.ts` creates a browser-side Supabase client from that data. All pages receive `supabase` and `user` via layout data.
 - **Auth callback**: `/auth/callback` handles OAuth redirect.
 - **Profile auto-creation**: `ensureProfile()` in `$lib/auth.ts` upserts a profile row on first sign-in.
-- **Database types**: Hand-maintained in `$lib/types/database.ts` (not auto-generated). Must be updated manually when the schema changes.
+- **Database types**: Auto-generated from the Supabase schema via `npm run db:types`. Run this after any migration to keep types in sync.
 - **Realtime**: `group_members` is added to the `supabase_realtime` publication. The group detail page subscribes via `onMount`/`onDestroy` and calls `invalidateAll()` on changes. **Important**: always call `unsubscribeRealtime()` before submitting forms that navigate away (leave, delete, transfer) to avoid a race condition where `invalidateAll()` re-runs the load function on a deleted/left resource and hits a 404.
 
 ### Score Parsing & Validation
 
-- `$lib/parsers.ts` contains share-text parsers for supported games (Wordle, Bandle, Connections, Contexto). `parseShareText()` chains them with nullish coalescing. Each parser extracts `gameId`, `score`, and `gameDate` from the puzzle number using a hardcoded epoch date.
+- `$lib/parsers.ts` contains share-text parsers for supported games (Wordle, Bandle, Connections, Contexto, Scrandle). `parseShareText()` chains them with nullish coalescing. Each parser extracts `gameId`, `score`, and `gameDate` from the puzzle number using a hardcoded epoch date.
 - `$lib/game-rules.ts` defines per-game score bounds (`minScore`, `maxScore`), labels, and hints as a `Record<string, GameRules>`. The `validateScore()` function is used server-side on both paste and manual submit actions. Future dates are also rejected server-side.
 
 ### Database Schema
