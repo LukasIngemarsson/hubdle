@@ -56,7 +56,8 @@
 	<div class="card-body">
 	<h2 class="card-title text-base">Leaderboard</h2>
 
-	<div role="tablist" class="tabs tabs-bordered mt-2">
+	<div class="mt-2 overflow-x-auto">
+	<div role="tablist" class="tabs tabs-bordered">
 		<button
 			role="tab"
 			class="tab {selectedGame === 'all' ? 'tab-active' : ''}"
@@ -73,6 +74,7 @@
 				{game.name}
 			</button>
 		{/each}
+	</div>
 	</div>
 
 	<div class="mt-3 flex gap-1">

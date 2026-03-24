@@ -24,24 +24,24 @@
 		<Alert type="error" message={form.error} />
 	{/if}
 
-	<div class="mt-6 flex gap-4">
-		<form method="POST" action="?/create" use:enhance class="flex gap-2">
+	<div class="mt-6 flex flex-col gap-4 sm:flex-row">
+		<form method="POST" action="?/create" use:enhance class="flex flex-1 gap-2">
 			<input
 				type="text"
 				name="name"
 				placeholder="Group name"
-				class="input input-bordered"
+				class="input input-bordered min-w-0 flex-1"
 				required
 			/>
 			<button class="btn btn-primary">Create</button>
 		</form>
 
-		<form method="POST" action="?/join" use:enhance class="flex gap-2">
+		<form method="POST" action="?/join" use:enhance class="flex flex-1 gap-2">
 			<input
 				type="text"
 				name="code"
 				placeholder="Invite code"
-				class="input input-bordered"
+				class="input input-bordered min-w-0 flex-1"
 				required
 			/>
 			<button class="btn btn-secondary">Join</button>
