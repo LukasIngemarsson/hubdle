@@ -6,12 +6,18 @@ export const load: PageServerLoad = async ({ locals }) => {
 	const { user } = await locals.safeGetSession();
 	if (!user) redirect(303, '/login');
 
-	const { data: groups } = await locals.supabase
+	const { data: memberships } = await locals.supabase
 		.from('group_members')
-		.select('group_id, groups(id, name, invite_code, created_at)')
+		.select('group_id, groups(id, name, invite_code, created_at, group_members(count))')
 		.eq('user_id', user.id);
 
-	return { groups: groups?.map((gm) => gm.groups) ?? [] };
+	const groups = memberships?.map((gm) => {
+		const group = gm.groups;
+		const memberCount = group?.group_members?.[0]?.count ?? 0;
+		return { ...group, member_count: memberCount };
+	}) ?? [];
+
+	return { groups };
 };
 
 export const actions: Actions = {
