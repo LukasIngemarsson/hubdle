@@ -112,7 +112,8 @@
 						<th>#</th>
 						<th>Player</th>
 						<th>Games</th>
-						<th>Total Score</th>
+						<th>Total</th>
+						<th>Avg</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -122,6 +123,7 @@
 							<td>{entry.username}</td>
 							<td>{entry.games}</td>
 							<td>{entry.total}</td>
+							<td>{(entry.total / entry.games).toFixed(1)}</td>
 						</tr>
 					{/each}
 				</tbody>
