@@ -8,10 +8,12 @@
 	let isSignUp = $state(false);
 	let loading = $state(false);
 	let error = $state('');
+	let signUpSuccess = $state(false);
 
 	async function handleSubmit() {
 		loading = true;
 		error = '';
+		signUpSuccess = false;
 
 		const { supabase } = data;
 
@@ -24,8 +26,7 @@
 			if (err) {
 				error = err.message;
 			} else {
-				error = '';
-				alert('Check your email for a confirmation link.');
+				signUpSuccess = true;
 			}
 		} else {
 			const { error: err, data: signInData } = await supabase.auth.signInWithPassword({
@@ -83,6 +84,9 @@
 
 				{#if error}
 					<p class="text-error text-sm">{error}</p>
+				{/if}
+				{#if signUpSuccess}
+					<p class="text-success text-sm">Check your email for a confirmation link.</p>
 				{/if}
 
 				<button class="btn btn-primary w-full" disabled={loading}>
