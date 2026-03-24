@@ -8,5 +8,17 @@ export const GET: RequestHandler = async ({ url, locals }) => {
 		await locals.supabase.auth.exchangeCodeForSession(code);
 	}
 
+	const {
+		data: { user }
+	} = await locals.supabase.auth.getUser();
+
+	if (user) {
+		const username = user.email?.split('@')[0] ?? `user-${user.id.slice(0, 8)}`;
+		await locals.supabase.from('profiles').upsert(
+			{ id: user.id, username },
+			{ onConflict: 'id' }
+		);
+	}
+
 	redirect(303, '/');
 };
