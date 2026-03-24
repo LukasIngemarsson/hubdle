@@ -28,7 +28,7 @@
 		</div>
 		<div class="flex-none">
 			{#if data.user}
-				<NavLink href="/profile" label={data.user.email ?? 'Profile'} />
+				<NavLink href="/profile" label="Profile" />
 				<button class="btn btn-ghost btn-sm" onclick={handleLogout}>Log Out</button>
 			{:else}
 				<a href="/login" class="btn btn-primary btn-sm">Log In</a>
