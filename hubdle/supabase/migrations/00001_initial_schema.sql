@@ -49,6 +49,23 @@ create table public.submissions (
 );
 
 -- ============================================
+-- Helper function (security definer to bypass RLS)
+-- ============================================
+
+create or replace function public.is_group_member(gid uuid)
+returns boolean
+language sql
+security definer
+set search_path = ''
+as $$
+  select exists (
+    select 1 from public.group_members
+    where group_id = gid
+      and user_id = auth.uid()
+  );
+$$;
+
+-- ============================================
 -- Row Level Security
 -- ============================================
 
@@ -74,13 +91,7 @@ create policy "Users can insert own profile"
 -- Groups policies
 create policy "Members can view their groups"
   on public.groups for select
-  using (
-    exists (
-      select 1 from public.group_members
-      where group_members.group_id = groups.id
-        and group_members.user_id = auth.uid()
-    )
-  );
+  using (public.is_group_member(id));
 
 create policy "Authenticated users can create groups"
   on public.groups for insert
@@ -89,13 +100,7 @@ create policy "Authenticated users can create groups"
 -- Group members policies
 create policy "Members can view group members"
   on public.group_members for select
-  using (
-    exists (
-      select 1 from public.group_members gm
-      where gm.group_id = group_members.group_id
-        and gm.user_id = auth.uid()
-    )
-  );
+  using (public.is_group_member(group_id));
 
 create policy "Authenticated users can join groups"
   on public.group_members for insert
@@ -109,13 +114,7 @@ create policy "Anyone can view games"
 -- Submissions policies
 create policy "Group members can view submissions"
   on public.submissions for select
-  using (
-    exists (
-      select 1 from public.group_members
-      where group_members.group_id = submissions.group_id
-        and group_members.user_id = auth.uid()
-    )
-  );
+  using (public.is_group_member(group_id));
 
 create policy "Users can insert own submissions"
   on public.submissions for insert
