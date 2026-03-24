@@ -24,7 +24,7 @@
 		<Alert type="error" message={form.error} />
 	{/if}
 
-	<div class="mt-6 flex gap-4">
+	<div class="mt-6 flex flex-col gap-4 sm:flex-row">
 		<form method="POST" action="?/create" use:enhance class="flex gap-2">
 			<input
 				type="text"
