@@ -17,7 +17,7 @@ AS $$
 $$;
 
 -- Replace the DELETE policy with an UPDATE policy for soft-delete
-DROP POLICY "Members can remove themselves" ON public.group_members;
+DROP POLICY "Members can leave groups" ON public.group_members;
 
 CREATE POLICY "Members can update own membership"
   ON public.group_members FOR UPDATE
