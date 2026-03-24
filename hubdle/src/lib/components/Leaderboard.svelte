@@ -49,10 +49,11 @@
 	});
 </script>
 
-<section class="mt-8">
-	<h2 class="text-lg font-semibold">Leaderboard</h2>
+<section class="card mt-6 bg-base-200">
+	<div class="card-body">
+	<h2 class="card-title text-base">Leaderboard</h2>
 
-	<div role="tablist" class="tabs tabs-bordered mt-4">
+	<div role="tablist" class="tabs tabs-bordered mt-2">
 		<button
 			role="tab"
 			class="tab {selectedGame === 'all' ? 'tab-active' : ''}"
@@ -107,7 +108,7 @@
 				</thead>
 				<tbody>
 					{#each filteredLeaderboard as entry, i}
-						<tr class={i === 0 ? 'bg-base-200 font-semibold' : ''}>
+						<tr class={i === 0 ? 'bg-base-300 font-semibold' : ''}>
 							<td>{i + 1}</td>
 							<td>{entry.username}</td>
 							<td>{entry.games}</td>
@@ -118,4 +119,5 @@
 			</table>
 		</div>
 	{/if}
+	</div>
 </section>
