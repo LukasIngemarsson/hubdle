@@ -5,16 +5,9 @@
 	import ScoreSubmitForm from '$lib/components/ScoreSubmitForm.svelte';
 	import Leaderboard from '$lib/components/Leaderboard.svelte';
 	import RecentSubmissions from '$lib/components/RecentSubmissions.svelte';
+	import CopyBadge from '$lib/components/CopyBadge.svelte';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
-
-	let copied = $state(false);
-
-	async function copyCode() {
-		await navigator.clipboard.writeText(data.group.invite_code);
-		copied = true;
-		setTimeout(() => (copied = false), 1500);
-	}
 </script>
 
 <PageContainer>
@@ -25,10 +18,7 @@
 		</div>
 		<div class="text-right">
 			<p class="text-xs opacity-50">Invite code</p>
-			<button class="flex items-center gap-2" onclick={copyCode}>
-				<span class="badge badge-ghost font-mono text-lg">{data.group.invite_code}</span>
-				<span class="text-xs opacity-70">{copied ? 'Copied!' : 'Copy'}</span>
-			</button>
+			<CopyBadge text={data.group.invite_code} size="lg" />
 		</div>
 	</div>
 
