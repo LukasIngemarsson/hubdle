@@ -60,7 +60,7 @@
 				<div class="flex flex-col gap-4">
 					<div class="flex items-center gap-4">
 						<Avatar src={data.avatarUrl} username={data.username} size="lg" />
-						<div class="flex flex-col gap-1">
+						<div class="flex items-center gap-1">
 							<form method="POST" action="?/uploadAvatar" enctype="multipart/form-data" use:enhance={() => {
 								uploadingAvatar = true;
 								return async ({ update }) => { await update(); uploadingAvatar = false; };
@@ -83,7 +83,7 @@
 									removingAvatar = true;
 									return async ({ update }) => { await update(); removingAvatar = false; };
 								}}>
-									<button class="btn btn-ghost btn-xs text-error" disabled={removingAvatar}>
+									<button class="btn btn-ghost btn-sm text-error" disabled={removingAvatar}>
 										{#if removingAvatar}<span class="loading loading-spinner loading-xs"></span>{/if}
 										Remove
 									</button>
