@@ -112,19 +112,32 @@
 			<div class="flex flex-wrap gap-2">
 				{#each data.members as member}
 					{@const friendStatus = data.friendshipStatusMap[member.user_id]}
-					<div class="flex items-center gap-1.5 rounded-full border border-base-content/20 px-3 py-1.5">
-						<a href="/users/{member.profiles?.username ?? ''}" class="flex items-center gap-1.5 transition-colors hover:underline">
+					{@const isself = member.user_id === data.userId}
+					<div class="relative">
+						<a href="/users/{member.profiles?.username ?? ''}" class="flex items-center gap-1.5 rounded-full border border-base-content/20 px-3 py-1.5 transition-colors hover:bg-base-300">
 							<Avatar src={member.profiles?.avatar_url} username={member.profiles?.username ?? 'Unknown'} size="xs" />
 							{member.profiles?.username ?? 'Unknown'}
+							{#if member.user_id === data.group.created_by}
+								<span class="text-xs opacity-50">Owner</span>
+							{/if}
 						</a>
-						{#if member.user_id === data.group.created_by}
-							<span class="text-xs opacity-50">Owner</span>
-						{/if}
-						{#if member.user_id !== data.userId && !friendStatus}
-							<form method="POST" action="?/sendRequest" use:enhance={toastEnhance('Friend request sent!')}>
-								<input type="hidden" name="addressee_id" value={member.user_id} />
-								<button class="btn btn-ghost btn-xs text-primary" title="Add Friend">+</button>
-							</form>
+						{#if !isself}
+							{#if friendStatus === 'accepted'}
+								<span class="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-success text-[10px] text-success-content" title="Friends">
+									<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="h-2.5 w-2.5"><path fill-rule="evenodd" d="M12.416 3.376a.75.75 0 0 1 .208 1.04l-5 7.5a.75.75 0 0 1-1.154.114l-3-3a.75.75 0 0 1 1.06-1.06l2.353 2.353 4.493-6.74a.75.75 0 0 1 1.04-.207Z" clip-rule="evenodd" /></svg>
+								</span>
+							{:else if friendStatus === 'pending'}
+								<span class="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-warning text-[10px] text-warning-content" title="Request pending">
+									<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="h-2.5 w-2.5"><path d="M8 2a.75.75 0 0 1 .75.75v4.5h4.5a.75.75 0 0 1 0 1.5h-4.5v4.5a.75.75 0 0 1-1.5 0v-4.5h-4.5a.75.75 0 0 1 0-1.5h4.5v-4.5A.75.75 0 0 1 8 2Z" /></svg>
+								</span>
+							{:else}
+								<form method="POST" action="?/sendRequest" use:enhance={toastEnhance('Friend request sent!')} class="absolute -top-1 -right-1">
+									<input type="hidden" name="addressee_id" value={member.user_id} />
+									<button class="flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] text-primary-content transition-transform hover:scale-110" title="Add Friend">
+										<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="h-2.5 w-2.5"><path d="M8 2a.75.75 0 0 1 .75.75v4.5h4.5a.75.75 0 0 1 0 1.5h-4.5v4.5a.75.75 0 0 1-1.5 0v-4.5h-4.5a.75.75 0 0 1 0-1.5h4.5v-4.5A.75.75 0 0 1 8 2Z" /></svg>
+									</button>
+								</form>
+							{/if}
 						{/if}
 					</div>
 				{/each}
