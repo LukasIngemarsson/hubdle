@@ -13,12 +13,6 @@
 	let uploadingAvatar = $state(false);
 	let removingAvatar = $state(false);
 	let username = $state('');
-	$effect(() => {
-		username = data.username;
-	});
-	$effect(() => {
-		if (form?.success) editing = false;
-	});
 
 	let fileInput = $state<HTMLInputElement>();
 
@@ -133,8 +127,11 @@
 									return async ({ result, update }) => {
 										await update();
 										saving = false;
-										if (result.type === 'success') toasts.push('success', 'Username updated!');
-										else if (result.type === 'failure' && result.data?.error)
+										if (result.type === 'success') {
+											editing = false;
+											username = data.username;
+											toasts.push('success', 'Username updated!');
+										} else if (result.type === 'failure' && result.data?.error)
 											toasts.push('error', result.data.error as string);
 									};
 								}}

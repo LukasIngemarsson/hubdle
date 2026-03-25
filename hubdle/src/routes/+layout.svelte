@@ -1,7 +1,6 @@
 <script lang="ts">
 	import favicon from '$lib/assets/favicon.svg';
-	import { goto } from '$app/navigation';
-	import { navigating } from '$app/state';
+	import { beforeNavigate, afterNavigate, goto } from '$app/navigation';
 	import '../app.css';
 	import { page } from '$app/stores';
 	import NavLink from '$lib/components/NavLink.svelte';
@@ -26,19 +25,20 @@
 	let menuOpen = $state(false);
 	let showLoadingBar = $state(false);
 	let loadingDone = $state(false);
+	let loadingTimeout: ReturnType<typeof setTimeout>;
 
-	$effect(() => {
-		if (navigating.to) {
-			showLoadingBar = true;
+	beforeNavigate(() => {
+		clearTimeout(loadingTimeout);
+		showLoadingBar = true;
+		loadingDone = false;
+	});
+
+	afterNavigate(() => {
+		loadingDone = true;
+		loadingTimeout = setTimeout(() => {
+			showLoadingBar = false;
 			loadingDone = false;
-		} else if (showLoadingBar) {
-			loadingDone = true;
-			const timeout = setTimeout(() => {
-				showLoadingBar = false;
-				loadingDone = false;
-			}, 300);
-			return () => clearTimeout(timeout);
-		}
+		}, 300);
 	});
 
 	let profileOpen = $state(false);
