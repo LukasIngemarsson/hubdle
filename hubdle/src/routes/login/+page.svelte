@@ -27,7 +27,7 @@
 	<title>Log In - Hubdle</title>
 </svelte:head>
 
-<div class="flex h-full items-center justify-center">
+<div class="flex min-h-screen items-center justify-center">
 	<div class="card w-full max-w-sm bg-base-200 shadow-xl">
 		<div class="card-body">
 			<h2 class="card-title justify-center text-2xl">Log In</h2>
