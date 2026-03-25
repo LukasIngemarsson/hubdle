@@ -58,7 +58,10 @@
 				{#if data.friendship?.status === 'accepted'}
 					<span class="badge badge-success">Friends</span>
 				{:else if data.friendship?.status === 'pending' && data.friendship.direction === 'outgoing'}
-					<span class="badge">Request Pending</span>
+					<form method="POST" action="?/cancelRequest" use:enhance={toastEnhance('Request cancelled.')}>
+						<input type="hidden" name="friendship_id" value={data.friendship.id} />
+						<button class="btn btn-ghost btn-sm">Cancel Request</button>
+					</form>
 				{:else if data.friendship?.status === 'pending' && data.friendship.direction === 'incoming'}
 					<form method="POST" action="?/acceptRequest" use:enhance={toastEnhance('Friend request accepted!')}>
 						<input type="hidden" name="friendship_id" value={data.friendship.id} />

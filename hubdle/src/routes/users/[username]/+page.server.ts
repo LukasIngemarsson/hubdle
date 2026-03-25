@@ -216,6 +216,25 @@ export const actions: Actions = {
 		return { success: true };
 	},
 
+	cancelRequest: async ({ request, locals }) => {
+		const { user } = await locals.safeGetSession();
+		if (!user) redirect(303, '/login');
+
+		const formData = await request.formData();
+		const friendshipId = (formData.get('friendship_id') as string)?.trim();
+
+		if (!friendshipId) return fail(400, { error: 'Friendship ID is required.' });
+
+		const { error: deleteError } = await locals.supabase
+			.from('friendships')
+			.delete()
+			.eq('id', friendshipId);
+
+		if (deleteError) return fail(500, { error: `Failed to cancel request: ${deleteError.message}` });
+
+		return { success: true };
+	},
+
 	deleteSubmission: async ({ request, locals }) => {
 		const { user } = await locals.safeGetSession();
 		if (!user) redirect(303, '/login');
