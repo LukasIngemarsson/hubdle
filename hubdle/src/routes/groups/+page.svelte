@@ -3,7 +3,7 @@
 	import type { PageData } from './$types';
 	import PageContainer from '$lib/components/PageContainer.svelte';
 	import CopyBadge from '$lib/components/CopyBadge.svelte';
-	import { toasts } from '$lib/stores/toast';
+	import { toasts } from '$lib/stores/toast.svelte';
 
 	let { data }: { data: PageData } = $props();
 

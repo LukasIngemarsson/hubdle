@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { GAME_RULES } from '$lib/game-rules';
-	import { toasts } from '$lib/stores/toast';
+	import { toasts } from '$lib/stores/toast.svelte';
 
 	type Game = { id: string; name: string };
 

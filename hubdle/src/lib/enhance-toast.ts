@@ -1,5 +1,5 @@
 import type { SubmitFunction } from '@sveltejs/kit';
-import { toasts } from '$lib/stores/toast';
+import { toasts } from '$lib/stores/toast.svelte';
 
 /**
  * Creates a use:enhance callback that shows toast notifications for form action results.

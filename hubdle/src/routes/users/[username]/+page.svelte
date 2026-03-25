@@ -5,7 +5,7 @@
 	import PageContainer from '$lib/components/PageContainer.svelte';
 	import Avatar from '$lib/components/Avatar.svelte';
 	import { toastEnhance } from '$lib/enhance-toast';
-	import { toasts } from '$lib/stores/toast';
+	import { toasts } from '$lib/stores/toast.svelte';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 
