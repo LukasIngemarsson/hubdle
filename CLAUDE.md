@@ -8,7 +8,7 @@ A social competition app where you and your friends compete at daily games or cr
 
 ## MVP Scope
 
-1. **Auth** — sign up / log in via Supabase Auth
+1. **Auth** — sign up / log in via Supabase Auth (Google + Microsoft OAuth)
 2. **Leaderboards** — create/join groups with friends
 3. **Daily games** — users play external games (Wordle, Bandle, etc.) and paste/submit their share-text scores; app parses and tracks them on the leaderboard
 
@@ -30,6 +30,7 @@ npm run build        # production build
 npm run preview      # preview production build
 npm run check        # svelte-check type checking
 npm run check:watch  # type checking in watch mode
+npm run format       # prettier format all source files
 npm run db:types     # regenerate database types from Supabase schema
 ```
 
@@ -41,12 +42,22 @@ There are no test or lint scripts configured.
 
 The SvelteKit app lives in `hubdle/` (not the repo root). The repo root contains only `CLAUDE.md` and the `hubdle/` directory.
 
+### Component Organization
+
+Components are co-located by usage, not grouped in a single folder:
+
+- **`$lib/components/`** — only shared, multi-use components: Avatar, PageContainer, ConfirmModal, CopyBadge, Toast.
+- **`$lib/components/icons/`** — reusable SVG icon components (e.g. `SunIcon`, `PlusIcon`). Each accepts a `class` prop for sizing.
+- **Route-local components** — components used by a single page live next to that page (e.g. `routes/groups/[id]/Leaderboard.svelte`). Any `.svelte` file in a route directory that doesn't start with `+` is a regular component, not a route.
+
+**When to extract a component**: Extract when a section has its own state and logic (e.g. search with debounce, edit/delete state machine, modal with transfer flow) or when nesting makes the code hard to follow. Don't extract flat markup that just renders a list with no local state — the props interface would add complexity without reducing it.
+
 ### Supabase Integration
 
 - **Server hook** (`src/hooks.server.ts`): Creates a per-request Supabase client and exposes `supabase` + `safeGetSession()` on `event.locals`.
 - **Layout data flow**: `+layout.server.ts` calls `safeGetSession()` and passes `user` + `cookies` to the client. `+layout.ts` creates a browser-side Supabase client from that data. All pages receive `supabase` and `user` via layout data.
 - **Auth callback**: `/auth/callback` handles OAuth redirect.
-- **Profile auto-creation**: `ensureProfile()` in `$lib/auth.ts` upserts a profile row on first sign-in.
+- **Profile auto-creation**: `ensureProfile()` in `$lib/auth.ts` upserts a profile row on first sign-in. Note: Microsoft (Azure) puts the user's email in `user_metadata.email` rather than the top-level `user.email` field — the code handles this fallback.
 - **Database types**: Auto-generated from the Supabase schema via `npm run db:types`. Run this after any migration to keep types in sync.
 - **Realtime**: `group_members` is added to the `supabase_realtime` publication. The group detail page subscribes via `onMount`/`onDestroy` and calls `invalidateAll()` on changes. **Important**: always call `unsubscribeRealtime()` before submitting forms that navigate away (leave, delete, transfer) to avoid a race condition where `invalidateAll()` re-runs the load function on a deleted/left resource and hits a 404.
 
@@ -67,7 +78,7 @@ Defined in `supabase/migrations/`. Key tables: `profiles`, `groups`, `group_memb
 
 ### Svelte 5
 
-This project uses Svelte 5 with runes mode enforced in `svelte.config.js`. Use `$props()`, `$state()`, `$derived()` — not the legacy Svelte 4 reactive syntax. **Avoid `$effect` for side effects** — use `onMount`/`onDestroy` lifecycle callbacks instead, as effects lose control and locality (you can't easily know when they trigger as the program grows).
+This project uses Svelte 5 with runes mode enforced in `svelte.config.js`. Use `$props()`, `$state()`, `$derived()` — not the legacy Svelte 4 reactive syntax. **Avoid `$effect` for side effects** — use `onMount`/`onDestroy` lifecycle callbacks, `beforeNavigate`/`afterNavigate`, or `use:enhance` callbacks instead. Effects lose control and locality as the program grows; prefer explicit triggers over reactive ones.
 
 ### Const Enum Pattern
 
@@ -86,3 +97,8 @@ Use these in conditionals (`TimeFilter.All`) instead of raw string literals.
 - **Navbar**: Text links with animated centered underline on hover/active. Hamburger menu on mobile. Main nav items (Groups, etc.) on the left; Profile and Log Out on the right.
 - **Destructive actions**: Use `ConfirmModal` component. Separate Leave and Delete with `justify-between`. Delete button uses `btn-error btn-outline btn-sm`.
 - **Copy badge**: Uses inline SVG clipboard/checkmark icons, not text labels.
+- **Notifications**: Use the toast system (`toasts.push()`) for all user feedback (success, error). No inline alerts.
+
+### Formatting
+
+Prettier is configured with `prettier-plugin-svelte`. Run `npm run format` to format all source files. Config is in `hubdle/.prettierrc`.
