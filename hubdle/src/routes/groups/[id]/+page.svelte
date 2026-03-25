@@ -5,6 +5,7 @@
 	import type { ActionData, PageData } from './$types';
 	import PageContainer from '$lib/components/PageContainer.svelte';
 	import ScoreSubmitForm from '$lib/components/ScoreSubmitForm.svelte';
+	import TodaysActivity from '$lib/components/TodaysActivity.svelte';
 	import Leaderboard from '$lib/components/Leaderboard.svelte';
 	import RecentSubmissions from '$lib/components/RecentSubmissions.svelte';
 	import CopyBadge from '$lib/components/CopyBadge.svelte';
@@ -104,6 +105,7 @@
 		{/each}
 	</section>
 
+	<TodaysActivity submissions={data.submissions} members={data.allMembers} userId={data.userId} />
 	<ScoreSubmitForm {form} games={data.games} />
 	<Leaderboard games={data.games} submissions={data.submissions} members={data.allMembers} />
 	<RecentSubmissions submissions={data.submissions} members={data.allMembers} userId={data.userId} />
