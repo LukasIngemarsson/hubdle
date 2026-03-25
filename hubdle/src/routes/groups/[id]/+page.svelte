@@ -4,10 +4,10 @@
 	import { onDestroy, onMount } from 'svelte';
 	import type { ActionData, PageData } from './$types';
 	import PageContainer from '$lib/components/PageContainer.svelte';
-	import ScoreSubmitForm from '$lib/components/ScoreSubmitForm.svelte';
-	import TodaysActivity from '$lib/components/TodaysActivity.svelte';
-	import Leaderboard from '$lib/components/Leaderboard.svelte';
-	import RecentSubmissions from '$lib/components/RecentSubmissions.svelte';
+	import ScoreSubmitForm from './ScoreSubmitForm.svelte';
+	import TodaysActivity from './TodaysActivity.svelte';
+	import Leaderboard from './Leaderboard.svelte';
+	import RecentSubmissions from './RecentSubmissions.svelte';
 	import CopyBadge from '$lib/components/CopyBadge.svelte';
 	import ConfirmModal from '$lib/components/ConfirmModal.svelte';
 	import Avatar from '$lib/components/Avatar.svelte';

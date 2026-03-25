@@ -1,19 +1,17 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import Alert from '$lib/components/Alert.svelte';
 	import GoogleLogo from '$lib/components/icons/GoogleLogo.svelte';
 	import MicrosoftLogo from '$lib/components/icons/MicrosoftLogo.svelte';
+	import { toasts } from '$lib/stores/toast.svelte';
 
 	let { data }: { data: PageData } = $props();
 
 	let loading = $state(false);
-	let error = $state('');
 
 	async function handleOAuth(provider: 'azure' | 'google') {
 		loading = true;
-		error = '';
 
-		const { error: err } = await data.supabase.auth.signInWithOAuth({
+		const { error } = await data.supabase.auth.signInWithOAuth({
 			provider,
 			options: {
 				redirectTo: `${window.location.origin}/auth/callback`,
@@ -21,8 +19,8 @@
 			}
 		});
 
-		if (err) {
-			error = err.message;
+		if (error) {
+			toasts.push('error', error.message);
 			loading = false;
 		}
 	}
@@ -38,10 +36,6 @@
 			<h2 class="card-title justify-center text-2xl">Log In</h2>
 
 			<div class="mt-4 flex flex-col gap-3">
-				{#if error}
-					<Alert type="error" message={error} />
-				{/if}
-
 				<button
 					class="btn btn-outline w-full"
 					disabled={loading}
