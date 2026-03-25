@@ -84,7 +84,7 @@
 
 	<ScoreSubmitForm {form} games={data.games} />
 	<Leaderboard games={data.games} submissions={data.submissions} members={data.allMembers} />
-	<RecentSubmissions submissions={data.submissions} members={data.allMembers} />
+	<RecentSubmissions submissions={data.submissions} members={data.allMembers} userId={data.userId} />
 
 	<section class="card mt-6 bg-base-200">
 		<div class="card-body">
