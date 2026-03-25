@@ -88,6 +88,10 @@
 	}
 </script>
 
+<svelte:head>
+	<title>Friends - Hubdle</title>
+</svelte:head>
+
 <PageContainer>
 	<h1 class="text-2xl font-bold">Friends</h1>
 

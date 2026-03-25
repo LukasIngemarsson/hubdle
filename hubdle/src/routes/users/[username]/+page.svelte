@@ -41,6 +41,10 @@
 	);
 </script>
 
+<svelte:head>
+	<title>{data.profile.username} - Hubdle</title>
+</svelte:head>
+
 <PageContainer>
 	<div class="flex items-center justify-between gap-4">
 		<div class="flex items-center gap-4">

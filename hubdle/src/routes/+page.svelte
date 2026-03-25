@@ -1,3 +1,7 @@
+<svelte:head>
+	<title>Hubdle</title>
+</svelte:head>
+
 <div class="flex h-full flex-col items-center justify-center text-center">
 	<h1 class="text-4xl font-bold">Hubdle</h1>
 	<p class="mt-4 max-w-md opacity-70">
