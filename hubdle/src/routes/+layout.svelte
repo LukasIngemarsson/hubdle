@@ -1,6 +1,7 @@
 <script lang="ts">
 	import favicon from '$lib/assets/favicon.svg';
 	import { goto } from '$app/navigation';
+	import { navigating } from '$app/state';
 	import '../app.css';
 	import NavLink from '$lib/components/NavLink.svelte';
 	import { dev } from '$app/environment';
@@ -25,6 +26,11 @@
 </svelte:head>
 
 <div class="grid h-screen grid-rows-[auto_1fr]">
+	{#if navigating.to}
+		<div class="fixed top-0 left-0 z-50 h-0.5 w-full">
+			<div class="loading-bar h-full bg-primary"></div>
+		</div>
+	{/if}
 	<nav class="navbar bg-base-200 px-4">
 		<div class="flex flex-1 items-center gap-6">
 			<a href="/" class="text-xl font-bold">Hubdle</a>
