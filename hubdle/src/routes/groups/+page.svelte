@@ -11,6 +11,10 @@
 	let joining = $state(false);
 </script>
 
+<svelte:head>
+	<title>Groups - Hubdle</title>
+</svelte:head>
+
 <PageContainer>
 	<h1 class="text-2xl font-bold">Your Groups</h1>
 

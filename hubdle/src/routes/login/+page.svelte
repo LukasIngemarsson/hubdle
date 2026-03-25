@@ -23,6 +23,10 @@
 	}
 </script>
 
+<svelte:head>
+	<title>Log In - Hubdle</title>
+</svelte:head>
+
 <div class="flex h-full items-center justify-center">
 	<div class="card w-full max-w-sm bg-base-200 shadow-xl">
 		<div class="card-body">

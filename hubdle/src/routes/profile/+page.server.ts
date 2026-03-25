@@ -34,7 +34,10 @@ export const actions: Actions = {
 			.update({ username })
 			.eq('id', user.id);
 
-		if (error) return fail(500, { error: `Failed to update username: ${error.message}` });
+		if (error) {
+			if (error.code === '23505') return fail(409, { error: 'That username is already taken.' });
+			return fail(500, { error: `Failed to update username: ${error.message}` });
+		}
 
 		return { success: true };
 	},

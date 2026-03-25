@@ -74,6 +74,10 @@
 	}
 </script>
 
+<svelte:head>
+	<title>{data.group.name} - Hubdle</title>
+</svelte:head>
+
 <PageContainer>
 	<div>
 		<a href="/groups" class="link text-sm opacity-70">&larr; All Groups</a>

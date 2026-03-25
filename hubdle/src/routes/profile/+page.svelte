@@ -39,6 +39,10 @@
 
 </script>
 
+<svelte:head>
+	<title>Profile - Hubdle</title>
+</svelte:head>
+
 <PageContainer>
 	<div class="flex items-center justify-between">
 		<h1 class="text-2xl font-bold">Profile</h1>
