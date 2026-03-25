@@ -3,7 +3,11 @@
 
 	type Game = { id: string; name: string; url: string; score_direction: string };
 	type Submission = { user_id: string; score: number; game_id: string; game_date: string };
-	type Member = { user_id: string; left_at: string | null; profiles: { username: string; avatar_url: string | null } | null };
+	type Member = {
+		user_id: string;
+		left_at: string | null;
+		profiles: { username: string; avatar_url: string | null } | null;
+	};
 
 	const TimeFilter = {
 		All: 'all',
@@ -33,9 +37,10 @@
 		{ value: TimeFilter.Daily, label: 'Today' }
 	];
 
-	let gameOptions = $derived(
-		[{ value: GameFilter.All, label: 'All' }, ...games.map((g) => ({ value: g.id, label: g.name }))]
-	);
+	let gameOptions = $derived([
+		{ value: GameFilter.All, label: 'All' },
+		...games.map((g) => ({ value: g.id, label: g.name }))
+	]);
 
 	let filteredLeaderboard = $derived.by(() => {
 		const now = new Date();
@@ -55,10 +60,17 @@
 			return true;
 		});
 
-		const userInfo = new Map<string, { username: string; avatarUrl: string | null; left: boolean }>();
+		const userInfo = new Map<
+			string,
+			{ username: string; avatarUrl: string | null; left: boolean }
+		>();
 		for (const member of members) {
 			if (member.profiles) {
-				userInfo.set(member.user_id, { username: member.profiles.username, avatarUrl: member.profiles.avatar_url, left: member.left_at !== null });
+				userInfo.set(member.user_id, {
+					username: member.profiles.username,
+					avatarUrl: member.profiles.avatar_url,
+					left: member.left_at !== null
+				});
 			}
 		}
 
@@ -78,7 +90,7 @@
 			return [...scores.entries()]
 				.map(([userId, d]) => ({ userId, ...userInfo.get(userId)!, ...d }))
 				.filter((e) => e.games > 0)
-				.sort((a, b) => ascending ? a.total - b.total : b.total - a.total);
+				.sort((a, b) => (ascending ? a.total - b.total : b.total - a.total));
 		}
 
 		// All games: rank players per game, then sum ranks
@@ -94,8 +106,7 @@
 			const gameData = games.find((g) => g.id === gameId);
 			const ascending = gameData ? gameData.score_direction === 'asc' : true;
 
-			const sorted = [...gameScores.entries()]
-				.sort(([, a], [, b]) => ascending ? a - b : b - a);
+			const sorted = [...gameScores.entries()].sort(([, a], [, b]) => (ascending ? a - b : b - a));
 
 			for (let i = 0; i < sorted.length; i++) {
 				const [userId] = sorted[i];
@@ -113,7 +124,12 @@
 	});
 </script>
 
-{#snippet filterGroup(label: string, options: { value: string; label: string }[], selected: string, onSelect: (value: string) => void)}
+{#snippet filterGroup(
+	label: string,
+	options: { value: string; label: string }[],
+	selected: string,
+	onSelect: (value: string) => void
+)}
 	<div>
 		<p class="mb-1 text-xs font-medium opacity-50">{label}</p>
 		<div class="flex flex-wrap gap-1">
@@ -131,55 +147,61 @@
 
 <section class="card mt-6 border border-base-300">
 	<div class="card-body">
-	<h2 class="card-title text-base">Leaderboard</h2>
+		<h2 class="card-title text-base">Leaderboard</h2>
 
-	<div class="mt-2 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-6">
-		{@render filterGroup('Game', gameOptions, selectedGame, (v) => (selectedGame = v))}
+		<div class="mt-2 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-6">
+			{@render filterGroup('Game', gameOptions, selectedGame, (v) => (selectedGame = v))}
 
-		<div class="hidden sm:block sm:self-stretch">
-			<div class="h-full w-px bg-base-300"></div>
+			<div class="hidden sm:block sm:self-stretch">
+				<div class="h-full w-px bg-base-300"></div>
+			</div>
+			<hr class="border-base-300 sm:hidden" />
+
+			{@render filterGroup(
+				'Period',
+				timeOptions,
+				selectedTime,
+				(v) => (selectedTime = v as TimeFilter)
+			)}
 		</div>
-		<hr class="border-base-300 sm:hidden" />
 
-		{@render filterGroup('Period', timeOptions, selectedTime, (v) => (selectedTime = v as TimeFilter))}
-	</div>
-
-	{#if filteredLeaderboard.length === 0}
-		<p class="mt-4 opacity-70">
-			{selectedGame === GameFilter.All && selectedTime === TimeFilter.All
-				? 'No scores yet — submit one above to get started!'
-				: 'No scores for this selection.'}
-		</p>
-	{:else}
-		<div class="mt-4 overflow-x-auto">
-			<table class="table">
-				<thead>
-					<tr>
-						<th>#</th>
-						<th>Player</th>
-						<th>Games</th>
-						<th>{selectedGame === GameFilter.All ? 'Rank Sum' : 'Total'}</th>
-						<th>{selectedGame === GameFilter.All ? 'Avg Rank' : 'Avg'}</th>
-					</tr>
-				</thead>
-				<tbody>
-					{#each filteredLeaderboard as entry, i}
-						<tr class={i === 0 ? 'bg-base-300 font-semibold' : ''}>
-							<td>{i + 1}</td>
-							<td>
-								<a href="/users/{entry.username}" class="flex items-center gap-2 hover:underline">
-									<Avatar src={entry.avatarUrl} username={entry.username} size="xs" />
-									{entry.username}{#if entry.left} <span class="opacity-40 text-xs">(left)</span>{/if}
-								</a>
-							</td>
-							<td>{entry.games}</td>
-							<td>{entry.total}</td>
-							<td>{(entry.total / entry.games).toFixed(1)}</td>
+		{#if filteredLeaderboard.length === 0}
+			<p class="mt-4 opacity-70">
+				{selectedGame === GameFilter.All && selectedTime === TimeFilter.All
+					? 'No scores yet — submit one above to get started!'
+					: 'No scores for this selection.'}
+			</p>
+		{:else}
+			<div class="mt-4 overflow-x-auto">
+				<table class="table">
+					<thead>
+						<tr>
+							<th>#</th>
+							<th>Player</th>
+							<th>Games</th>
+							<th>{selectedGame === GameFilter.All ? 'Rank Sum' : 'Total'}</th>
+							<th>{selectedGame === GameFilter.All ? 'Avg Rank' : 'Avg'}</th>
 						</tr>
-					{/each}
-				</tbody>
-			</table>
-		</div>
-	{/if}
+					</thead>
+					<tbody>
+						{#each filteredLeaderboard as entry, i}
+							<tr class={i === 0 ? 'bg-base-300 font-semibold' : ''}>
+								<td>{i + 1}</td>
+								<td>
+									<a href="/users/{entry.username}" class="flex items-center gap-2 hover:underline">
+										<Avatar src={entry.avatarUrl} username={entry.username} size="xs" />
+										{entry.username}{#if entry.left}
+											<span class="opacity-40 text-xs">(left)</span>{/if}
+									</a>
+								</td>
+								<td>{entry.games}</td>
+								<td>{entry.total}</td>
+								<td>{(entry.total / entry.games).toFixed(1)}</td>
+							</tr>
+						{/each}
+					</tbody>
+				</table>
+			</div>
+		{/if}
 	</div>
 </section>

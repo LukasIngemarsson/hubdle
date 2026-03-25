@@ -5,10 +5,8 @@
 
 	type Game = { id: string; name: string };
 
-	let {
-		form,
-		games
-	}: { form: { error?: string; success?: boolean } | null; games: Game[] } = $props();
+	let { form, games }: { form: { error?: string; success?: boolean } | null; games: Game[] } =
+		$props();
 
 	const SubmitMode = { Paste: 'paste', Manual: 'manual' } as const;
 	type SubmitMode = (typeof SubmitMode)[keyof typeof SubmitMode];
@@ -32,7 +30,13 @@
 
 	function handleSubmit() {
 		submitting = true;
-		return async ({ result, update }: { result: { type: string; data?: Record<string, unknown> }; update: () => Promise<void> }) => {
+		return async ({
+			result,
+			update
+		}: {
+			result: { type: string; data?: Record<string, unknown> };
+			update: () => Promise<void>;
+		}) => {
 			await update();
 			submitting = false;
 			if (result.type === 'success') {
@@ -72,7 +76,12 @@
 				</button>
 			</form>
 		{:else}
-			<form method="POST" action="?/submitManual" use:enhance={handleSubmit} class="flex flex-col gap-3">
+			<form
+				method="POST"
+				action="?/submitManual"
+				use:enhance={handleSubmit}
+				class="flex flex-col gap-3"
+			>
 				<select name="game_id" class="select select-bordered w-full" required bind:value={gameId}>
 					<option value="" disabled>Select a game</option>
 					{#each games as game}
@@ -106,6 +115,5 @@
 				</button>
 			</form>
 		{/if}
-
 	</div>
 </section>

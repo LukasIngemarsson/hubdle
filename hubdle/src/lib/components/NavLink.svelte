@@ -9,11 +9,15 @@
 <div class="flex items-center gap-1">
 	<a
 		{href}
-		class="nav-link relative px-1 py-0.5 text-sm transition-colors hover:opacity-100 {isActive ? 'font-semibold opacity-100' : 'opacity-70'}"
+		class="nav-link relative px-1 py-0.5 text-sm transition-colors hover:opacity-100 {isActive
+			? 'font-semibold opacity-100'
+			: 'opacity-70'}"
 	>
 		{label}
 		<span
-			class="nav-underline absolute bottom-0 left-1/2 h-px -translate-x-1/2 bg-current opacity-50 transition-all duration-300 ease-out {isActive ? 'w-[88%]' : 'w-0'}"
+			class="nav-underline absolute bottom-0 left-1/2 h-px -translate-x-1/2 bg-current opacity-50 transition-all duration-300 ease-out {isActive
+				? 'w-[88%]'
+				: 'w-0'}"
 		></span>
 	</a>
 	{#if badge > 0}<span class="badge badge-primary badge-xs">{badge > 9 ? '9+' : badge}</span>{/if}

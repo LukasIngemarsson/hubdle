@@ -18,10 +18,7 @@
 	}
 </script>
 
-<button
-	class="flex items-center gap-1 opacity-70 hover:opacity-100"
-	onclick={handleClick}
->
+<button class="flex items-center gap-1 opacity-70 hover:opacity-100" onclick={handleClick}>
 	<span class="badge badge-ghost font-mono {size === 'lg' ? 'text-lg' : 'text-sm'}">{text}</span>
 	{#if copied}
 		<CheckmarkIcon class="h-4 w-4 text-success" />

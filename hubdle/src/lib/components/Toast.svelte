@@ -8,12 +8,17 @@
 		<button
 			in:fly={{ x: 80, duration: 300 }}
 			out:fly={{ x: 80, duration: 250 }}
-			class="alert relative max-w-sm cursor-pointer overflow-hidden shadow-lg {toast.type === 'error' ? 'alert-error' : 'alert-success'}"
+			class="alert relative max-w-sm cursor-pointer overflow-hidden shadow-lg {toast.type ===
+			'error'
+				? 'alert-error'
+				: 'alert-success'}"
 			onclick={() => toasts.dismiss(toast.id)}
 		>
 			<span>{toast.message}</span>
 			<div
-				class="absolute bottom-0 left-0 h-0.5 {toast.type === 'error' ? 'bg-error-content/30' : 'bg-success-content/30'}"
+				class="absolute bottom-0 left-0 h-0.5 {toast.type === 'error'
+					? 'bg-error-content/30'
+					: 'bg-success-content/30'}"
 				style="animation: toast-drain {toast.duration}ms linear forwards; width: 100%"
 			></div>
 		</button>

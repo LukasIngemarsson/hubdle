@@ -26,9 +26,13 @@
 </script>
 
 <div class="avatar {showImg ? '' : 'placeholder'}">
-	<div class="flex items-center justify-center rounded-full bg-neutral text-neutral-content {sizeClasses[size]}">
+	<div
+		class="flex items-center justify-center rounded-full bg-neutral text-neutral-content {sizeClasses[
+			size
+		]}"
+	>
 		{#if showImg}
-			<img src={src} alt="{username}'s avatar" onerror={() => (imgError = true)} />
+			<img {src} alt="{username}'s avatar" onerror={() => (imgError = true)} />
 		{:else}
 			<UserIcon class={iconSizeClasses[size]} />
 		{/if}

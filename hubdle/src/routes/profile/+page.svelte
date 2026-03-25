@@ -13,8 +13,12 @@
 	let uploadingAvatar = $state(false);
 	let removingAvatar = $state(false);
 	let username = $state('');
-	$effect(() => { username = data.username; });
-	$effect(() => { if (form?.success) editing = false; });
+	$effect(() => {
+		username = data.username;
+	});
+	$effect(() => {
+		if (form?.success) editing = false;
+	});
 
 	let fileInput = $state<HTMLInputElement>();
 
@@ -37,7 +41,6 @@
 			fileInput.form?.requestSubmit();
 		}
 	}
-
 </script>
 
 <svelte:head>
@@ -59,15 +62,22 @@
 					<div class="flex items-center gap-4">
 						<Avatar src={data.avatarUrl} username={data.username} size="lg" />
 						<div class="flex items-center gap-1">
-							<form method="POST" action="?/uploadAvatar" enctype="multipart/form-data" use:enhance={() => {
-								uploadingAvatar = true;
-								return async ({ result, update }) => {
-									await update();
-									uploadingAvatar = false;
-									if (result.type === 'success') toasts.push('success', 'Profile picture updated!');
-									else if (result.type === 'failure' && result.data?.error) toasts.push('error', result.data.error as string);
-								};
-							}}>
+							<form
+								method="POST"
+								action="?/uploadAvatar"
+								enctype="multipart/form-data"
+								use:enhance={() => {
+									uploadingAvatar = true;
+									return async ({ result, update }) => {
+										await update();
+										uploadingAvatar = false;
+										if (result.type === 'success')
+											toasts.push('success', 'Profile picture updated!');
+										else if (result.type === 'failure' && result.data?.error)
+											toasts.push('error', result.data.error as string);
+									};
+								}}
+							>
 								<input
 									type="file"
 									name="avatar"
@@ -76,23 +86,35 @@
 									bind:this={fileInput}
 									onchange={handleFileSelected}
 								/>
-								<button type="button" class="btn btn-ghost btn-sm" onclick={triggerFileSelect} disabled={uploadingAvatar}>
+								<button
+									type="button"
+									class="btn btn-ghost btn-sm"
+									onclick={triggerFileSelect}
+									disabled={uploadingAvatar}
+								>
 									{#if uploadingAvatar}<span class="loading loading-spinner loading-xs"></span>{/if}
 									Change picture
 								</button>
 							</form>
 							{#if data.avatarUrl}
-								<form method="POST" action="?/removeAvatar" use:enhance={() => {
-									removingAvatar = true;
-									return async ({ result, update }) => {
-										await update();
-										removingAvatar = false;
-										if (result.type === 'success') toasts.push('success', 'Profile picture removed.');
-										else if (result.type === 'failure' && result.data?.error) toasts.push('error', result.data.error as string);
-									};
-								}}>
+								<form
+									method="POST"
+									action="?/removeAvatar"
+									use:enhance={() => {
+										removingAvatar = true;
+										return async ({ result, update }) => {
+											await update();
+											removingAvatar = false;
+											if (result.type === 'success')
+												toasts.push('success', 'Profile picture removed.');
+											else if (result.type === 'failure' && result.data?.error)
+												toasts.push('error', result.data.error as string);
+										};
+									}}
+								>
 									<button class="btn btn-ghost btn-sm text-error" disabled={removingAvatar}>
-										{#if removingAvatar}<span class="loading loading-spinner loading-xs"></span>{/if}
+										{#if removingAvatar}<span class="loading loading-spinner loading-xs"
+											></span>{/if}
 										Remove
 									</button>
 								</form>
@@ -103,15 +125,21 @@
 					<div>
 						<p class="text-xs opacity-50">Username</p>
 						{#if editing}
-							<form method="POST" action="?/updateUsername" use:enhance={() => {
-								saving = true;
-								return async ({ result, update }) => {
-									await update();
-									saving = false;
-									if (result.type === 'success') toasts.push('success', 'Username updated!');
-									else if (result.type === 'failure' && result.data?.error) toasts.push('error', result.data.error as string);
-								};
-							}} class="mt-1 inline-flex items-center gap-2">
+							<form
+								method="POST"
+								action="?/updateUsername"
+								use:enhance={() => {
+									saving = true;
+									return async ({ result, update }) => {
+										await update();
+										saving = false;
+										if (result.type === 'success') toasts.push('success', 'Username updated!');
+										else if (result.type === 'failure' && result.data?.error)
+											toasts.push('error', result.data.error as string);
+									};
+								}}
+								class="mt-1 inline-flex items-center gap-2"
+							>
 								<input
 									type="text"
 									name="username"
@@ -124,12 +152,18 @@
 									{#if saving}<span class="loading loading-spinner loading-xs"></span>{/if}
 									Save
 								</button>
-								<button type="button" class="btn btn-ghost btn-sm" onclick={cancelEditing}>Cancel</button>
+								<button type="button" class="btn btn-ghost btn-sm" onclick={cancelEditing}
+									>Cancel</button
+								>
 							</form>
 						{:else}
 							<div class="inline-flex items-center gap-1.5">
 								<p class="text-lg font-medium">{data.username}</p>
-								<button class="btn btn-ghost btn-xs btn-square" onclick={startEditing} aria-label="Edit username">
+								<button
+									class="btn btn-ghost btn-xs btn-square"
+									onclick={startEditing}
+									aria-label="Edit username"
+								>
 									<PencilIcon class="h-3.5 w-3.5 opacity-50" />
 								</button>
 							</div>
@@ -137,10 +171,8 @@
 					</div>
 
 					<p class="text-sm opacity-50">{data.email}</p>
-
-					</div>
+				</div>
 			</div>
 		</div>
-
 	</div>
 </PageContainer>

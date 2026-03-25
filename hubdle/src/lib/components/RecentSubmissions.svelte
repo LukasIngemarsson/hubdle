@@ -12,7 +12,11 @@
 		raw_text: string;
 		games: { name: string } | null;
 	};
-	type Member = { user_id: string; left_at: string | null; profiles: { username: string; avatar_url: string | null } | null };
+	type Member = {
+		user_id: string;
+		left_at: string | null;
+		profiles: { username: string; avatar_url: string | null } | null;
+	};
 
 	let {
 		submissions,
@@ -68,9 +72,17 @@
 							{@const rules = GAME_RULES[sub.game_id]}
 							<tr>
 								<td>
-									<a href="/users/{member?.profiles?.username ?? ''}" class="flex items-center gap-2 hover:underline">
-										<Avatar src={member?.profiles?.avatar_url} username={member?.profiles?.username ?? 'Unknown'} size="xs" />
-										{member?.profiles?.username ?? 'Unknown'}{#if member?.left_at} <span class="opacity-40 text-xs">(left)</span>{/if}
+									<a
+										href="/users/{member?.profiles?.username ?? ''}"
+										class="flex items-center gap-2 hover:underline"
+									>
+										<Avatar
+											src={member?.profiles?.avatar_url}
+											username={member?.profiles?.username ?? 'Unknown'}
+											size="xs"
+										/>
+										{member?.profiles?.username ?? 'Unknown'}{#if member?.left_at}
+											<span class="opacity-40 text-xs">(left)</span>{/if}
 									</a>
 								</td>
 								<td>{sub.games?.name ?? sub.game_id}</td>
@@ -91,47 +103,79 @@
 								<td class="text-right">
 									{#if isOwn}
 										{#if editingId === sub.id}
-											<form method="POST" action="?/editSubmission" use:enhance={() => {
-												savingId = sub.id;
-												return async ({ update }) => {
-													editingId = null;
-													savingId = null;
-													await update();
-												};
-											}}>
+											<form
+												method="POST"
+												action="?/editSubmission"
+												use:enhance={() => {
+													savingId = sub.id;
+													return async ({ update }) => {
+														editingId = null;
+														savingId = null;
+														await update();
+													};
+												}}
+											>
 												<input type="hidden" name="submission_id" value={sub.id} />
 												<input type="hidden" name="game_id" value={sub.game_id} />
 												<input type="hidden" name="score" value={editScore} />
 												<div class="flex justify-end gap-1">
-													<button type="submit" class="btn btn-success btn-xs" disabled={savingId === sub.id}>
-														{#if savingId === sub.id}<span class="loading loading-spinner loading-xs"></span>{/if}
+													<button
+														type="submit"
+														class="btn btn-success btn-xs"
+														disabled={savingId === sub.id}
+													>
+														{#if savingId === sub.id}<span
+																class="loading loading-spinner loading-xs"
+															></span>{/if}
 														Save
 													</button>
-													<button type="button" class="btn btn-ghost btn-xs" onclick={cancelEdit}>Cancel</button>
+													<button type="button" class="btn btn-ghost btn-xs" onclick={cancelEdit}
+														>Cancel</button
+													>
 												</div>
 											</form>
 										{:else if deletingId === sub.id}
-											<form method="POST" action="?/deleteSubmission" use:enhance={() => {
-												confirmingDeleteId = sub.id;
-												return async ({ update }) => {
-													deletingId = null;
-													confirmingDeleteId = null;
-													await update();
-												};
-											}}>
+											<form
+												method="POST"
+												action="?/deleteSubmission"
+												use:enhance={() => {
+													confirmingDeleteId = sub.id;
+													return async ({ update }) => {
+														deletingId = null;
+														confirmingDeleteId = null;
+														await update();
+													};
+												}}
+											>
 												<input type="hidden" name="submission_id" value={sub.id} />
 												<div class="flex justify-end gap-1">
-													<button type="submit" class="btn btn-error btn-xs" disabled={confirmingDeleteId === sub.id}>
-														{#if confirmingDeleteId === sub.id}<span class="loading loading-spinner loading-xs"></span>{/if}
+													<button
+														type="submit"
+														class="btn btn-error btn-xs"
+														disabled={confirmingDeleteId === sub.id}
+													>
+														{#if confirmingDeleteId === sub.id}<span
+																class="loading loading-spinner loading-xs"
+															></span>{/if}
 														Confirm
 													</button>
-													<button type="button" class="btn btn-ghost btn-xs" onclick={cancelDelete}>Cancel</button>
+													<button type="button" class="btn btn-ghost btn-xs" onclick={cancelDelete}
+														>Cancel</button
+													>
 												</div>
 											</form>
 										{:else}
 											<div class="flex justify-end gap-1">
-												<button type="button" class="btn btn-ghost btn-xs" onclick={() => startEdit(sub)}>Edit</button>
-												<button type="button" class="btn btn-ghost btn-xs text-error" onclick={() => confirmDelete(sub.id)}>Delete</button>
+												<button
+													type="button"
+													class="btn btn-ghost btn-xs"
+													onclick={() => startEdit(sub)}>Edit</button
+												>
+												<button
+													type="button"
+													class="btn btn-ghost btn-xs text-error"
+													onclick={() => confirmDelete(sub.id)}>Delete</button
+												>
 											</div>
 										{/if}
 									{/if}

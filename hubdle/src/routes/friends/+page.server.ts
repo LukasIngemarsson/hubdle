@@ -9,31 +9,63 @@ export const load: PageServerLoad = async ({ locals }) => {
 	// Friends where current user is requester
 	const { data: asRequester } = await locals.supabase
 		.from('friendships')
-		.select('id, status, created_at, addressee:profiles!friendships_addressee_id_fkey(id, username, avatar_url)')
+		.select(
+			'id, status, created_at, addressee:profiles!friendships_addressee_id_fkey(id, username, avatar_url)'
+		)
 		.eq('requester_id', user.id);
 
 	// Friends where current user is addressee
 	const { data: asAddressee } = await locals.supabase
 		.from('friendships')
-		.select('id, status, created_at, requester:profiles!friendships_requester_id_fkey(id, username, avatar_url)')
+		.select(
+			'id, status, created_at, requester:profiles!friendships_requester_id_fkey(id, username, avatar_url)'
+		)
 		.eq('addressee_id', user.id);
 
-	const friends: { friendshipId: string; userId: string; username: string; avatarUrl: string | null }[] = [];
+	const friends: {
+		friendshipId: string;
+		userId: string;
+		username: string;
+		avatarUrl: string | null;
+	}[] = [];
 	const outgoingRequests: typeof friends = [];
-	const incomingRequests: { friendshipId: string; userId: string; username: string; avatarUrl: string | null }[] = [];
+	const incomingRequests: {
+		friendshipId: string;
+		userId: string;
+		username: string;
+		avatarUrl: string | null;
+	}[] = [];
 
 	for (const row of asRequester ?? []) {
-		const profile = row.addressee as unknown as { id: string; username: string; avatar_url: string | null } | null;
+		const profile = row.addressee as unknown as {
+			id: string;
+			username: string;
+			avatar_url: string | null;
+		} | null;
 		if (!profile) continue;
-		const entry = { friendshipId: row.id, userId: profile.id, username: profile.username, avatarUrl: profile.avatar_url };
+		const entry = {
+			friendshipId: row.id,
+			userId: profile.id,
+			username: profile.username,
+			avatarUrl: profile.avatar_url
+		};
 		if (row.status === 'accepted') friends.push(entry);
 		else outgoingRequests.push(entry);
 	}
 
 	for (const row of asAddressee ?? []) {
-		const profile = row.requester as unknown as { id: string; username: string; avatar_url: string | null } | null;
+		const profile = row.requester as unknown as {
+			id: string;
+			username: string;
+			avatar_url: string | null;
+		} | null;
 		if (!profile) continue;
-		const entry = { friendshipId: row.id, userId: profile.id, username: profile.username, avatarUrl: profile.avatar_url };
+		const entry = {
+			friendshipId: row.id,
+			userId: profile.id,
+			username: profile.username,
+			avatarUrl: profile.avatar_url
+		};
 		if (row.status === 'accepted') friends.push(entry);
 		else incomingRequests.push(entry);
 	}
@@ -59,7 +91,8 @@ export const actions: Actions = {
 			.insert({ requester_id: user.id, addressee_id: addresseeId });
 
 		if (insertError) {
-			if (insertError.code === '23505') return fail(409, { error: 'Friend request already exists.' });
+			if (insertError.code === '23505')
+				return fail(409, { error: 'Friend request already exists.' });
 			return fail(500, { error: `Failed to send request: ${insertError.message}` });
 		}
 
@@ -82,7 +115,8 @@ export const actions: Actions = {
 			.eq('addressee_id', user.id)
 			.eq('status', 'pending');
 
-		if (updateError) return fail(500, { error: `Failed to accept request: ${updateError.message}` });
+		if (updateError)
+			return fail(500, { error: `Failed to accept request: ${updateError.message}` });
 
 		return { success: true };
 	},
@@ -101,7 +135,8 @@ export const actions: Actions = {
 			.delete()
 			.eq('id', friendshipId);
 
-		if (deleteError) return fail(500, { error: `Failed to decline request: ${deleteError.message}` });
+		if (deleteError)
+			return fail(500, { error: `Failed to decline request: ${deleteError.message}` });
 
 		return { success: true };
 	},

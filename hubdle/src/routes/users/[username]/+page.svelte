@@ -62,17 +62,29 @@
 				{#if data.friendship?.status === 'accepted'}
 					<span class="badge badge-success">Friends</span>
 				{:else if data.friendship?.status === 'pending' && data.friendship.direction === 'outgoing'}
-					<form method="POST" action="?/cancelRequest" use:enhance={toastEnhance('Request cancelled.')}>
+					<form
+						method="POST"
+						action="?/cancelRequest"
+						use:enhance={toastEnhance('Request cancelled.')}
+					>
 						<input type="hidden" name="friendship_id" value={data.friendship.id} />
 						<button class="btn btn-ghost btn-sm">Cancel Request</button>
 					</form>
 				{:else if data.friendship?.status === 'pending' && data.friendship.direction === 'incoming'}
-					<form method="POST" action="?/acceptRequest" use:enhance={toastEnhance('Friend request accepted!')}>
+					<form
+						method="POST"
+						action="?/acceptRequest"
+						use:enhance={toastEnhance('Friend request accepted!')}
+					>
 						<input type="hidden" name="friendship_id" value={data.friendship.id} />
 						<button class="btn btn-primary btn-sm">Accept Friend Request</button>
 					</form>
 				{:else}
-					<form method="POST" action="?/sendRequest" use:enhance={toastEnhance('Friend request sent!')}>
+					<form
+						method="POST"
+						action="?/sendRequest"
+						use:enhance={toastEnhance('Friend request sent!')}
+					>
 						<input type="hidden" name="addressee_id" value={data.profile.id} />
 						<button class="btn btn-primary btn-outline btn-sm">Add Friend</button>
 					</form>
@@ -162,51 +174,97 @@
 										{#if data.isOwnProfile}
 											<td class="text-right">
 												{#if editingId === activity.id}
-													<form method="POST" action="?/editSubmission" use:enhance={() => {
-														savingId = activity.id;
-														return async ({ result, update }) => {
-															editingId = null;
-															savingId = null;
-															await update();
-															if (result.type === 'success') toasts.push('success', 'Score updated!');
-															else if (result.type === 'failure' && result.data?.error) toasts.push('error', (result.data as Record<string, unknown>).error as string);
-														};
-													}}>
+													<form
+														method="POST"
+														action="?/editSubmission"
+														use:enhance={() => {
+															savingId = activity.id;
+															return async ({ result, update }) => {
+																editingId = null;
+																savingId = null;
+																await update();
+																if (result.type === 'success')
+																	toasts.push('success', 'Score updated!');
+																else if (result.type === 'failure' && result.data?.error)
+																	toasts.push(
+																		'error',
+																		(result.data as Record<string, unknown>).error as string
+																	);
+															};
+														}}
+													>
 														<input type="hidden" name="submission_id" value={activity.id} />
 														<input type="hidden" name="game_id" value={activity.gameId} />
 														<input type="hidden" name="score" value={editScore} />
 														<div class="flex justify-end gap-1">
-															<button type="submit" class="btn btn-success btn-xs" disabled={savingId === activity.id}>
-																{#if savingId === activity.id}<span class="loading loading-spinner loading-xs"></span>{/if}
+															<button
+																type="submit"
+																class="btn btn-success btn-xs"
+																disabled={savingId === activity.id}
+															>
+																{#if savingId === activity.id}<span
+																		class="loading loading-spinner loading-xs"
+																	></span>{/if}
 																Save
 															</button>
-															<button type="button" class="btn btn-ghost btn-xs" onclick={cancelEdit}>Cancel</button>
+															<button
+																type="button"
+																class="btn btn-ghost btn-xs"
+																onclick={cancelEdit}>Cancel</button
+															>
 														</div>
 													</form>
 												{:else if deletingId === activity.id}
-													<form method="POST" action="?/deleteSubmission" use:enhance={() => {
-														confirmingDeleteId = activity.id;
-														return async ({ result, update }) => {
-															deletingId = null;
-															confirmingDeleteId = null;
-															await update();
-															if (result.type === 'success') toasts.push('success', 'Score deleted.');
-															else if (result.type === 'failure' && result.data?.error) toasts.push('error', (result.data as Record<string, unknown>).error as string);
-														};
-													}}>
+													<form
+														method="POST"
+														action="?/deleteSubmission"
+														use:enhance={() => {
+															confirmingDeleteId = activity.id;
+															return async ({ result, update }) => {
+																deletingId = null;
+																confirmingDeleteId = null;
+																await update();
+																if (result.type === 'success')
+																	toasts.push('success', 'Score deleted.');
+																else if (result.type === 'failure' && result.data?.error)
+																	toasts.push(
+																		'error',
+																		(result.data as Record<string, unknown>).error as string
+																	);
+															};
+														}}
+													>
 														<input type="hidden" name="submission_id" value={activity.id} />
 														<div class="flex justify-end gap-1">
-															<button type="submit" class="btn btn-error btn-xs" disabled={confirmingDeleteId === activity.id}>
-																{#if confirmingDeleteId === activity.id}<span class="loading loading-spinner loading-xs"></span>{/if}
+															<button
+																type="submit"
+																class="btn btn-error btn-xs"
+																disabled={confirmingDeleteId === activity.id}
+															>
+																{#if confirmingDeleteId === activity.id}<span
+																		class="loading loading-spinner loading-xs"
+																	></span>{/if}
 																Confirm
 															</button>
-															<button type="button" class="btn btn-ghost btn-xs" onclick={cancelDelete}>Cancel</button>
+															<button
+																type="button"
+																class="btn btn-ghost btn-xs"
+																onclick={cancelDelete}>Cancel</button
+															>
 														</div>
 													</form>
 												{:else}
 													<div class="flex justify-end gap-1">
-														<button type="button" class="btn btn-ghost btn-xs" onclick={() => startEdit(activity)}>Edit</button>
-														<button type="button" class="btn btn-ghost btn-xs text-error" onclick={() => confirmDelete(activity.id)}>Delete</button>
+														<button
+															type="button"
+															class="btn btn-ghost btn-xs"
+															onclick={() => startEdit(activity)}>Edit</button
+														>
+														<button
+															type="button"
+															class="btn btn-ghost btn-xs text-error"
+															onclick={() => confirmDelete(activity.id)}>Delete</button
+														>
 													</div>
 												{/if}
 											</td>
