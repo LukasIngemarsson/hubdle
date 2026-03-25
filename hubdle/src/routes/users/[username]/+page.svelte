@@ -1,9 +1,35 @@
 <script lang="ts">
-	import type { PageData } from './$types';
+	import { enhance } from '$app/forms';
+	import { GAME_RULES } from '$lib/game-rules';
+	import type { ActionData, PageData } from './$types';
 	import PageContainer from '$lib/components/PageContainer.svelte';
 	import Avatar from '$lib/components/Avatar.svelte';
+	import Alert from '$lib/components/Alert.svelte';
 
-	let { data }: { data: PageData } = $props();
+	let { data, form }: { data: PageData; form: ActionData } = $props();
+
+	let editingId = $state<string | null>(null);
+	let editScore = $state(0);
+	let deletingId = $state<string | null>(null);
+	let savingId = $state<string | null>(null);
+	let confirmingDeleteId = $state<string | null>(null);
+
+	function startEdit(activity: { id: string; score: number }) {
+		editingId = activity.id;
+		editScore = activity.score;
+	}
+
+	function cancelEdit() {
+		editingId = null;
+	}
+
+	function confirmDelete(id: string) {
+		deletingId = id;
+	}
+
+	function cancelDelete() {
+		deletingId = null;
+	}
 
 	const memberSince = $derived(
 		new Date(data.profile.createdAt).toLocaleDateString('en-US', {
@@ -25,6 +51,12 @@
 			{/if}
 		</div>
 	</div>
+
+	{#if form?.error}
+		<div class="mt-4">
+			<Alert type="error" message={form.error} />
+		</div>
+	{/if}
 
 	<div class="mt-6 grid gap-6">
 		<div class="grid grid-cols-3 gap-4">
@@ -82,14 +114,76 @@
 									<th>Game</th>
 									<th>Score</th>
 									<th>Date</th>
+									{#if data.isOwnProfile}<th></th>{/if}
 								</tr>
 							</thead>
 							<tbody>
 								{#each data.recentActivity as activity}
+									{@const rules = GAME_RULES[activity.gameId]}
 									<tr>
 										<td>{activity.gameName}</td>
-										<td>{activity.score}</td>
+										<td>
+											{#if editingId === activity.id}
+												<input
+													type="number"
+													class="input input-bordered input-xs w-20"
+													min={rules?.minScore ?? 0}
+													max={rules?.maxScore ?? 999}
+													bind:value={editScore}
+												/>
+											{:else}
+												{activity.score}
+											{/if}
+										</td>
 										<td>{activity.gameDate}</td>
+										{#if data.isOwnProfile}
+											<td>
+												{#if editingId === activity.id}
+													<form method="POST" action="?/editSubmission" use:enhance={() => {
+														savingId = activity.id;
+														return async ({ update }) => {
+															editingId = null;
+															savingId = null;
+															await update();
+														};
+													}}>
+														<input type="hidden" name="submission_id" value={activity.id} />
+														<input type="hidden" name="game_id" value={activity.gameId} />
+														<input type="hidden" name="score" value={editScore} />
+														<div class="flex gap-1">
+															<button type="submit" class="btn btn-success btn-xs" disabled={savingId === activity.id}>
+																{#if savingId === activity.id}<span class="loading loading-spinner loading-xs"></span>{/if}
+																Save
+															</button>
+															<button type="button" class="btn btn-ghost btn-xs" onclick={cancelEdit}>Cancel</button>
+														</div>
+													</form>
+												{:else if deletingId === activity.id}
+													<form method="POST" action="?/deleteSubmission" use:enhance={() => {
+														confirmingDeleteId = activity.id;
+														return async ({ update }) => {
+															deletingId = null;
+															confirmingDeleteId = null;
+															await update();
+														};
+													}}>
+														<input type="hidden" name="submission_id" value={activity.id} />
+														<div class="flex gap-1">
+															<button type="submit" class="btn btn-error btn-xs" disabled={confirmingDeleteId === activity.id}>
+																{#if confirmingDeleteId === activity.id}<span class="loading loading-spinner loading-xs"></span>{/if}
+																Confirm
+															</button>
+															<button type="button" class="btn btn-ghost btn-xs" onclick={cancelDelete}>Cancel</button>
+														</div>
+													</form>
+												{:else}
+													<div class="flex gap-1">
+														<button type="button" class="btn btn-ghost btn-xs" onclick={() => startEdit(activity)}>Edit</button>
+														<button type="button" class="btn btn-ghost btn-xs text-error" onclick={() => confirmDelete(activity.id)}>Delete</button>
+													</div>
+												{/if}
+											</td>
+										{/if}
 									</tr>
 								{/each}
 							</tbody>
