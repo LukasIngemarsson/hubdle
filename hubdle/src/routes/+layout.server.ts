@@ -6,6 +6,7 @@ export const load: LayoutServerLoad = async ({ locals, cookies }) => {
 	let avatarUrl: string | null = null;
 	let username: string | null = null;
 	let friendRequestCount = 0;
+	let groupInviteCount = 0;
 	if (user) {
 		const { data: profile } = await locals.supabase
 			.from('profiles')
@@ -21,7 +22,13 @@ export const load: LayoutServerLoad = async ({ locals, cookies }) => {
 			.eq('addressee_id', user.id)
 			.eq('status', 'pending');
 		friendRequestCount = count ?? 0;
+
+		const { count: inviteCount } = await locals.supabase
+			.from('group_invites')
+			.select('id', { count: 'exact', head: true })
+			.eq('invited_user_id', user.id);
+		groupInviteCount = inviteCount ?? 0;
 	}
 
-	return { user, avatarUrl, username, friendRequestCount, cookies: cookies.getAll() };
+	return { user, avatarUrl, username, friendRequestCount, groupInviteCount, cookies: cookies.getAll() };
 };
