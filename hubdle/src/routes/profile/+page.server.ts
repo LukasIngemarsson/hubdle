@@ -12,7 +12,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 		.single();
 
 	return {
-		email: user.email ?? '',
+		email: user.email || user.user_metadata?.email || '',
 		username: profile?.username ?? '',
 		avatarUrl: profile?.avatar_url ?? null
 	};
