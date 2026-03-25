@@ -4,7 +4,8 @@
 	import type { ActionData, PageData } from './$types';
 	import PageContainer from '$lib/components/PageContainer.svelte';
 	import Avatar from '$lib/components/Avatar.svelte';
-	import Alert from '$lib/components/Alert.svelte';
+	import { toastEnhance } from '$lib/enhance-toast';
+	import { toasts } from '$lib/stores/toast';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 
@@ -59,12 +60,12 @@
 				{:else if data.friendship?.status === 'pending' && data.friendship.direction === 'outgoing'}
 					<span class="badge">Request Pending</span>
 				{:else if data.friendship?.status === 'pending' && data.friendship.direction === 'incoming'}
-					<form method="POST" action="?/acceptRequest" use:enhance>
+					<form method="POST" action="?/acceptRequest" use:enhance={toastEnhance('Friend request accepted!')}>
 						<input type="hidden" name="friendship_id" value={data.friendship.id} />
 						<button class="btn btn-primary btn-sm">Accept Friend Request</button>
 					</form>
 				{:else}
-					<form method="POST" action="?/sendRequest" use:enhance>
+					<form method="POST" action="?/sendRequest" use:enhance={toastEnhance('Friend request sent!')}>
 						<input type="hidden" name="addressee_id" value={data.profile.id} />
 						<button class="btn btn-primary btn-outline btn-sm">Add Friend</button>
 					</form>
@@ -72,12 +73,6 @@
 			</div>
 		{/if}
 	</div>
-
-	{#if form?.error}
-		<div class="mt-4">
-			<Alert type="error" message={form.error} />
-		</div>
-	{/if}
 
 	<div class="mt-6 grid gap-6">
 		<div class="grid grid-cols-3 gap-4">
@@ -162,7 +157,9 @@
 												{#if editingId === activity.id}
 													<form method="POST" action="?/editSubmission" use:enhance={() => {
 														savingId = activity.id;
-														return async ({ update }) => {
+														return async ({ result, update }) => {
+															if (result.type === 'success') toasts.push('success', 'Score updated!');
+															else if (result.type === 'failure' && result.data?.error) toasts.push('error', (result.data as Record<string, unknown>).error as string);
 															editingId = null;
 															savingId = null;
 															await update();
@@ -182,7 +179,9 @@
 												{:else if deletingId === activity.id}
 													<form method="POST" action="?/deleteSubmission" use:enhance={() => {
 														confirmingDeleteId = activity.id;
-														return async ({ update }) => {
+														return async ({ result, update }) => {
+															if (result.type === 'success') toasts.push('success', 'Score deleted.');
+															else if (result.type === 'failure' && result.data?.error) toasts.push('error', (result.data as Record<string, unknown>).error as string);
 															deletingId = null;
 															confirmingDeleteId = null;
 															await update();

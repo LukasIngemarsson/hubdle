@@ -5,6 +5,7 @@
 	import '../app.css';
 	import NavLink from '$lib/components/NavLink.svelte';
 	import Avatar from '$lib/components/Avatar.svelte';
+	import Toast from '$lib/components/Toast.svelte';
 	import { dev } from '$app/environment';
 	import { injectAnalytics } from '@vercel/analytics/sveltekit';
 	import type { LayoutData } from './$types';
@@ -107,3 +108,5 @@
 		{@render children()}
 	</main>
 </div>
+
+<Toast />

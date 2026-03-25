@@ -10,6 +10,7 @@
 	import CopyBadge from '$lib/components/CopyBadge.svelte';
 	import ConfirmModal from '$lib/components/ConfirmModal.svelte';
 	import Avatar from '$lib/components/Avatar.svelte';
+	import { toastEnhance } from '$lib/enhance-toast';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 
@@ -121,7 +122,7 @@
 			</div>
 
 			{#if data.invitableFriends.length > 0}
-				<form method="POST" action="?/inviteFriend" use:enhance class="mt-3 flex items-center gap-2">
+				<form method="POST" action="?/inviteFriend" use:enhance={toastEnhance('Friend invited!')} class="mt-3 flex items-center gap-2">
 					<select name="friend_id" class="select select-bordered select-sm flex-1" required>
 						<option value="" disabled selected>Invite a friend...</option>
 						{#each data.invitableFriends as friend}
