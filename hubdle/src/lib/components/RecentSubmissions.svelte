@@ -58,7 +58,7 @@
 							<th>Game</th>
 							<th>Score</th>
 							<th>Date</th>
-							<th></th>
+							<th class="text-right"></th>
 						</tr>
 					</thead>
 					<tbody>
@@ -88,7 +88,7 @@
 									{/if}
 								</td>
 								<td>{sub.game_date}</td>
-								<td>
+								<td class="text-right">
 									{#if isOwn}
 										{#if editingId === sub.id}
 											<form method="POST" action="?/editSubmission" use:enhance={() => {
@@ -102,7 +102,7 @@
 												<input type="hidden" name="submission_id" value={sub.id} />
 												<input type="hidden" name="game_id" value={sub.game_id} />
 												<input type="hidden" name="score" value={editScore} />
-												<div class="flex gap-1">
+												<div class="flex justify-end gap-1">
 													<button type="submit" class="btn btn-success btn-xs" disabled={savingId === sub.id}>
 														{#if savingId === sub.id}<span class="loading loading-spinner loading-xs"></span>{/if}
 														Save
@@ -120,7 +120,7 @@
 												};
 											}}>
 												<input type="hidden" name="submission_id" value={sub.id} />
-												<div class="flex gap-1">
+												<div class="flex justify-end gap-1">
 													<button type="submit" class="btn btn-error btn-xs" disabled={confirmingDeleteId === sub.id}>
 														{#if confirmingDeleteId === sub.id}<span class="loading loading-spinner loading-xs"></span>{/if}
 														Confirm
@@ -129,7 +129,7 @@
 												</div>
 											</form>
 										{:else}
-											<div class="flex gap-1">
+											<div class="flex justify-end gap-1">
 												<button type="button" class="btn btn-ghost btn-xs" onclick={() => startEdit(sub)}>Edit</button>
 												<button type="button" class="btn btn-ghost btn-xs text-error" onclick={() => confirmDelete(sub.id)}>Delete</button>
 											</div>

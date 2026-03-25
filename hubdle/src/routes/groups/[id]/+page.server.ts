@@ -1,6 +1,7 @@
 import { error, fail, redirect } from '@sveltejs/kit';
 import { parseShareText } from '$lib/parsers';
 import { validateScore } from '$lib/game-rules';
+import { ensureProfile } from '$lib/auth';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
@@ -30,27 +31,42 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 
 	const { data: games } = await locals.supabase.from('games').select('id, name, url, score_direction');
 
-	// Fetch friends who can be invited (not already active members)
-	const { data: friendsAsRequester } = await locals.supabase
+	// Fetch all friendships (accepted + pending) to show status on member list
+	const { data: friendshipsAsRequester } = await locals.supabase
 		.from('friendships')
-		.select('addressee:profiles!friendships_addressee_id_fkey(id, username)')
-		.eq('requester_id', user.id)
-		.eq('status', 'accepted');
+		.select('addressee_id, status')
+		.eq('requester_id', user.id);
 
-	const { data: friendsAsAddressee } = await locals.supabase
+	const { data: friendshipsAsAddressee } = await locals.supabase
 		.from('friendships')
-		.select('requester:profiles!friendships_requester_id_fkey(id, username)')
-		.eq('addressee_id', user.id)
-		.eq('status', 'accepted');
+		.select('requester_id, status')
+		.eq('addressee_id', user.id);
 
+	// Map of user_id -> friendship status for all members
+	const friendshipStatusMap: Record<string, string> = {};
+	for (const f of friendshipsAsRequester ?? []) friendshipStatusMap[f.addressee_id] = f.status;
+	for (const f of friendshipsAsAddressee ?? []) friendshipStatusMap[f.requester_id] = f.status;
+
+	// Invitable friends = accepted friends not already active members
 	const memberIds = new Set(members.map((m) => m.user_id));
-	const allFriends = [
-		...(friendsAsRequester ?? []).map((f) => f.addressee as unknown as { id: string; username: string } | null),
-		...(friendsAsAddressee ?? []).map((f) => f.requester as unknown as { id: string; username: string } | null)
-	];
-	const invitableFriends = allFriends.filter((f): f is { id: string; username: string } => f != null && !memberIds.has(f.id));
+	const acceptedFriendIds = Object.entries(friendshipStatusMap)
+		.filter(([, status]) => status === 'accepted')
+		.map(([id]) => id);
 
-	return { group, members, allMembers: allMembers ?? [], submissions: submissions ?? [], games: games ?? [], userId: user.id, invitableFriends };
+	// Need usernames for the invite dropdown — fetch from members + separate query
+	const memberProfiles = new Map(members.map((m) => [m.user_id, (m.profiles as unknown as { id: string; username: string } | null)?.username ?? '']));
+	const nonMemberFriendIds = acceptedFriendIds.filter((id) => !memberIds.has(id));
+
+	let invitableFriends: { id: string; username: string }[] = [];
+	if (nonMemberFriendIds.length > 0) {
+		const { data: friendProfiles } = await locals.supabase
+			.from('profiles')
+			.select('id, username')
+			.in('id', nonMemberFriendIds);
+		invitableFriends = friendProfiles ?? [];
+	}
+
+	return { group, members, allMembers: allMembers ?? [], submissions: submissions ?? [], games: games ?? [], userId: user.id, invitableFriends, friendshipStatusMap };
 };
 
 export const actions: Actions = {
@@ -289,6 +305,30 @@ export const actions: Actions = {
 		if (deleteError) return fail(500, { error: `Failed to delete group: ${deleteError.message}` });
 
 		redirect(303, '/groups');
+	},
+
+	sendRequest: async ({ request, locals }) => {
+		const { user } = await locals.safeGetSession();
+		if (!user) redirect(303, '/login');
+
+		const formData = await request.formData();
+		const addresseeId = (formData.get('addressee_id') as string)?.trim();
+
+		if (!addresseeId) return fail(400, { error: 'User ID is required.' });
+		if (addresseeId === user.id) return fail(400, { error: 'You cannot add yourself.' });
+
+		await ensureProfile(locals.supabase, user);
+
+		const { error: insertError } = await locals.supabase
+			.from('friendships')
+			.insert({ requester_id: user.id, addressee_id: addresseeId });
+
+		if (insertError) {
+			if (insertError.code === '23505') return fail(409, { error: 'Friend request already exists.' });
+			return fail(500, { error: `Failed to send request: ${insertError.message}` });
+		}
+
+		return { success: true };
 	},
 
 	inviteFriend: async ({ request, params, locals }) => {

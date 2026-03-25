@@ -78,11 +78,11 @@
 		<div class="grid grid-cols-3 gap-4">
 			<div class="rounded-lg bg-base-200 p-4 text-center">
 				<p class="text-3xl font-bold">{data.stats.totalSubmissions}</p>
-				<p class="text-sm opacity-60">Scores</p>
+				<p class="text-sm opacity-60">{data.stats.totalSubmissions === 1 ? 'Score' : 'Scores'}</p>
 			</div>
 			<div class="rounded-lg bg-base-200 p-4 text-center">
 				<p class="text-3xl font-bold">{data.stats.totalGroups}</p>
-				<p class="text-sm opacity-60">Groups</p>
+				<p class="text-sm opacity-60">{data.stats.totalGroups === 1 ? 'Group' : 'Groups'}</p>
 			</div>
 			<div class="rounded-lg bg-base-200 p-4 text-center">
 				<p class="text-3xl font-bold">{data.stats.streak}</p>
@@ -130,7 +130,7 @@
 									<th>Game</th>
 									<th>Score</th>
 									<th>Date</th>
-									{#if data.isOwnProfile}<th></th>{/if}
+									{#if data.isOwnProfile}<th class="text-right"></th>{/if}
 								</tr>
 							</thead>
 							<tbody>
@@ -153,7 +153,7 @@
 										</td>
 										<td>{activity.gameDate}</td>
 										{#if data.isOwnProfile}
-											<td>
+											<td class="text-right">
 												{#if editingId === activity.id}
 													<form method="POST" action="?/editSubmission" use:enhance={() => {
 														savingId = activity.id;
@@ -168,7 +168,7 @@
 														<input type="hidden" name="submission_id" value={activity.id} />
 														<input type="hidden" name="game_id" value={activity.gameId} />
 														<input type="hidden" name="score" value={editScore} />
-														<div class="flex gap-1">
+														<div class="flex justify-end gap-1">
 															<button type="submit" class="btn btn-success btn-xs" disabled={savingId === activity.id}>
 																{#if savingId === activity.id}<span class="loading loading-spinner loading-xs"></span>{/if}
 																Save
@@ -188,7 +188,7 @@
 														};
 													}}>
 														<input type="hidden" name="submission_id" value={activity.id} />
-														<div class="flex gap-1">
+														<div class="flex justify-end gap-1">
 															<button type="submit" class="btn btn-error btn-xs" disabled={confirmingDeleteId === activity.id}>
 																{#if confirmingDeleteId === activity.id}<span class="loading loading-spinner loading-xs"></span>{/if}
 																Confirm
@@ -197,7 +197,7 @@
 														</div>
 													</form>
 												{:else}
-													<div class="flex gap-1">
+													<div class="flex justify-end gap-1">
 														<button type="button" class="btn btn-ghost btn-xs" onclick={() => startEdit(activity)}>Edit</button>
 														<button type="button" class="btn btn-ghost btn-xs text-error" onclick={() => confirmDelete(activity.id)}>Delete</button>
 													</div>
