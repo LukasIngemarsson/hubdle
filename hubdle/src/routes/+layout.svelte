@@ -51,7 +51,11 @@
 	}
 </script>
 
-<svelte:window onclick={() => { if (profileOpen) profileOpen = false; }} />
+<svelte:window
+	onclick={() => {
+		if (profileOpen) profileOpen = false;
+	}}
+/>
 
 <svelte:head>
 	<link rel="icon" href={favicon} />
@@ -64,89 +68,111 @@
 		</div>
 	{/if}
 	<nav class="bg-base-200">
-		<div class="navbar mx-auto max-w-4xl px-6 {$page.url.pathname.startsWith('/login') ? 'justify-center' : ''}">
+		<div
+			class="navbar mx-auto max-w-4xl px-6 {$page.url.pathname.startsWith('/login')
+				? 'justify-center'
+				: ''}"
+		>
 			{#if !$page.url.pathname.startsWith('/login')}
-			<div class="flex flex-1 items-center gap-6">
+				<div class="flex flex-1 items-center gap-6">
+					<a href="/" class="flex items-center gap-2 text-xl font-bold">
+						<img src={favicon} alt="Hubdle" class="h-7 w-7" />
+						Hubdle
+					</a>
+					{#if data.user}
+						<div class="hidden items-center gap-4 sm:flex">
+							<NavLink href="/groups" label="Groups" badge={data.groupInviteCount} />
+							<NavLink href="/friends" label="Friends" badge={data.friendRequestCount} />
+						</div>
+					{/if}
+				</div>
+
+				<div class="flex-none">
+					{#if data.user}
+						<div class="hidden items-center gap-2 sm:flex">
+							<div class="relative">
+								<button
+									class="flex cursor-pointer items-center gap-1.5 rounded-full px-2 py-1 transition-colors hover:bg-base-300"
+									onclick={(e) => {
+										e.stopPropagation();
+										profileOpen = !profileOpen;
+									}}
+									aria-label="Profile menu"
+									aria-expanded={profileOpen}
+								>
+									<Avatar src={data.avatarUrl} size="xs" />
+									<span class="text-sm {profileOpen ? 'opacity-100' : 'opacity-70'}"
+										>{data.username ?? 'Profile'}</span
+									>
+									<ChevronDownIcon class="h-3 w-3 opacity-50" />
+								</button>
+								{#if profileOpen}
+									<div
+										class="absolute right-0 top-full z-40 mt-1 w-40 rounded-lg border border-base-300 bg-base-100 py-1 shadow-lg"
+									>
+										<a
+											href="/users/{data.username ?? ''}"
+											class="block px-4 py-2 text-sm hover:bg-base-200"
+											onclick={() => (profileOpen = false)}>View Profile</a
+										>
+										<a
+											href="/profile"
+											class="block px-4 py-2 text-sm hover:bg-base-200"
+											onclick={() => (profileOpen = false)}>Edit Profile</a
+										>
+										<div class="my-1 border-t border-base-300"></div>
+										<button
+											class="block w-full cursor-pointer px-4 py-2 text-left text-sm text-error hover:bg-base-200"
+											onclick={handleLogout}>Log Out</button
+										>
+									</div>
+								{/if}
+							</div>
+							<button
+								class="btn btn-ghost btn-sm btn-square cursor-pointer opacity-70 hover:opacity-100"
+								onclick={() => theme.toggle()}
+								aria-label="Toggle theme"
+							>
+								{#if theme.isDark}
+									<SunIcon />
+								{:else}
+									<MoonIcon />
+								{/if}
+							</button>
+						</div>
+
+						<div class="sm:hidden">
+							<button
+								class="btn btn-ghost btn-sm btn-square"
+								onclick={() => (menuOpen = !menuOpen)}
+								aria-label="Toggle menu"
+								aria-expanded={menuOpen}
+							>
+								<MenuIcon open={menuOpen} />
+							</button>
+						</div>
+					{:else if !$page.url.pathname.startsWith('/login')}
+						<div class="flex items-center gap-2">
+							<button
+								class="btn btn-ghost btn-sm btn-square cursor-pointer opacity-70 hover:opacity-100"
+								onclick={() => theme.toggle()}
+								aria-label="Toggle theme"
+							>
+								{#if theme.isDark}
+									<SunIcon />
+								{:else}
+									<MoonIcon />
+								{/if}
+							</button>
+							<a href="/login" class="btn btn-primary btn-sm">Log In</a>
+						</div>
+					{/if}
+				</div>
+			{:else}
 				<a href="/" class="flex items-center gap-2 text-xl font-bold">
 					<img src={favicon} alt="Hubdle" class="h-7 w-7" />
 					Hubdle
 				</a>
-				{#if data.user}
-					<div class="hidden items-center gap-4 sm:flex">
-						<NavLink href="/groups" label="Groups" badge={data.groupInviteCount} />
-						<NavLink href="/friends" label="Friends" badge={data.friendRequestCount} />
-					</div>
-				{/if}
-			</div>
-
-			<div class="flex-none">
-				{#if data.user}
-					<div class="hidden items-center gap-2 sm:flex">
-						<div class="relative">
-							<button
-								class="flex cursor-pointer items-center gap-1.5 rounded-full px-2 py-1 transition-colors hover:bg-base-300"
-								onclick={(e) => { e.stopPropagation(); profileOpen = !profileOpen; }}
-								aria-label="Profile menu"
-								aria-expanded={profileOpen}
-							>
-								<Avatar src={data.avatarUrl} size="xs" />
-								<span class="text-sm {profileOpen ? 'opacity-100' : 'opacity-70'}">{data.username ?? 'Profile'}</span>
-								<ChevronDownIcon class="h-3 w-3 opacity-50" />
-							</button>
-							{#if profileOpen}
-								<div class="absolute right-0 top-full z-40 mt-1 w-40 rounded-lg border border-base-300 bg-base-100 py-1 shadow-lg">
-									<a href="/users/{data.username ?? ''}" class="block px-4 py-2 text-sm hover:bg-base-200" onclick={() => (profileOpen = false)}>View Profile</a>
-									<a href="/profile" class="block px-4 py-2 text-sm hover:bg-base-200" onclick={() => (profileOpen = false)}>Edit Profile</a>
-									<div class="my-1 border-t border-base-300"></div>
-									<button class="block w-full cursor-pointer px-4 py-2 text-left text-sm text-error hover:bg-base-200" onclick={handleLogout}>Log Out</button>
-								</div>
-							{/if}
-						</div>
-						<button
-							class="btn btn-ghost btn-sm btn-square cursor-pointer opacity-70 hover:opacity-100"
-							onclick={() => theme.toggle()}
-							aria-label="Toggle theme"
-						>
-							{#if theme.isDark}
-								<SunIcon />
-							{:else}
-								<MoonIcon />
-							{/if}
-						</button>
-					</div>
-
-					<div class="sm:hidden">
-						<button
-							class="btn btn-ghost btn-sm btn-square"
-							onclick={() => (menuOpen = !menuOpen)}
-							aria-label="Toggle menu"
-						aria-expanded={menuOpen}
-						>
-							<MenuIcon open={menuOpen} />
-						</button>
-					</div>
-				{:else if !$page.url.pathname.startsWith('/login')}
-					<div class="flex items-center gap-2">
-						<button
-							class="btn btn-ghost btn-sm btn-square cursor-pointer opacity-70 hover:opacity-100"
-							onclick={() => theme.toggle()}
-							aria-label="Toggle theme"
-						>
-							{#if theme.isDark}
-								<SunIcon />
-							{:else}
-								<MoonIcon />
-							{/if}
-						</button>
-						<a href="/login" class="btn btn-primary btn-sm">Log In</a>
-					</div>
-				{/if}
-			</div>
-			{:else}
-			<a href="/" class="flex items-center gap-2 text-xl font-bold">
-				<img src={favicon} alt="Hubdle" class="h-7 w-7" />
-				Hubdle
-			</a>
 			{/if}
 		</div>
 	</nav>
@@ -154,13 +180,25 @@
 	{#if menuOpen && data.user}
 		<div class="border-b border-base-300 bg-base-200 sm:hidden">
 			<div class="mx-auto flex max-w-4xl flex-col gap-3 px-6 py-3">
-				<a href="/groups" class="text-sm" onclick={() => (menuOpen = false)}>Groups{#if data.groupInviteCount > 0}<span class="badge badge-primary badge-xs ml-1">{data.groupInviteCount}</span>{/if}</a>
-				<a href="/friends" class="text-sm" onclick={() => (menuOpen = false)}>Friends{#if data.friendRequestCount > 0}<span class="badge badge-primary badge-xs ml-1">{data.friendRequestCount}</span>{/if}</a>
-				<a href="/users/{data.username ?? ''}" class="text-sm" onclick={() => (menuOpen = false)}>Profile</a>
+				<a href="/groups" class="text-sm" onclick={() => (menuOpen = false)}
+					>Groups{#if data.groupInviteCount > 0}<span class="badge badge-primary badge-xs ml-1"
+							>{data.groupInviteCount}</span
+						>{/if}</a
+				>
+				<a href="/friends" class="text-sm" onclick={() => (menuOpen = false)}
+					>Friends{#if data.friendRequestCount > 0}<span class="badge badge-primary badge-xs ml-1"
+							>{data.friendRequestCount}</span
+						>{/if}</a
+				>
+				<a href="/users/{data.username ?? ''}" class="text-sm" onclick={() => (menuOpen = false)}
+					>Profile</a
+				>
 				<button class="cursor-pointer text-left text-sm opacity-70" onclick={() => theme.toggle()}>
 					{theme.isDark ? 'Light Mode' : 'Dark Mode'}
 				</button>
-				<button class="cursor-pointer text-left text-sm opacity-70" onclick={handleLogout}>Log Out</button>
+				<button class="cursor-pointer text-left text-sm opacity-70" onclick={handleLogout}
+					>Log Out</button
+				>
 			</div>
 		</div>
 	{/if}

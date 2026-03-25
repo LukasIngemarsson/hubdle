@@ -30,5 +30,12 @@ export const load: LayoutServerLoad = async ({ locals, cookies }) => {
 		groupInviteCount = inviteCount ?? 0;
 	}
 
-	return { user, avatarUrl, username, friendRequestCount, groupInviteCount, cookies: cookies.getAll() };
+	return {
+		user,
+		avatarUrl,
+		username,
+		friendRequestCount,
+		groupInviteCount,
+		cookies: cookies.getAll()
+	};
 };

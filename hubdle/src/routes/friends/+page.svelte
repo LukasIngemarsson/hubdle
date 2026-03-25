@@ -12,7 +12,18 @@
 
 	// Live search state
 	let searchQuery = $state('');
-	let searchResults = $state<{ id: string; username: string; avatarUrl: string | null; friendship: { friendshipId: string; status: string; direction: 'outgoing' | 'incoming' } | null }[]>([]);
+	let searchResults = $state<
+		{
+			id: string;
+			username: string;
+			avatarUrl: string | null;
+			friendship: {
+				friendshipId: string;
+				status: string;
+				direction: 'outgoing' | 'incoming';
+			} | null;
+		}[]
+	>([]);
 	let searched = $state(false);
 	let debounceTimer: ReturnType<typeof setTimeout>;
 
@@ -49,11 +60,17 @@
 			.select('id, requester_id, addressee_id, status')
 			.or(
 				profileIds
-					.map((id) => `and(requester_id.eq.${userId},addressee_id.eq.${id}),and(requester_id.eq.${id},addressee_id.eq.${userId})`)
+					.map(
+						(id) =>
+							`and(requester_id.eq.${userId},addressee_id.eq.${id}),and(requester_id.eq.${id},addressee_id.eq.${userId})`
+					)
 					.join(',')
 			);
 
-		const friendshipMap = new Map<string, { friendshipId: string; status: string; direction: 'outgoing' | 'incoming' }>();
+		const friendshipMap = new Map<
+			string,
+			{ friendshipId: string; status: string; direction: 'outgoing' | 'incoming' }
+		>();
 		for (const f of existingFriendships ?? []) {
 			const otherId = f.requester_id === userId ? f.addressee_id : f.requester_id;
 			friendshipMap.set(otherId, {
@@ -115,18 +132,38 @@
 				<div class="mt-2 grid gap-2">
 					{#each searchResults as result}
 						<div class="flex items-center justify-between rounded-lg bg-base-300 px-4 py-2">
-							<a href="/users/{result.username}" class="flex items-center gap-2 font-medium hover:underline"><Avatar src={result.avatarUrl} username={result.username} size="xs" />{result.username}</a>
+							<a
+								href="/users/{result.username}"
+								class="flex items-center gap-2 font-medium hover:underline"
+								><Avatar
+									src={result.avatarUrl}
+									username={result.username}
+									size="xs"
+								/>{result.username}</a
+							>
 							{#if result.friendship?.status === 'accepted'}
 								<span class="badge badge-success badge-sm">Friends</span>
 							{:else if result.friendship?.status === 'pending' && result.friendship.direction === 'outgoing'}
 								<span class="badge badge-sm">Pending</span>
 							{:else if result.friendship?.status === 'pending' && result.friendship.direction === 'incoming'}
-								<form method="POST" action="?/acceptRequest" use:enhance={searchEnhance('Friend request accepted!')}>
-									<input type="hidden" name="friendship_id" value={result.friendship.friendshipId} />
+								<form
+									method="POST"
+									action="?/acceptRequest"
+									use:enhance={searchEnhance('Friend request accepted!')}
+								>
+									<input
+										type="hidden"
+										name="friendship_id"
+										value={result.friendship.friendshipId}
+									/>
 									<button class="btn btn-primary btn-sm">Accept</button>
 								</form>
 							{:else}
-								<form method="POST" action="?/sendRequest" use:enhance={searchEnhance('Friend request sent!')}>
+								<form
+									method="POST"
+									action="?/sendRequest"
+									use:enhance={searchEnhance('Friend request sent!')}
+								>
 									<input type="hidden" name="addressee_id" value={result.id} />
 									<button class="btn btn-primary btn-outline btn-sm">Add Friend</button>
 								</form>
@@ -149,13 +186,29 @@
 				<div class="grid gap-2">
 					{#each data.incomingRequests as request}
 						<div class="flex items-center justify-between rounded-lg bg-base-200 px-4 py-2">
-							<a href="/users/{request.username}" class="flex items-center gap-2 font-medium hover:underline"><Avatar src={request.avatarUrl} username={request.username} size="xs" />{request.username}</a>
+							<a
+								href="/users/{request.username}"
+								class="flex items-center gap-2 font-medium hover:underline"
+								><Avatar
+									src={request.avatarUrl}
+									username={request.username}
+									size="xs"
+								/>{request.username}</a
+							>
 							<div class="flex gap-2">
-								<form method="POST" action="?/acceptRequest" use:enhance={searchEnhance('Friend request accepted!')}>
+								<form
+									method="POST"
+									action="?/acceptRequest"
+									use:enhance={searchEnhance('Friend request accepted!')}
+								>
 									<input type="hidden" name="friendship_id" value={request.friendshipId} />
 									<button class="btn btn-primary btn-sm">Accept</button>
 								</form>
-								<form method="POST" action="?/declineRequest" use:enhance={searchEnhance('Request declined.')}>
+								<form
+									method="POST"
+									action="?/declineRequest"
+									use:enhance={searchEnhance('Request declined.')}
+								>
 									<input type="hidden" name="friendship_id" value={request.friendshipId} />
 									<button class="btn btn-ghost btn-sm">Decline</button>
 								</form>
@@ -175,8 +228,20 @@
 				<div class="grid gap-2">
 					{#each data.outgoingRequests as request}
 						<div class="flex items-center justify-between rounded-lg bg-base-200 px-4 py-2">
-							<a href="/users/{request.username}" class="flex items-center gap-2 font-medium hover:underline"><Avatar src={request.avatarUrl} username={request.username} size="xs" />{request.username}</a>
-							<form method="POST" action="?/declineRequest" use:enhance={searchEnhance('Request cancelled.')}>
+							<a
+								href="/users/{request.username}"
+								class="flex items-center gap-2 font-medium hover:underline"
+								><Avatar
+									src={request.avatarUrl}
+									username={request.username}
+									size="xs"
+								/>{request.username}</a
+							>
+							<form
+								method="POST"
+								action="?/declineRequest"
+								use:enhance={searchEnhance('Request cancelled.')}
+							>
 								<input type="hidden" name="friendship_id" value={request.friendshipId} />
 								<button class="btn btn-ghost btn-sm">Cancel</button>
 							</form>
@@ -206,8 +271,22 @@
 					{#each data.friends as friend}
 						{@const formId = `remove-form-${friend.friendshipId}`}
 						<div class="flex items-center justify-between rounded-lg bg-base-200 px-4 py-2">
-							<a href="/users/{friend.username}" class="flex items-center gap-2 font-medium hover:underline"><Avatar src={friend.avatarUrl} username={friend.username} size="xs" />{friend.username}</a>
-							<form id={formId} method="POST" action="?/removeFriend" use:enhance={searchEnhance('Friend removed.')} class="hidden">
+							<a
+								href="/users/{friend.username}"
+								class="flex items-center gap-2 font-medium hover:underline"
+								><Avatar
+									src={friend.avatarUrl}
+									username={friend.username}
+									size="xs"
+								/>{friend.username}</a
+							>
+							<form
+								id={formId}
+								method="POST"
+								action="?/removeFriend"
+								use:enhance={searchEnhance('Friend removed.')}
+								class="hidden"
+							>
 								<input type="hidden" name="friendship_id" value={friend.friendshipId} />
 							</form>
 							<ConfirmModal
@@ -218,7 +297,9 @@
 								triggerClass="btn-error btn-outline btn-sm"
 								confirmLabel="Remove"
 								confirmClass="btn-error"
-								onConfirm={() => { (document.getElementById(formId) as HTMLFormElement)?.requestSubmit(); }}
+								onConfirm={() => {
+									(document.getElementById(formId) as HTMLFormElement)?.requestSubmit();
+								}}
 							/>
 						</div>
 					{/each}

@@ -56,7 +56,7 @@ function parseConnections(text: string): ParseResult {
 	const puzzleNumber = parseInt(headerMatch[1], 10);
 
 	// Count emoji rows — each row is 4 coloured squares
-	const emojiRows = (text.match(/[🟨🟩🟪🟦]{4}/g) ?? []);
+	const emojiRows = text.match(/[🟨🟩🟪🟦]{4}/g) ?? [];
 	const totalRows = emojiRows.length;
 	if (totalRows < 4) return null;
 	const score = totalRows - 4; // mistakes
@@ -87,7 +87,9 @@ function parseContexto(text: string): ParseResult {
 
 function parseScrandle(text: string): ParseResult {
 	// "🟩🟥🟩🟩🟩🟥🟥🟩🟩🟩 7/10 | 2026-03-24 | https://scrandle.com"
-	const match = text.match(/(\d{1,2})\/10\s*\|\s*(\d{4}-\d{2}-\d{2})\s*\|\s*https?:\/\/scrandle\.com/);
+	const match = text.match(
+		/(\d{1,2})\/10\s*\|\s*(\d{4}-\d{2}-\d{2})\s*\|\s*https?:\/\/scrandle\.com/
+	);
 	if (!match) return null;
 
 	const score = parseInt(match[1], 10);

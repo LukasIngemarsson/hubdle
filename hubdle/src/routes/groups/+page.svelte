@@ -21,14 +21,20 @@
 	<h1 class="text-2xl font-bold">Your Groups</h1>
 
 	<div class="mt-6 grid gap-4 sm:grid-cols-2">
-		<form method="POST" action="?/create" use:enhance={() => {
-			creating = true;
-			return async ({ result, update }) => {
-				await update();
-				creating = false;
-				if (result.type === 'failure' && result.data?.error) toasts.push('error', result.data.error as string);
-			};
-		}} class="card bg-base-200">
+		<form
+			method="POST"
+			action="?/create"
+			use:enhance={() => {
+				creating = true;
+				return async ({ result, update }) => {
+					await update();
+					creating = false;
+					if (result.type === 'failure' && result.data?.error)
+						toasts.push('error', result.data.error as string);
+				};
+			}}
+			class="card bg-base-200"
+		>
 			<div class="card-body gap-3">
 				<label for="group-name" class="card-title text-sm">Create a group</label>
 				<input
@@ -48,14 +54,20 @@
 			</div>
 		</form>
 
-		<form method="POST" action="?/join" use:enhance={() => {
-			joining = true;
-			return async ({ result, update }) => {
-				await update();
-				joining = false;
-				if (result.type === 'failure' && result.data?.error) toasts.push('error', result.data.error as string);
-			};
-		}} class="card bg-base-200">
+		<form
+			method="POST"
+			action="?/join"
+			use:enhance={() => {
+				joining = true;
+				return async ({ result, update }) => {
+					await update();
+					joining = false;
+					if (result.type === 'failure' && result.data?.error)
+						toasts.push('error', result.data.error as string);
+				};
+			}}
+			class="card bg-base-200"
+		>
 			<div class="card-body gap-3">
 				<label for="invite-code" class="card-title text-sm">Join a group</label>
 				<input
@@ -83,13 +95,20 @@
 				</h2>
 				<div class="grid gap-2">
 					{#each data.pendingInvites as invite}
-						{@const inviter = invite.inviter as unknown as { username: string; avatar_url: string | null } | null}
+						{@const inviter = invite.inviter as unknown as {
+							username: string;
+							avatar_url: string | null;
+						} | null}
 						<div class="flex items-center justify-between rounded-lg bg-base-200 px-4 py-2">
 							<div class="flex items-center gap-2">
 								<span class="font-medium">{invite.groups?.name ?? 'Unknown group'}</span>
-								<span class="flex items-center gap-1 text-sm opacity-50">from
+								<span class="flex items-center gap-1 text-sm opacity-50"
+									>from
 									{#if inviter}
-										<a href="/users/{inviter.username}" class="flex items-center gap-1 hover:underline">
+										<a
+											href="/users/{inviter.username}"
+											class="flex items-center gap-1 hover:underline"
+										>
 											<Avatar src={inviter.avatar_url} username={inviter.username} size="xs" />
 											{inviter.username}
 										</a>
@@ -97,11 +116,19 @@
 								</span>
 							</div>
 							<div class="flex gap-2">
-								<form method="POST" action="?/acceptInvite" use:enhance={toastEnhance('Invite accepted!')}>
+								<form
+									method="POST"
+									action="?/acceptInvite"
+									use:enhance={toastEnhance('Invite accepted!')}
+								>
 									<input type="hidden" name="invite_id" value={invite.id} />
 									<button class="btn btn-primary btn-sm">Accept</button>
 								</form>
-								<form method="POST" action="?/declineInvite" use:enhance={toastEnhance('Invite declined.')}>
+								<form
+									method="POST"
+									action="?/declineInvite"
+									use:enhance={toastEnhance('Invite declined.')}
+								>
 									<input type="hidden" name="invite_id" value={invite.id} />
 									<button class="btn btn-ghost btn-sm">Decline</button>
 								</form>
@@ -126,11 +153,17 @@
 					<div class="card-body flex-row items-center justify-between py-4">
 						<div>
 							<h2 class="text-lg font-semibold">{group.name}</h2>
-							<p class="text-sm opacity-50">{group.member_count} {group.member_count === 1 ? 'member' : 'members'}</p>
+							<p class="text-sm opacity-50">
+								{group.member_count}
+								{group.member_count === 1 ? 'member' : 'members'}
+							</p>
 						</div>
 						<CopyBadge
 							text={group.invite_code}
-							onclick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+							onclick={(e) => {
+								e.preventDefault();
+								e.stopPropagation();
+							}}
 						/>
 					</div>
 				</a>

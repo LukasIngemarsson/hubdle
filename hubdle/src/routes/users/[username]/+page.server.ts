@@ -45,33 +45,34 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		}
 	}
 
-	const perGameStats = [...gameMap.entries()].map(([gameId, data]) => {
-		const { scores, name, scoreDirection } = data;
-		const total = scores.reduce((a, b) => a + b, 0);
-		const avg = total / scores.length;
-		const best = scoreDirection === 'asc'
-			? Math.min(...scores)
-			: Math.max(...scores);
-		const rules = GAME_RULES[gameId];
-		let barPct = 50;
-		if (rules) {
-			const range = rules.maxScore - rules.minScore;
-			if (range > 0) {
-				barPct = scoreDirection === 'asc'
-					? (1 - (avg - rules.minScore) / range) * 100
-					: ((avg - rules.minScore) / range) * 100;
+	const perGameStats = [...gameMap.entries()]
+		.map(([gameId, data]) => {
+			const { scores, name, scoreDirection } = data;
+			const total = scores.reduce((a, b) => a + b, 0);
+			const avg = total / scores.length;
+			const best = scoreDirection === 'asc' ? Math.min(...scores) : Math.max(...scores);
+			const rules = GAME_RULES[gameId];
+			let barPct = 50;
+			if (rules) {
+				const range = rules.maxScore - rules.minScore;
+				if (range > 0) {
+					barPct =
+						scoreDirection === 'asc'
+							? (1 - (avg - rules.minScore) / range) * 100
+							: ((avg - rules.minScore) / range) * 100;
+				}
 			}
-		}
-		return {
-			gameId,
-			name,
-			count: scores.length,
-			best,
-			avg: Math.round(avg * 10) / 10,
-			scoreDirection,
-			barPct: Math.max(5, Math.min(100, Math.round(barPct)))
-		};
-	}).sort((a, b) => b.count - a.count);
+			return {
+				gameId,
+				name,
+				count: scores.length,
+				best,
+				avg: Math.round(avg * 10) / 10,
+				scoreDirection,
+				barPct: Math.max(5, Math.min(100, Math.round(barPct)))
+			};
+		})
+		.sort((a, b) => b.count - a.count);
 
 	// Active streak: consecutive days with submissions up to today
 	let streak = 0;
@@ -111,7 +112,9 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		const { data: existing } = await locals.supabase
 			.from('friendships')
 			.select('id, requester_id, status')
-			.or(`and(requester_id.eq.${user.id},addressee_id.eq.${profile.id}),and(requester_id.eq.${profile.id},addressee_id.eq.${user.id})`)
+			.or(
+				`and(requester_id.eq.${user.id},addressee_id.eq.${profile.id}),and(requester_id.eq.${profile.id},addressee_id.eq.${user.id})`
+			)
 			.maybeSingle();
 
 		if (existing) {
@@ -152,7 +155,8 @@ export const actions: Actions = {
 		const scoreStr = (formData.get('score') as string)?.trim();
 		const gameId = (formData.get('game_id') as string)?.trim();
 
-		if (!submissionId || !scoreStr || !gameId) return fail(400, { error: 'All fields are required.' });
+		if (!submissionId || !scoreStr || !gameId)
+			return fail(400, { error: 'All fields are required.' });
 
 		const score = parseInt(scoreStr, 10);
 		if (isNaN(score)) return fail(400, { error: 'Score must be a number.' });
@@ -188,7 +192,8 @@ export const actions: Actions = {
 			.insert({ requester_id: user.id, addressee_id: addresseeId });
 
 		if (insertError) {
-			if (insertError.code === '23505') return fail(409, { error: 'Friend request already exists.' });
+			if (insertError.code === '23505')
+				return fail(409, { error: 'Friend request already exists.' });
 			return fail(500, { error: `Failed to send request: ${insertError.message}` });
 		}
 
@@ -211,7 +216,8 @@ export const actions: Actions = {
 			.eq('addressee_id', user.id)
 			.eq('status', 'pending');
 
-		if (updateError) return fail(500, { error: `Failed to accept request: ${updateError.message}` });
+		if (updateError)
+			return fail(500, { error: `Failed to accept request: ${updateError.message}` });
 
 		return { success: true };
 	},
@@ -230,7 +236,8 @@ export const actions: Actions = {
 			.delete()
 			.eq('id', friendshipId);
 
-		if (deleteError) return fail(500, { error: `Failed to cancel request: ${deleteError.message}` });
+		if (deleteError)
+			return fail(500, { error: `Failed to cancel request: ${deleteError.message}` });
 
 		return { success: true };
 	},

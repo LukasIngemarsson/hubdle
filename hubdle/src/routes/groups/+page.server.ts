@@ -25,7 +25,9 @@ export const load: PageServerLoad = async ({ locals }) => {
 
 	const { data: pendingInvites } = await locals.supabase
 		.from('group_invites')
-		.select('id, group_id, invited_by, created_at, groups(id, name), inviter:profiles!group_invites_invited_by_fkey(username, avatar_url)')
+		.select(
+			'id, group_id, invited_by, created_at, groups(id, name), inviter:profiles!group_invites_invited_by_fkey(username, avatar_url)'
+		)
 		.eq('invited_user_id', user.id);
 
 	return { groups, pendingInvites: pendingInvites ?? [] };
@@ -51,7 +53,8 @@ export const actions: Actions = {
 			.select('id')
 			.single();
 
-		if (groupError || !group) return fail(500, { error: `Failed to create group: ${groupError?.message}` });
+		if (groupError || !group)
+			return fail(500, { error: `Failed to create group: ${groupError?.message}` });
 
 		const { error: memberError } = await locals.supabase
 			.from('group_members')
@@ -103,10 +106,7 @@ export const actions: Actions = {
 		}
 
 		// Delete the invite
-		await locals.supabase
-			.from('group_invites')
-			.delete()
-			.eq('id', inviteId);
+		await locals.supabase.from('group_invites').delete().eq('id', inviteId);
 
 		return { success: true };
 	},
@@ -131,7 +131,9 @@ export const actions: Actions = {
 	},
 
 	join: async ({ request, locals }) => {
-		const { data: { user } } = await locals.supabase.auth.getUser();
+		const {
+			data: { user }
+		} = await locals.supabase.auth.getUser();
 		if (!user) redirect(303, '/login');
 
 		const formData = await request.formData();

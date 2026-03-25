@@ -29,7 +29,9 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		.eq('group_id', params.id)
 		.order('game_date', { ascending: false });
 
-	const { data: games } = await locals.supabase.from('games').select('id, name, url, score_direction');
+	const { data: games } = await locals.supabase
+		.from('games')
+		.select('id, name, url, score_direction');
 
 	// Fetch all friendships (accepted + pending) to show status on member list
 	const { data: friendshipsAsRequester } = await locals.supabase
@@ -60,7 +62,9 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		.eq('group_id', params.id);
 	const pendingInviteUserIds = new Set((pendingInvites ?? []).map((i) => i.invited_user_id));
 
-	const nonMemberFriendIds = acceptedFriendIds.filter((id) => !memberIds.has(id) && !pendingInviteUserIds.has(id));
+	const nonMemberFriendIds = acceptedFriendIds.filter(
+		(id) => !memberIds.has(id) && !pendingInviteUserIds.has(id)
+	);
 
 	let invitableFriends: { id: string; username: string }[] = [];
 	if (nonMemberFriendIds.length > 0) {
@@ -71,7 +75,16 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		invitableFriends = friendProfiles ?? [];
 	}
 
-	return { group, members, allMembers: allMembers ?? [], submissions: submissions ?? [], games: games ?? [], userId: user.id, invitableFriends, friendshipStatusMap };
+	return {
+		group,
+		members,
+		allMembers: allMembers ?? [],
+		submissions: submissions ?? [],
+		games: games ?? [],
+		userId: user.id,
+		invitableFriends,
+		friendshipStatusMap
+	};
 };
 
 export const actions: Actions = {
@@ -85,13 +98,18 @@ export const actions: Actions = {
 		if (!rawText) return fail(400, { error: 'Paste your share text.' });
 
 		const parsed = parseShareText(rawText);
-		if (!parsed) return fail(400, { error: 'Could not parse that share text. Supported games: Wordle, Bandle, Connections, Contexto.' });
+		if (!parsed)
+			return fail(400, {
+				error:
+					'Could not parse that share text. Supported games: Wordle, Bandle, Connections, Contexto.'
+			});
 
 		const scoreError = validateScore(parsed.gameId, parsed.score);
 		if (scoreError) return fail(400, { error: scoreError });
 
 		const today = new Date().toISOString().slice(0, 10);
-		if (parsed.gameDate > today) return fail(400, { error: 'Cannot submit a score for a future date.' });
+		if (parsed.gameDate > today)
+			return fail(400, { error: 'Cannot submit a score for a future date.' });
 
 		const { error: insertError } = await locals.supabase.from('submissions').insert({
 			user_id: user.id,
@@ -158,7 +176,8 @@ export const actions: Actions = {
 		const scoreStr = (formData.get('score') as string)?.trim();
 		const gameId = (formData.get('game_id') as string)?.trim();
 
-		if (!submissionId || !scoreStr || !gameId) return fail(400, { error: 'All fields are required.' });
+		if (!submissionId || !scoreStr || !gameId)
+			return fail(400, { error: 'All fields are required.' });
 
 		const score = parseInt(scoreStr, 10);
 		if (isNaN(score)) return fail(400, { error: 'Score must be a number.' });
@@ -209,7 +228,9 @@ export const actions: Actions = {
 			.single();
 
 		if (group?.created_by === user.id) {
-			return fail(400, { error: 'As the group owner, you must transfer ownership or delete the group.' });
+			return fail(400, {
+				error: 'As the group owner, you must transfer ownership or delete the group.'
+			});
 		}
 
 		const { error: leaveError } = await locals.supabase
@@ -260,7 +281,8 @@ export const actions: Actions = {
 			.update({ created_by: newOwnerId })
 			.eq('id', params.id);
 
-		if (updateError) return fail(500, { error: `Failed to transfer ownership: ${updateError.message}` });
+		if (updateError)
+			return fail(500, { error: `Failed to transfer ownership: ${updateError.message}` });
 
 		// Soft-delete the old owner from the group
 		const { error: leaveError } = await locals.supabase
@@ -270,7 +292,10 @@ export const actions: Actions = {
 			.eq('user_id', user.id)
 			.is('left_at', null);
 
-		if (leaveError) return fail(500, { error: `Ownership transferred but failed to leave: ${leaveError.message}` });
+		if (leaveError)
+			return fail(500, {
+				error: `Ownership transferred but failed to leave: ${leaveError.message}`
+			});
 
 		redirect(303, '/groups');
 	},
@@ -299,7 +324,9 @@ export const actions: Actions = {
 			.is('left_at', null);
 
 		if (activeMembers && activeMembers.length > 0) {
-			return fail(400, { error: 'Cannot delete a group with other members. Transfer ownership first.' });
+			return fail(400, {
+				error: 'Cannot delete a group with other members. Transfer ownership first.'
+			});
 		}
 
 		const { error: deleteError } = await locals.supabase
@@ -329,7 +356,8 @@ export const actions: Actions = {
 			.insert({ requester_id: user.id, addressee_id: addresseeId });
 
 		if (insertError) {
-			if (insertError.code === '23505') return fail(409, { error: 'Friend request already exists.' });
+			if (insertError.code === '23505')
+				return fail(409, { error: 'Friend request already exists.' });
 			return fail(500, { error: `Failed to send request: ${insertError.message}` });
 		}
 
@@ -350,7 +378,8 @@ export const actions: Actions = {
 			.insert({ group_id: params.id, invited_by: user.id, invited_user_id: friendId });
 
 		if (insertError) {
-			if (insertError.code === '23505') return fail(409, { error: 'An invite has already been sent to this user.' });
+			if (insertError.code === '23505')
+				return fail(409, { error: 'An invite has already been sent to this user.' });
 			return fail(500, { error: `Failed to send invite: ${insertError.message}` });
 		}
 

@@ -2,13 +2,22 @@
 @plugin 'daisyui';
 
 @keyframes loading-bar {
-	0% { width: 0; }
-	50% { width: 60%; }
-	100% { width: 90%; }
+	0% {
+		width: 0;
+	}
+	50% {
+		width: 60%;
+	}
+	100% {
+		width: 90%;
+	}
 }
 
 @keyframes loading-bar-done {
-	to { width: 100%; opacity: 0; }
+	to {
+		width: 100%;
+		opacity: 0;
+	}
 }
 
 .loading-bar {
@@ -21,6 +30,10 @@
 }
 
 @keyframes toast-drain {
-	from { width: 100%; }
-	to { width: 0%; }
+	from {
+		width: 100%;
+	}
+	to {
+		width: 0%;
+	}
 }

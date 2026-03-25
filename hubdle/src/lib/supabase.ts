@@ -24,9 +24,7 @@ export function createSupabaseClient(
 		cookies: {
 			getAll: () => cookies.getAll(),
 			setAll: (newCookies) =>
-				cookies.setAll(
-					newCookies.map(({ name, value, options }) => ({ name, value, options }))
-				)
+				cookies.setAll(newCookies.map(({ name, value, options }) => ({ name, value, options })))
 		}
 	});
 }

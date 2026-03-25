@@ -27,12 +27,10 @@ export const actions: Actions = {
 		const username = (formData.get('username') as string)?.trim();
 
 		if (!username) return fail(400, { error: 'Username cannot be empty.' });
-		if (username.length > 30) return fail(400, { error: 'Username must be 30 characters or less.' });
+		if (username.length > 30)
+			return fail(400, { error: 'Username must be 30 characters or less.' });
 
-		const { error } = await locals.supabase
-			.from('profiles')
-			.update({ username })
-			.eq('id', user.id);
+		const { error } = await locals.supabase.from('profiles').update({ username }).eq('id', user.id);
 
 		if (error) {
 			if (error.code === '23505') return fail(409, { error: 'That username is already taken.' });
@@ -59,9 +57,7 @@ export const actions: Actions = {
 		const filePath = `${user.id}/avatar.${ext}`;
 
 		// Remove any existing avatar files for this user
-		const { data: existingFiles } = await locals.supabase.storage
-			.from('avatars')
-			.list(user.id);
+		const { data: existingFiles } = await locals.supabase.storage.from('avatars').list(user.id);
 
 		if (existingFiles && existingFiles.length > 0) {
 			await locals.supabase.storage
@@ -95,9 +91,7 @@ export const actions: Actions = {
 		if (!user) redirect(303, '/login');
 
 		// Remove files from storage
-		const { data: existingFiles } = await locals.supabase.storage
-			.from('avatars')
-			.list(user.id);
+		const { data: existingFiles } = await locals.supabase.storage.from('avatars').list(user.id);
 
 		if (existingFiles && existingFiles.length > 0) {
 			await locals.supabase.storage

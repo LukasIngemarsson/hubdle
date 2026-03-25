@@ -1,10 +1,23 @@
 <script lang="ts">
 	import Avatar from './Avatar.svelte';
 
-	type Submission = { user_id: string; game_id: string; game_date: string; games: { name: string } | null };
-	type Member = { user_id: string; left_at: string | null; profiles: { username: string; avatar_url: string | null } | null };
+	type Submission = {
+		user_id: string;
+		game_id: string;
+		game_date: string;
+		games: { name: string } | null;
+	};
+	type Member = {
+		user_id: string;
+		left_at: string | null;
+		profiles: { username: string; avatar_url: string | null } | null;
+	};
 
-	let { submissions, members, userId }: { submissions: Submission[]; members: Member[]; userId: string } = $props();
+	let {
+		submissions,
+		members,
+		userId
+	}: { submissions: Submission[]; members: Member[]; userId: string } = $props();
 
 	const today = new Date().toISOString().slice(0, 10);
 
@@ -33,9 +46,7 @@
 			.sort((a, b) => b.games.length - a.games.length)
 	);
 
-	let notPlayed = $derived(
-		activeMembers.filter((m) => !submittedByUser.has(m.user_id))
-	);
+	let notPlayed = $derived(activeMembers.filter((m) => !submittedByUser.has(m.user_id)));
 </script>
 
 {#if activeMembers.length > 0}
@@ -56,7 +67,11 @@
 							class="flex items-center gap-1.5 rounded-full bg-success/10 border border-success/30 px-3 py-1.5 text-sm transition-colors hover:bg-success/20"
 							title={member.games.join(', ')}
 						>
-							<Avatar src={member.profiles?.avatar_url} username={member.profiles?.username ?? 'Unknown'} size="xs" />
+							<Avatar
+								src={member.profiles?.avatar_url}
+								username={member.profiles?.username ?? 'Unknown'}
+								size="xs"
+							/>
 							{member.profiles?.username ?? 'Unknown'}
 							<span class="opacity-50">{member.games.length}</span>
 						</a>
@@ -71,7 +86,11 @@
 							href="/users/{member.profiles?.username ?? ''}"
 							class="flex items-center gap-1.5 rounded-full border border-base-content/10 px-3 py-1.5 text-sm opacity-40 transition-colors hover:opacity-70"
 						>
-							<Avatar src={member.profiles?.avatar_url} username={member.profiles?.username ?? 'Unknown'} size="xs" />
+							<Avatar
+								src={member.profiles?.avatar_url}
+								username={member.profiles?.username ?? 'Unknown'}
+								size="xs"
+							/>
 							{member.profiles?.username ?? 'Unknown'}
 						</a>
 					{/each}
