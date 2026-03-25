@@ -37,17 +37,13 @@
 		}
 	}
 
-	const memberSince = $derived(
-		new Date(data.memberSince).toLocaleDateString('en-US', {
-			year: 'numeric',
-			month: 'long',
-			day: 'numeric'
-		})
-	);
 </script>
 
 <PageContainer>
-	<h1 class="text-2xl font-bold">Profile</h1>
+	<div class="flex items-center justify-between">
+		<h1 class="text-2xl font-bold">Profile</h1>
+		<a href="/users/{data.username}" class="link text-sm opacity-70">View public profile</a>
+	</div>
 
 	<div class="mt-6 grid gap-6">
 		<div class="card bg-base-200">
@@ -57,7 +53,7 @@
 				<div class="flex flex-col gap-4">
 					<div class="flex items-center gap-4">
 						<Avatar src={data.avatarUrl} username={data.username} size="lg" />
-						<div class="flex flex-col gap-1">
+						<div class="flex items-center gap-1">
 							<form method="POST" action="?/uploadAvatar" enctype="multipart/form-data" use:enhance={() => {
 								uploadingAvatar = true;
 								return async ({ update }) => { await update(); uploadingAvatar = false; };
@@ -80,7 +76,7 @@
 									removingAvatar = true;
 									return async ({ update }) => { await update(); removingAvatar = false; };
 								}}>
-									<button class="btn btn-ghost btn-xs text-error" disabled={removingAvatar}>
+									<button class="btn btn-ghost btn-sm text-error" disabled={removingAvatar}>
 										{#if removingAvatar}<span class="loading loading-spinner loading-xs"></span>{/if}
 										Remove
 									</button>
@@ -138,21 +134,5 @@
 			</div>
 		</div>
 
-		<div class="card border border-base-300">
-			<div class="card-body">
-				<h2 class="card-title text-base">Stats</h2>
-				<div class="mt-2 grid grid-cols-2 gap-4">
-					<div class="rounded-lg bg-base-200 p-4 text-center">
-						<p class="text-3xl font-bold">{data.totalSubmissions}</p>
-						<p class="text-sm opacity-60">Scores submitted</p>
-					</div>
-					<div class="rounded-lg bg-base-200 p-4 text-center">
-						<p class="text-3xl font-bold">{data.totalGroups}</p>
-						<p class="text-sm opacity-60">Groups joined</p>
-					</div>
-				</div>
-				<p class="mt-2 text-xs opacity-40">Member since {memberSince}</p>
-			</div>
-		</div>
 	</div>
 </PageContainer>

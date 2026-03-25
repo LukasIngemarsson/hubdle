@@ -110,13 +110,13 @@
 			</h2>
 			<div class="flex flex-wrap gap-2">
 				{#each data.members as member}
-					<div class="flex items-center gap-1.5 rounded-full border border-base-content/20 px-3 py-1.5">
+					<a href="/users/{member.profiles?.username ?? ''}" class="flex items-center gap-1.5 rounded-full border border-base-content/20 px-3 py-1.5 transition-colors hover:bg-base-300">
 						<Avatar src={member.profiles?.avatar_url} username={member.profiles?.username ?? 'Unknown'} size="xs" />
 						{member.profiles?.username ?? 'Unknown'}
 						{#if member.user_id === data.group.created_by}
 							<span class="text-xs opacity-50">Owner</span>
 						{/if}
-					</div>
+					</a>
 				{/each}
 			</div>
 		</div>

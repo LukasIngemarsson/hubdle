@@ -7,28 +7,14 @@ export const load: PageServerLoad = async ({ locals }) => {
 
 	const { data: profile } = await locals.supabase
 		.from('profiles')
-		.select('username, avatar_url, created_at')
+		.select('username, avatar_url')
 		.eq('id', user.id)
 		.single();
-
-	const { count: totalSubmissions } = await locals.supabase
-		.from('submissions')
-		.select('id', { count: 'exact', head: true })
-		.eq('user_id', user.id);
-
-	const { count: totalGroups } = await locals.supabase
-		.from('group_members')
-		.select('group_id', { count: 'exact', head: true })
-		.eq('user_id', user.id)
-		.is('left_at', null);
 
 	return {
 		email: user.email ?? '',
 		username: profile?.username ?? '',
-		avatarUrl: profile?.avatar_url ?? null,
-		memberSince: profile?.created_at ?? '',
-		totalSubmissions: totalSubmissions ?? 0,
-		totalGroups: totalGroups ?? 0
+		avatarUrl: profile?.avatar_url ?? null
 	};
 };
 
