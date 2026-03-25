@@ -19,3 +19,8 @@
 	width: 90%;
 	animation: loading-bar-done 0.3s ease-out forwards;
 }
+
+@keyframes toast-drain {
+	from { width: 100%; }
+	to { width: 0%; }
+}
