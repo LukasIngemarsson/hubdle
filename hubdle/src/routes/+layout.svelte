@@ -63,7 +63,7 @@
 				<div class="hidden items-center gap-4 sm:flex">
 					<div class="flex items-center gap-1.5">
 						<Avatar src={data.avatarUrl} size="xs" />
-						<NavLink href="/profile" label="Profile" />
+						<NavLink href="/users/{data.username ?? ''}" label="Profile" />
 					</div>
 					<button class="text-sm opacity-70 transition-colors hover:opacity-100" onclick={handleLogout}>
 						Log Out
@@ -95,7 +95,7 @@
 		<div class="border-b border-base-300 bg-base-200 px-4 py-3 sm:hidden">
 			<div class="flex flex-col gap-3">
 				<a href="/groups" class="text-sm" onclick={() => (menuOpen = false)}>Groups</a>
-				<a href="/profile" class="text-sm" onclick={() => (menuOpen = false)}>Profile</a>
+				<a href="/users/{data.username ?? ''}" class="text-sm" onclick={() => (menuOpen = false)}>Profile</a>
 				<button class="text-left text-sm opacity-70" onclick={handleLogout}>Log Out</button>
 			</div>
 		</div>

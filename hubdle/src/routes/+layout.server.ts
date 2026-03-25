@@ -4,14 +4,16 @@ export const load: LayoutServerLoad = async ({ locals, cookies }) => {
 	const { user } = await locals.safeGetSession();
 
 	let avatarUrl: string | null = null;
+	let username: string | null = null;
 	if (user) {
 		const { data: profile } = await locals.supabase
 			.from('profiles')
-			.select('avatar_url')
+			.select('username, avatar_url')
 			.eq('id', user.id)
 			.single();
 		avatarUrl = profile?.avatar_url ?? null;
+		username = profile?.username ?? null;
 	}
 
-	return { user, avatarUrl, cookies: cookies.getAll() };
+	return { user, avatarUrl, username, cookies: cookies.getAll() };
 };
