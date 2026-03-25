@@ -68,10 +68,10 @@
 			<div class="flex-none">
 				{#if data.user}
 					<div class="hidden items-center gap-4 sm:flex">
-						<div class="flex items-center gap-1.5">
+						<a href="/users/{data.username ?? ''}" class="flex items-center gap-1.5">
 							<Avatar src={data.avatarUrl} size="xs" />
 							<NavLink href="/users/{data.username ?? ''}" label="Profile" />
-						</div>
+						</a>
 						<button class="cursor-pointer text-sm opacity-70 transition-colors hover:opacity-100" onclick={handleLogout}>
 							Log Out
 						</button>
