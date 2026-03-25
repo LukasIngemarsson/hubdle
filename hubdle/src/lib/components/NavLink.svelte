@@ -10,14 +10,14 @@
 	{href}
 	class="nav-link relative px-1 py-0.5 text-sm transition-colors hover:opacity-100 {isActive ? 'font-semibold opacity-100' : 'opacity-70'}"
 >
-	{label}{#if badge > 0}<span class="badge badge-primary badge-xs ml-1">{badge}</span>{/if}
+	{label}{#if badge > 0}<span class="badge badge-primary badge-xs ml-1">{badge > 9 ? '9+' : badge}</span>{/if}
 	<span
-		class="absolute bottom-0 left-1/2 h-px -translate-x-1/2 bg-current opacity-50 transition-all duration-300 ease-out {isActive ? 'w-[88%]' : 'w-0'}"
+		class="nav-underline absolute bottom-0 left-1/2 h-px -translate-x-1/2 bg-current opacity-50 transition-all duration-300 ease-out {isActive ? 'w-[88%]' : 'w-0'}"
 	></span>
 </a>
 
 <style>
-	.nav-link:hover span {
+	.nav-link:hover .nav-underline {
 		width: 88%;
 	}
 </style>
