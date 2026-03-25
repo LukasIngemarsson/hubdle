@@ -1,6 +1,7 @@
 <script lang="ts">
 	import favicon from '$lib/assets/favicon.svg';
 	import { goto } from '$app/navigation';
+	import { navigating } from '$app/state';
 	import '../app.css';
 	import NavLink from '$lib/components/NavLink.svelte';
 	import { dev } from '$app/environment';
@@ -12,6 +13,22 @@
 	let { data, children }: { data: LayoutData; children: any } = $props();
 
 	let menuOpen = $state(false);
+	let showLoadingBar = $state(false);
+	let loadingDone = $state(false);
+
+	$effect(() => {
+		if (navigating.to) {
+			showLoadingBar = true;
+			loadingDone = false;
+		} else if (showLoadingBar) {
+			loadingDone = true;
+			const timeout = setTimeout(() => {
+				showLoadingBar = false;
+				loadingDone = false;
+			}, 300);
+			return () => clearTimeout(timeout);
+		}
+	});
 
 	async function handleLogout() {
 		menuOpen = false;
@@ -25,6 +42,11 @@
 </svelte:head>
 
 <div class="grid h-screen grid-rows-[auto_1fr]">
+	{#if showLoadingBar}
+		<div class="fixed top-0 left-0 z-50 h-0.5 w-full">
+			<div class="h-full bg-primary {loadingDone ? 'loading-bar-done' : 'loading-bar'}"></div>
+		</div>
+	{/if}
 	<nav class="navbar bg-base-200 px-4">
 		<div class="flex flex-1 items-center gap-6">
 			<a href="/" class="text-xl font-bold">Hubdle</a>

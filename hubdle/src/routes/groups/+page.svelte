@@ -6,6 +6,9 @@
 	import CopyBadge from '$lib/components/CopyBadge.svelte';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
+
+	let creating = $state(false);
+	let joining = $state(false);
 </script>
 
 <PageContainer>
@@ -16,7 +19,10 @@
 	{/if}
 
 	<div class="mt-6 grid gap-4 sm:grid-cols-2">
-		<form method="POST" action="?/create" use:enhance class="card bg-base-200">
+		<form method="POST" action="?/create" use:enhance={() => {
+			creating = true;
+			return async ({ update }) => { await update(); creating = false; };
+		}} class="card bg-base-200">
 			<div class="card-body gap-3">
 				<h2 class="card-title text-sm">Create a group</h2>
 				<input
@@ -26,11 +32,17 @@
 					class="input input-bordered w-full"
 					required
 				/>
-				<button class="btn btn-primary w-full">Create</button>
+				<button class="btn btn-primary w-full" disabled={creating}>
+					{#if creating}<span class="loading loading-spinner loading-sm"></span>{/if}
+					Create
+				</button>
 			</div>
 		</form>
 
-		<form method="POST" action="?/join" use:enhance class="card bg-base-200">
+		<form method="POST" action="?/join" use:enhance={() => {
+			joining = true;
+			return async ({ update }) => { await update(); joining = false; };
+		}} class="card bg-base-200">
 			<div class="card-body gap-3">
 				<h2 class="card-title text-sm">Join a group</h2>
 				<input
@@ -40,7 +52,10 @@
 					class="input input-bordered w-full"
 					required
 				/>
-				<button class="btn btn-primary btn-outline w-full">Join</button>
+				<button class="btn btn-primary btn-outline w-full" disabled={joining}>
+					{#if joining}<span class="loading loading-spinner loading-sm"></span>{/if}
+					Join
+				</button>
 			</div>
 		</form>
 	</div>

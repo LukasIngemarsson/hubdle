@@ -19,6 +19,8 @@
 		onConfirm: () => void;
 	} = $props();
 
+	let loading = $state(false);
+
 	function open() {
 		(document.getElementById(id) as HTMLDialogElement)?.showModal();
 	}
@@ -28,12 +30,14 @@
 	}
 
 	function handleConfirm() {
+		loading = true;
 		close();
 		onConfirm();
 	}
 </script>
 
-<button type="button" class="btn {triggerClass}" onclick={open}>
+<button type="button" class="btn {triggerClass}" onclick={open} disabled={loading}>
+	{#if loading}<span class="loading loading-spinner loading-sm"></span>{/if}
 	{triggerLabel}
 </button>
 

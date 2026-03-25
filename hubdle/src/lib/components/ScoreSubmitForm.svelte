@@ -19,6 +19,7 @@
 	let score = $state('');
 	const today = new Date().toISOString().slice(0, 10);
 	let gameDate = $state(today);
+	let submitting = $state(false);
 
 	let selectedRules = $derived(gameId ? GAME_RULES[gameId] : null);
 
@@ -28,6 +29,14 @@
 			score = '';
 		}
 	});
+
+	function handleSubmit() {
+		submitting = true;
+		return async ({ update }: { update: () => Promise<void> }) => {
+			await update();
+			submitting = false;
+		};
+	}
 </script>
 
 <section class="card mt-6 bg-base-200">
@@ -43,7 +52,7 @@
 		</div>
 
 		{#if mode === SubmitMode.Paste}
-			<form method="POST" action="?/submit" use:enhance class="flex flex-col gap-3">
+			<form method="POST" action="?/submit" use:enhance={handleSubmit} class="flex flex-col gap-3">
 				<textarea
 					name="raw_text"
 					placeholder="Paste your share text here (e.g. Wordle 1,234 3/6)"
@@ -52,10 +61,13 @@
 					required
 					bind:value={rawText}
 				></textarea>
-				<button class="btn btn-primary w-fit">Submit</button>
+				<button class="btn btn-primary w-fit" disabled={submitting}>
+					{#if submitting}<span class="loading loading-spinner loading-sm"></span>{/if}
+					Submit
+				</button>
 			</form>
 		{:else}
-			<form method="POST" action="?/submitManual" use:enhance class="flex flex-col gap-3">
+			<form method="POST" action="?/submitManual" use:enhance={handleSubmit} class="flex flex-col gap-3">
 				<select name="game_id" class="select select-bordered w-full" required bind:value={gameId}>
 					<option value="" disabled>Select a game</option>
 					{#each games as game}
@@ -83,7 +95,10 @@
 					max={today}
 					bind:value={gameDate}
 				/>
-				<button class="btn btn-primary w-fit">Submit</button>
+				<button class="btn btn-primary w-fit" disabled={submitting}>
+					{#if submitting}<span class="loading loading-spinner loading-sm"></span>{/if}
+					Submit
+				</button>
 			</form>
 		{/if}
 
