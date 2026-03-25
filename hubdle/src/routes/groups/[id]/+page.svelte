@@ -110,7 +110,7 @@
 			</h2>
 			<div class="flex flex-wrap gap-2">
 				{#each data.members as member}
-					<div class="badge badge-outline gap-1.5 py-3 pl-1">
+					<div class="flex items-center gap-1.5 rounded-full border border-base-300 px-3 py-1.5">
 						<Avatar src={member.profiles?.avatar_url} username={member.profiles?.username ?? 'Unknown'} size="xs" />
 						{member.profiles?.username ?? 'Unknown'}
 						{#if member.user_id === data.group.created_by}
