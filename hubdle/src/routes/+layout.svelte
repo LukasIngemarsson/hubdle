@@ -3,6 +3,7 @@
 	import { goto } from '$app/navigation';
 	import { navigating } from '$app/state';
 	import '../app.css';
+	import { page } from '$app/stores';
 	import NavLink from '$lib/components/NavLink.svelte';
 	import Avatar from '$lib/components/Avatar.svelte';
 	import Toast from '$lib/components/Toast.svelte';
@@ -81,6 +82,7 @@
 							class="btn btn-ghost btn-sm btn-square"
 							onclick={() => (menuOpen = !menuOpen)}
 							aria-label="Toggle menu"
+						aria-expanded={menuOpen}
 						>
 							<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="h-5 w-5">
 								{#if menuOpen}
@@ -91,7 +93,7 @@
 							</svg>
 						</button>
 					</div>
-				{:else}
+				{:else if !$page.url.pathname.startsWith('/login')}
 					<a href="/login" class="btn btn-primary btn-sm">Log In</a>
 				{/if}
 			</div>

@@ -28,13 +28,16 @@
 			};
 		}} class="card bg-base-200">
 			<div class="card-body gap-3">
-				<h2 class="card-title text-sm">Create a group</h2>
+				<label for="group-name" class="card-title text-sm">Create a group</label>
 				<input
+					id="group-name"
 					type="text"
 					name="name"
 					placeholder="Group name"
 					class="input input-bordered w-full"
 					required
+					minlength="2"
+					maxlength="50"
 				/>
 				<button class="btn btn-primary w-full" disabled={creating}>
 					{#if creating}<span class="loading loading-spinner loading-sm"></span>{/if}
@@ -52,8 +55,9 @@
 			};
 		}} class="card bg-base-200">
 			<div class="card-body gap-3">
-				<h2 class="card-title text-sm">Join a group</h2>
+				<label for="invite-code" class="card-title text-sm">Join a group</label>
 				<input
+					id="invite-code"
 					type="text"
 					name="code"
 					placeholder="Invite code"

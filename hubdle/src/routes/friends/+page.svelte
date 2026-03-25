@@ -98,8 +98,9 @@
 	<!-- Search -->
 	<section class="card mt-6 bg-base-200">
 		<div class="card-body gap-3">
-			<h2 class="card-title text-sm">Find friends</h2>
+			<label for="friend-search" class="card-title text-sm">Find friends</label>
 			<input
+				id="friend-search"
 				type="text"
 				placeholder="Search by username"
 				bind:value={searchQuery}
