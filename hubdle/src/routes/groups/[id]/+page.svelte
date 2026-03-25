@@ -11,6 +11,10 @@
 	import CopyBadge from '$lib/components/CopyBadge.svelte';
 	import ConfirmModal from '$lib/components/ConfirmModal.svelte';
 	import Avatar from '$lib/components/Avatar.svelte';
+	import ExternalLinkIcon from '$lib/components/icons/ExternalLinkIcon.svelte';
+	import CheckIcon from '$lib/components/icons/CheckIcon.svelte';
+	import ClockIcon from '$lib/components/icons/ClockIcon.svelte';
+	import PlusIcon from '$lib/components/icons/PlusIcon.svelte';
 	import { toastEnhance } from '$lib/enhance-toast';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
@@ -96,10 +100,7 @@
 			{#if game.url}
 				<a href={game.url} target="_blank" rel="noopener noreferrer" class="btn btn-outline btn-sm gap-1">
 					{game.name}
-					<svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
-						<path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z" />
-						<path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z" />
-					</svg>
+					<ExternalLinkIcon />
 				</a>
 			{/if}
 		{/each}
@@ -143,17 +144,17 @@
 						{#if !isself}
 							{#if friendStatus === 'accepted'}
 								<span class="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-success text-[10px] text-success-content" title="Friends">
-									<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="h-2.5 w-2.5"><path fill-rule="evenodd" d="M12.416 3.376a.75.75 0 0 1 .208 1.04l-5 7.5a.75.75 0 0 1-1.154.114l-3-3a.75.75 0 0 1 1.06-1.06l2.353 2.353 4.493-6.74a.75.75 0 0 1 1.04-.207Z" clip-rule="evenodd" /></svg>
+									<CheckIcon class="h-2.5 w-2.5" />
 								</span>
 							{:else if friendStatus === 'pending'}
 								<span class="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-warning text-[10px] text-warning-content" title="Request pending">
-									<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="h-2.5 w-2.5"><path fill-rule="evenodd" d="M1 8a7 7 0 1 1 14 0A7 7 0 0 1 1 8Zm7.75-4.25a.75.75 0 0 0-1.5 0V8c0 .414.336.75.75.75h3.25a.75.75 0 0 0 0-1.5h-2.5v-3.5Z" clip-rule="evenodd" /></svg>
+									<ClockIcon />
 								</span>
 							{:else}
 								<form method="POST" action="?/sendRequest" use:enhance={toastEnhance('Friend request sent!')} class="absolute -top-1 -right-1">
 									<input type="hidden" name="addressee_id" value={member.user_id} />
 									<button class="flex h-4 w-4 cursor-pointer items-center justify-center rounded-full bg-primary text-[10px] text-primary-content transition-transform hover:scale-110" title="Add Friend">
-										<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="h-2.5 w-2.5"><path d="M8 2a.75.75 0 0 1 .75.75v4.5h4.5a.75.75 0 0 1 0 1.5h-4.5v4.5a.75.75 0 0 1-1.5 0v-4.5h-4.5a.75.75 0 0 1 0-1.5h4.5v-4.5A.75.75 0 0 1 8 2Z" /></svg>
+										<PlusIcon />
 									</button>
 								</form>
 							{/if}
