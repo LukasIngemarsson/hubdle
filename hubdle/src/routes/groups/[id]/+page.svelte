@@ -112,9 +112,22 @@
 
 	<section class="card mt-6 bg-base-200">
 		<div class="card-body">
-			<h2 class="card-title text-base">Members
-				<span class="badge badge-sm">{data.members.length}</span>
-			</h2>
+			<div class="flex items-center justify-between">
+				<h2 class="card-title text-base">Members
+					<span class="badge badge-sm">{data.members.length}</span>
+				</h2>
+				{#if data.invitableFriends.length > 0}
+					<form method="POST" action="?/inviteFriend" use:enhance={toastEnhance('Friend invited!')} class="flex items-center gap-1.5">
+						<select name="friend_id" class="select select-bordered select-xs" required>
+							<option value="" disabled selected>Invite friend</option>
+							{#each data.invitableFriends as friend}
+								<option value={friend.id}>{friend.username}</option>
+							{/each}
+						</select>
+						<button class="btn btn-primary btn-xs">Invite</button>
+					</form>
+				{/if}
+			</div>
 			<div class="flex flex-wrap gap-2">
 				{#each data.members as member}
 					{@const friendStatus = data.friendshipStatusMap[member.user_id]}
@@ -148,18 +161,6 @@
 					</div>
 				{/each}
 			</div>
-
-			{#if data.invitableFriends.length > 0}
-				<form method="POST" action="?/inviteFriend" use:enhance={toastEnhance('Friend invited!')} class="mt-3 flex items-center gap-2">
-					<select name="friend_id" class="select select-bordered select-sm flex-1" required>
-						<option value="" disabled selected>Invite a friend...</option>
-						{#each data.invitableFriends as friend}
-							<option value={friend.id}>{friend.username}</option>
-						{/each}
-					</select>
-					<button class="btn btn-primary btn-sm">Invite</button>
-				</form>
-			{/if}
 		</div>
 	</section>
 
