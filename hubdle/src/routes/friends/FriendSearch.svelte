@@ -33,7 +33,7 @@
 	function handleSearchInput() {
 		clearTimeout(debounceTimer);
 		const query = searchQuery.trim();
-		if (query.length < 2) {
+		if (query.length < 1) {
 			searchResults = [];
 			searched = false;
 			return;
@@ -98,7 +98,7 @@
 				await update();
 				if (result.type === 'success') {
 					toasts.push('success', successMessage);
-					if (searchQuery.trim().length >= 2) runSearch(searchQuery.trim());
+					if (searchQuery.trim().length >= 1) runSearch(searchQuery.trim());
 				} else if (result.type === 'failure' && result.data?.error) {
 					toasts.push('error', result.data.error as string);
 				}
