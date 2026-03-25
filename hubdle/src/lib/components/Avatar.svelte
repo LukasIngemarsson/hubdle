@@ -6,15 +6,15 @@
 	}: { src?: string | null; username?: string; size?: 'xs' | 'sm' | 'md' | 'lg' } = $props();
 
 	const sizeClasses = {
-		xs: 'h-5 w-5',
-		sm: 'h-7 w-7',
+		xs: 'h-6 w-6',
+		sm: 'h-8 w-8',
 		md: 'h-10 w-10',
 		lg: 'h-20 w-20'
 	} as const;
 
 	const iconSizeClasses = {
-		xs: 'h-3 w-3',
-		sm: 'h-4 w-4',
+		xs: 'h-3.5 w-3.5',
+		sm: 'h-4.5 w-4.5',
 		md: 'h-6 w-6',
 		lg: 'h-12 w-12'
 	} as const;
