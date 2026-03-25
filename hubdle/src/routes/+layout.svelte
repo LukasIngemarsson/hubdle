@@ -3,7 +3,7 @@
 	import { beforeNavigate, afterNavigate, goto } from '$app/navigation';
 	import '../app.css';
 	import { page } from '$app/stores';
-	import NavLink from '$lib/components/NavLink.svelte';
+	import NavLink from './NavLink.svelte';
 	import Avatar from '$lib/components/Avatar.svelte';
 	import Toast from '$lib/components/Toast.svelte';
 	import SunIcon from '$lib/components/icons/SunIcon.svelte';
