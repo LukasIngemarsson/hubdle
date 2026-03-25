@@ -9,6 +9,7 @@
 	import RecentSubmissions from '$lib/components/RecentSubmissions.svelte';
 	import CopyBadge from '$lib/components/CopyBadge.svelte';
 	import ConfirmModal from '$lib/components/ConfirmModal.svelte';
+	import Avatar from '$lib/components/Avatar.svelte';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 
@@ -109,7 +110,8 @@
 			</h2>
 			<div class="flex flex-wrap gap-2">
 				{#each data.members as member}
-					<div class="badge badge-outline gap-1 py-3">
+					<div class="badge badge-outline gap-1.5 py-3">
+						<Avatar src={member.profiles?.avatar_url} username={member.profiles?.username ?? 'Unknown'} size="xs" />
 						{member.profiles?.username ?? 'Unknown'}
 						{#if member.user_id === data.group.created_by}
 							<span class="text-xs opacity-50">Owner</span>

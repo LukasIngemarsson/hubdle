@@ -4,6 +4,7 @@
 	import { navigating } from '$app/state';
 	import '../app.css';
 	import NavLink from '$lib/components/NavLink.svelte';
+	import Avatar from '$lib/components/Avatar.svelte';
 	import { dev } from '$app/environment';
 	import { injectAnalytics } from '@vercel/analytics/sveltekit';
 	import type { LayoutData } from './$types';
@@ -60,7 +61,10 @@
 		<div class="flex-none">
 			{#if data.user}
 				<div class="hidden items-center gap-4 sm:flex">
-					<NavLink href="/profile" label="Profile" />
+					<div class="flex items-center gap-1.5">
+						<Avatar src={data.avatarUrl} size="xs" />
+						<NavLink href="/profile" label="Profile" />
+					</div>
 					<button class="text-sm opacity-70 transition-colors hover:opacity-100" onclick={handleLogout}>
 						Log Out
 					</button>
