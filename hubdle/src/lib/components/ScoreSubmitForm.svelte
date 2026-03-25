@@ -21,13 +21,6 @@
 
 	let selectedRules = $derived(gameId ? GAME_RULES[gameId] : null);
 
-	$effect(() => {
-		if (form?.success) {
-			rawText = '';
-			score = '';
-		}
-	});
-
 	function handleSubmit() {
 		submitting = true;
 		return async ({
@@ -40,6 +33,8 @@
 			await update();
 			submitting = false;
 			if (result.type === 'success') {
+				rawText = '';
+				score = '';
 				toasts.push('success', 'Score submitted!');
 			} else if (result.type === 'failure' && result.data?.error) {
 				toasts.push('error', result.data.error as string);
