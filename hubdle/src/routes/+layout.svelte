@@ -3,6 +3,7 @@
 	import { goto } from '$app/navigation';
 	import { navigating } from '$app/state';
 	import '../app.css';
+	import { page } from '$app/stores';
 	import NavLink from '$lib/components/NavLink.svelte';
 	import Avatar from '$lib/components/Avatar.svelte';
 	import Toast from '$lib/components/Toast.svelte';
@@ -49,7 +50,7 @@
 			<div class="h-full bg-primary {loadingDone ? 'loading-bar-done' : 'loading-bar'}"></div>
 		</div>
 	{/if}
-	<nav class="bg-base-200">
+	<nav class="bg-base-200" class:hidden={$page.url.pathname.startsWith('/login')}>
 		<div class="navbar mx-auto max-w-4xl px-6">
 			<div class="flex flex-1 items-center gap-6">
 				<a href="/" class="flex items-center gap-2 text-xl font-bold">
@@ -67,11 +68,11 @@
 			<div class="flex-none">
 				{#if data.user}
 					<div class="hidden items-center gap-4 sm:flex">
-						<div class="flex items-center gap-1.5">
+						<a href="/users/{data.username ?? ''}" class="flex items-center gap-1.5">
 							<Avatar src={data.avatarUrl} size="xs" />
 							<NavLink href="/users/{data.username ?? ''}" label="Profile" />
-						</div>
-						<button class="text-sm opacity-70 transition-colors hover:opacity-100" onclick={handleLogout}>
+						</a>
+						<button class="cursor-pointer text-sm opacity-70 transition-colors hover:opacity-100" onclick={handleLogout}>
 							Log Out
 						</button>
 					</div>
@@ -81,6 +82,7 @@
 							class="btn btn-ghost btn-sm btn-square"
 							onclick={() => (menuOpen = !menuOpen)}
 							aria-label="Toggle menu"
+						aria-expanded={menuOpen}
 						>
 							<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="h-5 w-5">
 								{#if menuOpen}
@@ -91,7 +93,7 @@
 							</svg>
 						</button>
 					</div>
-				{:else}
+				{:else if !$page.url.pathname.startsWith('/login')}
 					<a href="/login" class="btn btn-primary btn-sm">Log In</a>
 				{/if}
 			</div>
@@ -104,7 +106,7 @@
 				<a href="/groups" class="text-sm" onclick={() => (menuOpen = false)}>Groups</a>
 				<a href="/friends" class="text-sm" onclick={() => (menuOpen = false)}>Friends{#if data.friendRequestCount > 0}<span class="badge badge-primary badge-xs ml-1">{data.friendRequestCount}</span>{/if}</a>
 				<a href="/users/{data.username ?? ''}" class="text-sm" onclick={() => (menuOpen = false)}>Profile</a>
-				<button class="text-left text-sm opacity-70" onclick={handleLogout}>Log Out</button>
+				<button class="cursor-pointer text-left text-sm opacity-70" onclick={handleLogout}>Log Out</button>
 			</div>
 		</div>
 	{/if}

@@ -3,5 +3,5 @@ import type { PageLoad } from './$types';
 
 export const load: PageLoad = async ({ parent }) => {
 	const { user } = await parent();
-	if (user) redirect(303, '/');
+	if (user) redirect(303, '/groups');
 };
