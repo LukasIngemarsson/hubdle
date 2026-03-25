@@ -1,5 +1,6 @@
 import { error, fail, redirect } from '@sveltejs/kit';
 import { GAME_RULES, validateScore } from '$lib/game-rules';
+import { ensureProfile } from '$lib/auth';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
@@ -104,13 +105,33 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		gameDate: sub.game_date
 	}));
 
+	// Friendship status (only for other users when logged in)
+	let friendship: { id: string; status: string; direction: 'outgoing' | 'incoming' } | null = null;
+	if (user && !isOwnProfile) {
+		const { data: existing } = await locals.supabase
+			.from('friendships')
+			.select('id, requester_id, status')
+			.or(`and(requester_id.eq.${user.id},addressee_id.eq.${profile.id}),and(requester_id.eq.${profile.id},addressee_id.eq.${user.id})`)
+			.maybeSingle();
+
+		if (existing) {
+			friendship = {
+				id: existing.id,
+				status: existing.status,
+				direction: existing.requester_id === user.id ? 'outgoing' : 'incoming'
+			};
+		}
+	}
+
 	return {
 		profile: {
+			id: profile.id,
 			username: profile.username,
 			avatarUrl: profile.avatar_url,
 			createdAt: profile.created_at
 		},
 		isOwnProfile,
+		friendship,
 		stats: {
 			totalSubmissions: allSubs.length,
 			totalGroups: totalGroups ?? 0,
@@ -146,6 +167,51 @@ export const actions: Actions = {
 			.eq('user_id', user.id);
 
 		if (updateError) return fail(500, { error: `Failed to update: ${updateError.message}` });
+
+		return { success: true };
+	},
+
+	sendRequest: async ({ request, locals }) => {
+		const { user } = await locals.safeGetSession();
+		if (!user) redirect(303, '/login');
+
+		const formData = await request.formData();
+		const addresseeId = (formData.get('addressee_id') as string)?.trim();
+
+		if (!addresseeId) return fail(400, { error: 'User ID is required.' });
+		if (addresseeId === user.id) return fail(400, { error: 'You cannot add yourself.' });
+
+		await ensureProfile(locals.supabase, user);
+
+		const { error: insertError } = await locals.supabase
+			.from('friendships')
+			.insert({ requester_id: user.id, addressee_id: addresseeId });
+
+		if (insertError) {
+			if (insertError.code === '23505') return fail(409, { error: 'Friend request already exists.' });
+			return fail(500, { error: `Failed to send request: ${insertError.message}` });
+		}
+
+		return { success: true };
+	},
+
+	acceptRequest: async ({ request, locals }) => {
+		const { user } = await locals.safeGetSession();
+		if (!user) redirect(303, '/login');
+
+		const formData = await request.formData();
+		const friendshipId = (formData.get('friendship_id') as string)?.trim();
+
+		if (!friendshipId) return fail(400, { error: 'Friendship ID is required.' });
+
+		const { error: updateError } = await locals.supabase
+			.from('friendships')
+			.update({ status: 'accepted', updated_at: new Date().toISOString() })
+			.eq('id', friendshipId)
+			.eq('addressee_id', user.id)
+			.eq('status', 'pending');
+
+		if (updateError) return fail(500, { error: `Failed to accept request: ${updateError.message}` });
 
 		return { success: true };
 	},

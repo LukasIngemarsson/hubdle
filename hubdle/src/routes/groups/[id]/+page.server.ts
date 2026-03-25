@@ -30,7 +30,27 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 
 	const { data: games } = await locals.supabase.from('games').select('id, name, url, score_direction');
 
-	return { group, members, allMembers: allMembers ?? [], submissions: submissions ?? [], games: games ?? [], userId: user.id };
+	// Fetch friends who can be invited (not already active members)
+	const { data: friendsAsRequester } = await locals.supabase
+		.from('friendships')
+		.select('addressee:profiles!friendships_addressee_id_fkey(id, username)')
+		.eq('requester_id', user.id)
+		.eq('status', 'accepted');
+
+	const { data: friendsAsAddressee } = await locals.supabase
+		.from('friendships')
+		.select('requester:profiles!friendships_requester_id_fkey(id, username)')
+		.eq('addressee_id', user.id)
+		.eq('status', 'accepted');
+
+	const memberIds = new Set(members.map((m) => m.user_id));
+	const allFriends = [
+		...(friendsAsRequester ?? []).map((f) => f.addressee as unknown as { id: string; username: string } | null),
+		...(friendsAsAddressee ?? []).map((f) => f.requester as unknown as { id: string; username: string } | null)
+	];
+	const invitableFriends = allFriends.filter((f): f is { id: string; username: string } => f != null && !memberIds.has(f.id));
+
+	return { group, members, allMembers: allMembers ?? [], submissions: submissions ?? [], games: games ?? [], userId: user.id, invitableFriends };
 };
 
 export const actions: Actions = {
@@ -269,6 +289,42 @@ export const actions: Actions = {
 		if (deleteError) return fail(500, { error: `Failed to delete group: ${deleteError.message}` });
 
 		redirect(303, '/groups');
+	},
+
+	inviteFriend: async ({ request, params, locals }) => {
+		const { user } = await locals.safeGetSession();
+		if (!user) redirect(303, '/login');
+
+		const formData = await request.formData();
+		const friendId = (formData.get('friend_id') as string)?.trim();
+
+		if (!friendId) return fail(400, { error: 'Please select a friend to invite.' });
+
+		const { error: insertError } = await locals.supabase
+			.from('group_members')
+			.insert({ group_id: params.id, user_id: friendId });
+
+		if (insertError) {
+			if (insertError.code === '23505') {
+				// Row exists — try to rejoin soft-deleted member
+				const { data: updated, error: updateError } = await locals.supabase
+					.from('group_members')
+					.update({ left_at: null, joined_at: new Date().toISOString() })
+					.eq('group_id', params.id)
+					.eq('user_id', friendId)
+					.not('left_at', 'is', null)
+					.select();
+
+				if (updateError) return fail(500, { error: 'Failed to invite friend.' });
+				if (!updated || updated.length === 0) {
+					return fail(409, { error: 'This user is already in the group.' });
+				}
+			} else {
+				return fail(500, { error: `Failed to invite friend: ${insertError.message}` });
+			}
+		}
+
+		return { success: true };
 	},
 
 	delete: async ({ params, locals }) => {

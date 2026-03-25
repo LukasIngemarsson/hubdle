@@ -119,6 +119,18 @@
 					</a>
 				{/each}
 			</div>
+
+			{#if data.invitableFriends.length > 0}
+				<form method="POST" action="?/inviteFriend" use:enhance class="mt-3 flex items-center gap-2">
+					<select name="friend_id" class="select select-bordered select-sm flex-1" required>
+						<option value="" disabled selected>Invite a friend...</option>
+						{#each data.invitableFriends as friend}
+							<option value={friend.id}>{friend.username}</option>
+						{/each}
+					</select>
+					<button class="btn btn-primary btn-sm">Invite</button>
+				</form>
+			{/if}
 		</div>
 	</section>
 
