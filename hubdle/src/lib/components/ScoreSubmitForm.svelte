@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { GAME_RULES } from '$lib/game-rules';
-	import { toasts } from '$lib/stores/toast';
+	import { toasts } from '$lib/stores/toast.svelte';
 
 	type Game = { id: string; name: string };
 
@@ -33,13 +33,13 @@
 	function handleSubmit() {
 		submitting = true;
 		return async ({ result, update }: { result: { type: string; data?: Record<string, unknown> }; update: () => Promise<void> }) => {
+			await update();
+			submitting = false;
 			if (result.type === 'success') {
 				toasts.push('success', 'Score submitted!');
 			} else if (result.type === 'failure' && result.data?.error) {
 				toasts.push('error', result.data.error as string);
 			}
-			await update();
-			submitting = false;
 		};
 	}
 </script>

@@ -5,7 +5,7 @@
 	import PageContainer from '$lib/components/PageContainer.svelte';
 	import Avatar from '$lib/components/Avatar.svelte';
 	import { toastEnhance } from '$lib/enhance-toast';
-	import { toasts } from '$lib/stores/toast';
+	import { toasts } from '$lib/stores/toast.svelte';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 
@@ -161,11 +161,11 @@
 													<form method="POST" action="?/editSubmission" use:enhance={() => {
 														savingId = activity.id;
 														return async ({ result, update }) => {
-															if (result.type === 'success') toasts.push('success', 'Score updated!');
-															else if (result.type === 'failure' && result.data?.error) toasts.push('error', (result.data as Record<string, unknown>).error as string);
 															editingId = null;
 															savingId = null;
 															await update();
+															if (result.type === 'success') toasts.push('success', 'Score updated!');
+															else if (result.type === 'failure' && result.data?.error) toasts.push('error', (result.data as Record<string, unknown>).error as string);
 														};
 													}}>
 														<input type="hidden" name="submission_id" value={activity.id} />
@@ -183,11 +183,11 @@
 													<form method="POST" action="?/deleteSubmission" use:enhance={() => {
 														confirmingDeleteId = activity.id;
 														return async ({ result, update }) => {
-															if (result.type === 'success') toasts.push('success', 'Score deleted.');
-															else if (result.type === 'failure' && result.data?.error) toasts.push('error', (result.data as Record<string, unknown>).error as string);
 															deletingId = null;
 															confirmingDeleteId = null;
 															await update();
+															if (result.type === 'success') toasts.push('success', 'Score deleted.');
+															else if (result.type === 'failure' && result.data?.error) toasts.push('error', (result.data as Record<string, unknown>).error as string);
 														};
 													}}>
 														<input type="hidden" name="submission_id" value={activity.id} />

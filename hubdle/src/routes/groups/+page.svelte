@@ -3,7 +3,7 @@
 	import type { PageData } from './$types';
 	import PageContainer from '$lib/components/PageContainer.svelte';
 	import CopyBadge from '$lib/components/CopyBadge.svelte';
-	import { toasts } from '$lib/stores/toast';
+	import { toasts } from '$lib/stores/toast.svelte';
 
 	let { data }: { data: PageData } = $props();
 
@@ -18,9 +18,9 @@
 		<form method="POST" action="?/create" use:enhance={() => {
 			creating = true;
 			return async ({ result, update }) => {
-				if (result.type === 'failure' && result.data?.error) toasts.push('error', result.data.error as string);
 				await update();
 				creating = false;
+				if (result.type === 'failure' && result.data?.error) toasts.push('error', result.data.error as string);
 			};
 		}} class="card bg-base-200">
 			<div class="card-body gap-3">
@@ -42,9 +42,9 @@
 		<form method="POST" action="?/join" use:enhance={() => {
 			joining = true;
 			return async ({ result, update }) => {
-				if (result.type === 'failure' && result.data?.error) toasts.push('error', result.data.error as string);
 				await update();
 				joining = false;
+				if (result.type === 'failure' && result.data?.error) toasts.push('error', result.data.error as string);
 			};
 		}} class="card bg-base-200">
 			<div class="card-body gap-3">

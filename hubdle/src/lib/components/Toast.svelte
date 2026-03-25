@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { toasts } from '$lib/stores/toast';
+	import { toasts } from '$lib/stores/toast.svelte';
 	import { fly } from 'svelte/transition';
 </script>
 
 <div class="fixed top-2 right-2 z-50 flex flex-col gap-2 sm:top-4 sm:right-4">
-	{#each $toasts as toast (toast.id)}
+	{#each toasts.items as toast (toast.id)}
 		<button
 			in:fly={{ x: 80, duration: 300 }}
 			out:fly={{ x: 80, duration: 250 }}

@@ -1,5 +1,5 @@
 import type { SubmitFunction } from '@sveltejs/kit';
-import { toasts } from '$lib/stores/toast';
+import { toasts } from '$lib/stores/toast.svelte';
 
 /**
  * Creates a use:enhance callback that shows toast notifications for form action results.
@@ -8,12 +8,12 @@ import { toasts } from '$lib/stores/toast';
 export function toastEnhance(successMessage?: string): SubmitFunction {
 	return () => {
 		return async ({ result, update }) => {
+			await update();
 			if (result.type === 'success') {
 				toasts.push('success', successMessage ?? 'Done!');
 			} else if (result.type === 'failure' && result.data?.error) {
 				toasts.push('error', result.data.error as string);
 			}
-			await update();
 		};
 	};
 }
