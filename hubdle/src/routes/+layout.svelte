@@ -52,7 +52,10 @@
 	<nav class="bg-base-200">
 		<div class="navbar mx-auto max-w-4xl px-6">
 			<div class="flex flex-1 items-center gap-6">
-				<a href="/" class="text-xl font-bold">Hubdle</a>
+				<a href="/" class="flex items-center gap-2 text-xl font-bold">
+					<img src={favicon} alt="Hubdle" class="h-7 w-7" />
+					Hubdle
+				</a>
 				{#if data.user}
 					<div class="hidden items-center gap-4 sm:flex">
 						<NavLink href="/groups" label="Groups" />
