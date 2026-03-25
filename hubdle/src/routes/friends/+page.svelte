@@ -5,6 +5,7 @@
 	import type { PageData } from './$types';
 	import PageContainer from '$lib/components/PageContainer.svelte';
 	import ConfirmModal from '$lib/components/ConfirmModal.svelte';
+	import Avatar from '$lib/components/Avatar.svelte';
 	import { toasts } from '$lib/stores/toast.svelte';
 
 	let { data }: { data: PageData } = $props();
@@ -114,7 +115,7 @@
 				<div class="mt-2 grid gap-2">
 					{#each searchResults as result}
 						<div class="flex items-center justify-between rounded-lg bg-base-300 px-4 py-2">
-							<a href="/users/{result.username}" class="font-medium hover:underline">{result.username}</a>
+							<a href="/users/{result.username}" class="flex items-center gap-2 font-medium hover:underline"><Avatar src={result.avatarUrl} username={result.username} size="xs" />{result.username}</a>
 							{#if result.friendship?.status === 'accepted'}
 								<span class="badge badge-success badge-sm">Friends</span>
 							{:else if result.friendship?.status === 'pending' && result.friendship.direction === 'outgoing'}
@@ -148,7 +149,7 @@
 				<div class="grid gap-2">
 					{#each data.incomingRequests as request}
 						<div class="flex items-center justify-between rounded-lg bg-base-200 px-4 py-2">
-							<a href="/users/{request.username}" class="font-medium hover:underline">{request.username}</a>
+							<a href="/users/{request.username}" class="flex items-center gap-2 font-medium hover:underline"><Avatar src={request.avatarUrl} username={request.username} size="xs" />{request.username}</a>
 							<div class="flex gap-2">
 								<form method="POST" action="?/acceptRequest" use:enhance={searchEnhance('Friend request accepted!')}>
 									<input type="hidden" name="friendship_id" value={request.friendshipId} />
@@ -174,7 +175,7 @@
 				<div class="grid gap-2">
 					{#each data.outgoingRequests as request}
 						<div class="flex items-center justify-between rounded-lg bg-base-200 px-4 py-2">
-							<a href="/users/{request.username}" class="font-medium hover:underline">{request.username}</a>
+							<a href="/users/{request.username}" class="flex items-center gap-2 font-medium hover:underline"><Avatar src={request.avatarUrl} username={request.username} size="xs" />{request.username}</a>
 							<form method="POST" action="?/declineRequest" use:enhance={searchEnhance('Request cancelled.')}>
 								<input type="hidden" name="friendship_id" value={request.friendshipId} />
 								<button class="btn btn-ghost btn-sm">Cancel</button>
@@ -205,7 +206,7 @@
 					{#each data.friends as friend}
 						{@const formId = `remove-form-${friend.friendshipId}`}
 						<div class="flex items-center justify-between rounded-lg bg-base-200 px-4 py-2">
-							<a href="/users/{friend.username}" class="font-medium hover:underline">{friend.username}</a>
+							<a href="/users/{friend.username}" class="flex items-center gap-2 font-medium hover:underline"><Avatar src={friend.avatarUrl} username={friend.username} size="xs" />{friend.username}</a>
 							<form id={formId} method="POST" action="?/removeFriend" use:enhance={searchEnhance('Friend removed.')} class="hidden">
 								<input type="hidden" name="friendship_id" value={friend.friendshipId} />
 							</form>
