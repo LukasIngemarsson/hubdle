@@ -47,7 +47,10 @@
 </script>
 
 <PageContainer>
-	<h1 class="text-2xl font-bold">Profile</h1>
+	<div class="flex items-center justify-between">
+		<h1 class="text-2xl font-bold">Profile</h1>
+		<a href="/users/{data.username}" class="link text-sm opacity-70">View public profile</a>
+	</div>
 
 	<div class="mt-6 grid gap-6">
 		<div class="card bg-base-200">

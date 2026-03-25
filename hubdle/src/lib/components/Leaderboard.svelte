@@ -167,10 +167,10 @@
 						<tr class={i === 0 ? 'bg-base-300 font-semibold' : ''}>
 							<td>{i + 1}</td>
 							<td>
-								<div class="flex items-center gap-2">
+								<a href="/users/{entry.username}" class="flex items-center gap-2 hover:underline">
 									<Avatar src={entry.avatarUrl} username={entry.username} size="xs" />
 									{entry.username}{#if entry.left} <span class="opacity-40 text-xs">(left)</span>{/if}
-								</div>
+								</a>
 							</td>
 							<td>{entry.games}</td>
 							<td>{entry.total}</td>

@@ -68,10 +68,10 @@
 							{@const rules = GAME_RULES[sub.game_id]}
 							<tr>
 								<td>
-									<div class="flex items-center gap-2">
+									<a href="/users/{member?.profiles?.username ?? ''}" class="flex items-center gap-2 hover:underline">
 										<Avatar src={member?.profiles?.avatar_url} username={member?.profiles?.username ?? 'Unknown'} size="xs" />
 										{member?.profiles?.username ?? 'Unknown'}{#if member?.left_at} <span class="opacity-40 text-xs">(left)</span>{/if}
-									</div>
+									</a>
 								</td>
 								<td>{sub.games?.name ?? sub.game_id}</td>
 								<td>
