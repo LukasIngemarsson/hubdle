@@ -72,7 +72,7 @@
 							<Avatar src={data.avatarUrl} size="xs" />
 							<NavLink href="/users/{data.username ?? ''}" label="Profile" />
 						</div>
-						<button class="text-sm opacity-70 transition-colors hover:opacity-100" onclick={handleLogout}>
+						<button class="cursor-pointer text-sm opacity-70 transition-colors hover:opacity-100" onclick={handleLogout}>
 							Log Out
 						</button>
 					</div>
@@ -106,7 +106,7 @@
 				<a href="/groups" class="text-sm" onclick={() => (menuOpen = false)}>Groups</a>
 				<a href="/friends" class="text-sm" onclick={() => (menuOpen = false)}>Friends{#if data.friendRequestCount > 0}<span class="badge badge-primary badge-xs ml-1">{data.friendRequestCount}</span>{/if}</a>
 				<a href="/users/{data.username ?? ''}" class="text-sm" onclick={() => (menuOpen = false)}>Profile</a>
-				<button class="text-left text-sm opacity-70" onclick={handleLogout}>Log Out</button>
+				<button class="cursor-pointer text-left text-sm opacity-70" onclick={handleLogout}>Log Out</button>
 			</div>
 		</div>
 	{/if}
