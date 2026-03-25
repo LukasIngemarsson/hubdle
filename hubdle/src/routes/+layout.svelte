@@ -50,7 +50,7 @@
 		</div>
 	{/if}
 	<nav class="bg-base-200">
-		<div class="navbar mx-auto max-w-2xl px-6">
+		<div class="navbar mx-auto max-w-3xl px-6">
 			<div class="flex flex-1 items-center gap-6">
 				<a href="/" class="text-xl font-bold">Hubdle</a>
 				{#if data.user}
@@ -97,7 +97,7 @@
 
 	{#if menuOpen && data.user}
 		<div class="border-b border-base-300 bg-base-200 sm:hidden">
-			<div class="mx-auto flex max-w-2xl flex-col gap-3 px-6 py-3">
+			<div class="mx-auto flex max-w-3xl flex-col gap-3 px-6 py-3">
 				<a href="/groups" class="text-sm" onclick={() => (menuOpen = false)}>Groups</a>
 				<a href="/friends" class="text-sm" onclick={() => (menuOpen = false)}>Friends{#if data.friendRequestCount > 0}<span class="badge badge-primary badge-xs ml-1">{data.friendRequestCount}</span>{/if}</a>
 				<a href="/users/{data.username ?? ''}" class="text-sm" onclick={() => (menuOpen = false)}>Profile</a>
