@@ -30,6 +30,7 @@
 				...m,
 				games: submittedByUser.get(m.user_id) ?? []
 			}))
+			.sort((a, b) => b.games.length - a.games.length)
 	);
 
 	let notPlayed = $derived(
