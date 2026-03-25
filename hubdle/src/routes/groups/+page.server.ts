@@ -25,7 +25,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 
 	const { data: pendingInvites } = await locals.supabase
 		.from('group_invites')
-		.select('id, group_id, invited_by, created_at, groups(id, name), inviter:profiles!group_invites_invited_by_fkey(username)')
+		.select('id, group_id, invited_by, created_at, groups(id, name), inviter:profiles!group_invites_invited_by_fkey(username, avatar_url)')
 		.eq('invited_user_id', user.id);
 
 	return { groups, pendingInvites: pendingInvites ?? [] };
