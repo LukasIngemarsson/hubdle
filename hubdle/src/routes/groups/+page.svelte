@@ -82,10 +82,11 @@
 				</h2>
 				<div class="grid gap-2">
 					{#each data.pendingInvites as invite}
+						{@const inviterUsername = (invite.inviter as unknown as { username: string } | null)?.username}
 						<div class="flex items-center justify-between rounded-lg bg-base-200 px-4 py-2">
 							<div>
 								<span class="font-medium">{invite.groups?.name ?? 'Unknown group'}</span>
-								<span class="text-sm opacity-50"> from {(invite.inviter as unknown as { username: string } | null)?.username ?? 'someone'}</span>
+								<span class="text-sm opacity-50"> from {#if inviterUsername}<a href="/users/{inviterUsername}" class="hover:underline">{inviterUsername}</a>{:else}someone{/if}</span>
 							</div>
 							<div class="flex gap-2">
 								<form method="POST" action="?/acceptInvite" use:enhance={toastEnhance('Invite accepted!')}>
