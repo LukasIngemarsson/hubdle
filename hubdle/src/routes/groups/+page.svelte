@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import type { ActionData, PageData } from './$types';
+	import type { PageData } from './$types';
 	import PageContainer from '$lib/components/PageContainer.svelte';
-	import Alert from '$lib/components/Alert.svelte';
 	import CopyBadge from '$lib/components/CopyBadge.svelte';
+	import { toasts } from '$lib/stores/toast';
 
-	let { data, form }: { data: PageData; form: ActionData } = $props();
+	let { data }: { data: PageData } = $props();
 
 	let creating = $state(false);
 	let joining = $state(false);
@@ -14,14 +14,14 @@
 <PageContainer>
 	<h1 class="text-2xl font-bold">Your Groups</h1>
 
-	{#if form?.error}
-		<Alert type="error" message={form.error} />
-	{/if}
-
 	<div class="mt-6 grid gap-4 sm:grid-cols-2">
 		<form method="POST" action="?/create" use:enhance={() => {
 			creating = true;
-			return async ({ update }) => { await update(); creating = false; };
+			return async ({ result, update }) => {
+				if (result.type === 'failure' && result.data?.error) toasts.push('error', result.data.error as string);
+				await update();
+				creating = false;
+			};
 		}} class="card bg-base-200">
 			<div class="card-body gap-3">
 				<h2 class="card-title text-sm">Create a group</h2>
@@ -41,7 +41,11 @@
 
 		<form method="POST" action="?/join" use:enhance={() => {
 			joining = true;
-			return async ({ update }) => { await update(); joining = false; };
+			return async ({ result, update }) => {
+				if (result.type === 'failure' && result.data?.error) toasts.push('error', result.data.error as string);
+				await update();
+				joining = false;
+			};
 		}} class="card bg-base-200">
 			<div class="card-body gap-3">
 				<h2 class="card-title text-sm">Join a group</h2>

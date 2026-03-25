@@ -2,8 +2,8 @@
 	import { enhance } from '$app/forms';
 	import type { ActionData, PageData } from './$types';
 	import PageContainer from '$lib/components/PageContainer.svelte';
-	import Alert from '$lib/components/Alert.svelte';
 	import Avatar from '$lib/components/Avatar.svelte';
+	import { toasts } from '$lib/stores/toast';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 
@@ -56,7 +56,12 @@
 						<div class="flex items-center gap-1">
 							<form method="POST" action="?/uploadAvatar" enctype="multipart/form-data" use:enhance={() => {
 								uploadingAvatar = true;
-								return async ({ update }) => { await update(); uploadingAvatar = false; };
+								return async ({ result, update }) => {
+									if (result.type === 'success') toasts.push('success', 'Profile picture updated!');
+									else if (result.type === 'failure' && result.data?.error) toasts.push('error', result.data.error as string);
+									await update();
+									uploadingAvatar = false;
+								};
 							}}>
 								<input
 									type="file"
@@ -74,7 +79,12 @@
 							{#if data.avatarUrl}
 								<form method="POST" action="?/removeAvatar" use:enhance={() => {
 									removingAvatar = true;
-									return async ({ update }) => { await update(); removingAvatar = false; };
+									return async ({ result, update }) => {
+										if (result.type === 'success') toasts.push('success', 'Profile picture removed.');
+										else if (result.type === 'failure' && result.data?.error) toasts.push('error', result.data.error as string);
+										await update();
+										removingAvatar = false;
+									};
 								}}>
 									<button class="btn btn-ghost btn-sm text-error" disabled={removingAvatar}>
 										{#if removingAvatar}<span class="loading loading-spinner loading-xs"></span>{/if}
@@ -90,7 +100,12 @@
 						{#if editing}
 							<form method="POST" action="?/updateUsername" use:enhance={() => {
 								saving = true;
-								return async ({ update }) => { await update(); saving = false; };
+								return async ({ result, update }) => {
+									if (result.type === 'success') toasts.push('success', 'Username updated!');
+									else if (result.type === 'failure' && result.data?.error) toasts.push('error', result.data.error as string);
+									await update();
+									saving = false;
+								};
 							}} class="mt-1 inline-flex items-center gap-2">
 								<input
 									type="text"
@@ -121,16 +136,7 @@
 
 					<p class="text-sm opacity-50">{data.email}</p>
 
-					{#if form?.error}
-						<Alert type="error" message={form.error} />
-					{/if}
-					{#if form?.success && !form?.avatarUpdated}
-						<Alert type="success" message="Username updated!" />
-					{/if}
-					{#if form?.avatarUpdated}
-						<Alert type="success" message="Profile picture updated!" />
-					{/if}
-				</div>
+					</div>
 			</div>
 		</div>
 
