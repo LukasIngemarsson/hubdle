@@ -11,7 +11,7 @@ let nextId = 0;
 
 const { subscribe, update } = writable<Toast[]>([]);
 
-const APPEAR_DELAY = 500;
+const APPEAR_DELAY = 200;
 
 export const toasts = {
 	subscribe,
