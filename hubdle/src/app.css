@@ -3,10 +3,19 @@
 
 @keyframes loading-bar {
 	0% { width: 0; }
-	50% { width: 70%; }
-	100% { width: 95%; }
+	50% { width: 60%; }
+	100% { width: 90%; }
+}
+
+@keyframes loading-bar-done {
+	to { width: 100%; opacity: 0; }
 }
 
 .loading-bar {
-	animation: loading-bar 1.5s ease-out forwards;
+	animation: loading-bar 2s ease-out forwards;
+}
+
+.loading-bar-done {
+	width: 90%;
+	animation: loading-bar-done 0.3s ease-out forwards;
 }

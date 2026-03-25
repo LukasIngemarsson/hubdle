@@ -7,6 +7,7 @@
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 
 	let editing = $state(false);
+	let saving = $state(false);
 	let username = $state('');
 	$effect(() => { username = data.username; });
 	$effect(() => { if (form?.success) editing = false; });
@@ -42,7 +43,10 @@
 					<div>
 						<p class="text-xs opacity-50">Username</p>
 						{#if editing}
-							<form method="POST" action="?/updateUsername" use:enhance class="mt-1 inline-flex items-center gap-2">
+							<form method="POST" action="?/updateUsername" use:enhance={() => {
+								saving = true;
+								return async ({ update }) => { await update(); saving = false; };
+							}} class="mt-1 inline-flex items-center gap-2">
 								<input
 									type="text"
 									name="username"
@@ -51,7 +55,10 @@
 									maxlength="30"
 									required
 								/>
-								<button class="btn btn-primary btn-sm">Save</button>
+								<button class="btn btn-primary btn-sm" disabled={saving}>
+									{#if saving}<span class="loading loading-spinner loading-xs"></span>{/if}
+									Save
+								</button>
 								<button type="button" class="btn btn-ghost btn-sm" onclick={cancelEditing}>Cancel</button>
 							</form>
 						{:else}

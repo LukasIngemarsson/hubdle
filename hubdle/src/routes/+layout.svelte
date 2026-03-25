@@ -13,6 +13,22 @@
 	let { data, children }: { data: LayoutData; children: any } = $props();
 
 	let menuOpen = $state(false);
+	let showLoadingBar = $state(false);
+	let loadingDone = $state(false);
+
+	$effect(() => {
+		if (navigating.to) {
+			showLoadingBar = true;
+			loadingDone = false;
+		} else if (showLoadingBar) {
+			loadingDone = true;
+			const timeout = setTimeout(() => {
+				showLoadingBar = false;
+				loadingDone = false;
+			}, 300);
+			return () => clearTimeout(timeout);
+		}
+	});
 
 	async function handleLogout() {
 		menuOpen = false;
@@ -26,9 +42,9 @@
 </svelte:head>
 
 <div class="grid h-screen grid-rows-[auto_1fr]">
-	{#if navigating.to}
+	{#if showLoadingBar}
 		<div class="fixed top-0 left-0 z-50 h-0.5 w-full">
-			<div class="loading-bar h-full bg-primary"></div>
+			<div class="h-full bg-primary {loadingDone ? 'loading-bar-done' : 'loading-bar'}"></div>
 		</div>
 	{/if}
 	<nav class="navbar bg-base-200 px-4">
