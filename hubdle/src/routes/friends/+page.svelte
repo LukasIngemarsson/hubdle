@@ -1,10 +1,11 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { onDestroy } from 'svelte';
+	import type { SubmitFunction } from '@sveltejs/kit';
 	import type { PageData } from './$types';
 	import PageContainer from '$lib/components/PageContainer.svelte';
 	import ConfirmModal from '$lib/components/ConfirmModal.svelte';
-	import { toastEnhance } from '$lib/enhance-toast';
+	import { toasts } from '$lib/stores/toast.svelte';
 
 	let { data }: { data: PageData } = $props();
 
@@ -71,6 +72,20 @@
 	}
 
 	onDestroy(() => clearTimeout(debounceTimer));
+
+	function searchEnhance(successMessage: string): SubmitFunction {
+		return () => {
+			return async ({ result, update }) => {
+				await update();
+				if (result.type === 'success') {
+					toasts.push('success', successMessage);
+					if (searchQuery.trim().length >= 2) runSearch(searchQuery.trim());
+				} else if (result.type === 'failure' && result.data?.error) {
+					toasts.push('error', result.data.error as string);
+				}
+			};
+		};
+	}
 </script>
 
 <PageContainer>
@@ -100,12 +115,12 @@
 							{:else if result.friendship?.status === 'pending' && result.friendship.direction === 'outgoing'}
 								<span class="badge badge-sm">Pending</span>
 							{:else if result.friendship?.status === 'pending' && result.friendship.direction === 'incoming'}
-								<form method="POST" action="?/acceptRequest" use:enhance={toastEnhance('Friend request accepted!')}>
+								<form method="POST" action="?/acceptRequest" use:enhance={searchEnhance('Friend request accepted!')}>
 									<input type="hidden" name="friendship_id" value={result.friendship.friendshipId} />
 									<button class="btn btn-primary btn-sm">Accept</button>
 								</form>
 							{:else}
-								<form method="POST" action="?/sendRequest" use:enhance={toastEnhance('Friend request sent!')}>
+								<form method="POST" action="?/sendRequest" use:enhance={searchEnhance('Friend request sent!')}>
 									<input type="hidden" name="addressee_id" value={result.id} />
 									<button class="btn btn-primary btn-outline btn-sm">Add Friend</button>
 								</form>
@@ -130,11 +145,11 @@
 						<div class="flex items-center justify-between rounded-lg bg-base-200 px-4 py-2">
 							<a href="/users/{request.username}" class="font-medium hover:underline">{request.username}</a>
 							<div class="flex gap-2">
-								<form method="POST" action="?/acceptRequest" use:enhance={toastEnhance('Friend request accepted!')}>
+								<form method="POST" action="?/acceptRequest" use:enhance={searchEnhance('Friend request accepted!')}>
 									<input type="hidden" name="friendship_id" value={request.friendshipId} />
 									<button class="btn btn-primary btn-sm">Accept</button>
 								</form>
-								<form method="POST" action="?/declineRequest" use:enhance={toastEnhance('Request declined.')}>
+								<form method="POST" action="?/declineRequest" use:enhance={searchEnhance('Request declined.')}>
 									<input type="hidden" name="friendship_id" value={request.friendshipId} />
 									<button class="btn btn-ghost btn-sm">Decline</button>
 								</form>
@@ -155,7 +170,7 @@
 					{#each data.outgoingRequests as request}
 						<div class="flex items-center justify-between rounded-lg bg-base-200 px-4 py-2">
 							<a href="/users/{request.username}" class="font-medium hover:underline">{request.username}</a>
-							<form method="POST" action="?/declineRequest" use:enhance={toastEnhance('Request cancelled.')}>
+							<form method="POST" action="?/declineRequest" use:enhance={searchEnhance('Request cancelled.')}>
 								<input type="hidden" name="friendship_id" value={request.friendshipId} />
 								<button class="btn btn-ghost btn-sm">Cancel</button>
 							</form>
@@ -186,7 +201,7 @@
 						{@const formId = `remove-form-${friend.friendshipId}`}
 						<div class="flex items-center justify-between rounded-lg bg-base-200 px-4 py-2">
 							<a href="/users/{friend.username}" class="font-medium hover:underline">{friend.username}</a>
-							<form id={formId} method="POST" action="?/removeFriend" use:enhance={toastEnhance('Friend removed.')} class="hidden">
+							<form id={formId} method="POST" action="?/removeFriend" use:enhance={searchEnhance('Friend removed.')} class="hidden">
 								<input type="hidden" name="friendship_id" value={friend.friendshipId} />
 							</form>
 							<ConfirmModal
