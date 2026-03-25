@@ -1,7 +1,9 @@
 <script lang="ts">
+	import Avatar from '$lib/components/Avatar.svelte';
+
 	type Game = { id: string; name: string; url: string; score_direction: string };
 	type Submission = { user_id: string; score: number; game_id: string; game_date: string };
-	type Member = { user_id: string; left_at: string | null; profiles: { username: string } | null };
+	type Member = { user_id: string; left_at: string | null; profiles: { username: string; avatar_url: string | null } | null };
 
 	const TimeFilter = {
 		All: 'all',
@@ -53,10 +55,10 @@
 			return true;
 		});
 
-		const userInfo = new Map<string, { username: string; left: boolean }>();
+		const userInfo = new Map<string, { username: string; avatarUrl: string | null; left: boolean }>();
 		for (const member of members) {
 			if (member.profiles) {
-				userInfo.set(member.user_id, { username: member.profiles.username, left: member.left_at !== null });
+				userInfo.set(member.user_id, { username: member.profiles.username, avatarUrl: member.profiles.avatar_url, left: member.left_at !== null });
 			}
 		}
 
@@ -164,7 +166,12 @@
 					{#each filteredLeaderboard as entry, i}
 						<tr class={i === 0 ? 'bg-base-300 font-semibold' : ''}>
 							<td>{i + 1}</td>
-							<td>{entry.username}{#if entry.left} <span class="opacity-40 text-xs">(left)</span>{/if}</td>
+							<td>
+								<div class="flex items-center gap-2">
+									<Avatar src={entry.avatarUrl} username={entry.username} size="xs" />
+									{entry.username}{#if entry.left} <span class="opacity-40 text-xs">(left)</span>{/if}
+								</div>
+							</td>
 							<td>{entry.games}</td>
 							<td>{entry.total}</td>
 							<td>{(entry.total / entry.games).toFixed(1)}</td>

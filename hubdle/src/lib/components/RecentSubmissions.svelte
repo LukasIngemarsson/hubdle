@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { GAME_RULES } from '$lib/game-rules';
+	import Avatar from '$lib/components/Avatar.svelte';
 
 	type Submission = {
 		id: string;
@@ -11,7 +12,7 @@
 		raw_text: string;
 		games: { name: string } | null;
 	};
-	type Member = { user_id: string; left_at: string | null; profiles: { username: string } | null };
+	type Member = { user_id: string; left_at: string | null; profiles: { username: string; avatar_url: string | null } | null };
 
 	let {
 		submissions,
@@ -66,7 +67,12 @@
 							{@const isOwn = sub.user_id === userId}
 							{@const rules = GAME_RULES[sub.game_id]}
 							<tr>
-								<td>{member?.profiles?.username ?? 'Unknown'}{#if member?.left_at} <span class="opacity-40 text-xs">(left)</span>{/if}</td>
+								<td>
+									<div class="flex items-center gap-2">
+										<Avatar src={member?.profiles?.avatar_url} username={member?.profiles?.username ?? 'Unknown'} size="xs" />
+										{member?.profiles?.username ?? 'Unknown'}{#if member?.left_at} <span class="opacity-40 text-xs">(left)</span>{/if}
+									</div>
+								</td>
 								<td>{sub.games?.name ?? sub.game_id}</td>
 								<td>
 									{#if editingId === sub.id}

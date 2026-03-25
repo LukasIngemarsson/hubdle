@@ -3,14 +3,19 @@
 	import type { ActionData, PageData } from './$types';
 	import PageContainer from '$lib/components/PageContainer.svelte';
 	import Alert from '$lib/components/Alert.svelte';
+	import Avatar from '$lib/components/Avatar.svelte';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 
 	let editing = $state(false);
 	let saving = $state(false);
+	let uploadingAvatar = $state(false);
+	let removingAvatar = $state(false);
 	let username = $state('');
 	$effect(() => { username = data.username; });
 	$effect(() => { if (form?.success) editing = false; });
+
+	let fileInput = $state<HTMLInputElement>();
 
 	function startEditing() {
 		username = data.username;
@@ -20,6 +25,16 @@
 	function cancelEditing() {
 		username = data.username;
 		editing = false;
+	}
+
+	function triggerFileSelect() {
+		fileInput?.click();
+	}
+
+	function handleFileSelected() {
+		if (fileInput?.files?.length) {
+			fileInput.form?.requestSubmit();
+		}
 	}
 
 	const memberSince = $derived(
@@ -39,7 +54,41 @@
 			<div class="card-body">
 				<h2 class="card-title text-base">Account</h2>
 
-				<div class="flex flex-col gap-3">
+				<div class="flex flex-col gap-4">
+					<div class="flex items-center gap-4">
+						<Avatar src={data.avatarUrl} username={data.username} size="lg" />
+						<div class="flex flex-col gap-1">
+							<form method="POST" action="?/uploadAvatar" enctype="multipart/form-data" use:enhance={() => {
+								uploadingAvatar = true;
+								return async ({ update }) => { await update(); uploadingAvatar = false; };
+							}}>
+								<input
+									type="file"
+									name="avatar"
+									accept="image/jpeg,image/png,image/webp"
+									class="hidden"
+									bind:this={fileInput}
+									onchange={handleFileSelected}
+								/>
+								<button type="button" class="btn btn-ghost btn-sm" onclick={triggerFileSelect} disabled={uploadingAvatar}>
+									{#if uploadingAvatar}<span class="loading loading-spinner loading-xs"></span>{/if}
+									Change picture
+								</button>
+							</form>
+							{#if data.avatarUrl}
+								<form method="POST" action="?/removeAvatar" use:enhance={() => {
+									removingAvatar = true;
+									return async ({ update }) => { await update(); removingAvatar = false; };
+								}}>
+									<button class="btn btn-ghost btn-xs text-error" disabled={removingAvatar}>
+										{#if removingAvatar}<span class="loading loading-spinner loading-xs"></span>{/if}
+										Remove
+									</button>
+								</form>
+							{/if}
+						</div>
+					</div>
+
 					<div>
 						<p class="text-xs opacity-50">Username</p>
 						{#if editing}
@@ -79,8 +128,11 @@
 					{#if form?.error}
 						<Alert type="error" message={form.error} />
 					{/if}
-					{#if form?.success}
+					{#if form?.success && !form?.avatarUpdated}
 						<Alert type="success" message="Username updated!" />
+					{/if}
+					{#if form?.avatarUpdated}
+						<Alert type="success" message="Profile picture updated!" />
 					{/if}
 				</div>
 			</div>
