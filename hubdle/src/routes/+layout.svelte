@@ -34,6 +34,7 @@
 	});
 
 	afterNavigate(() => {
+		if (!showLoadingBar) return;
 		loadingDone = true;
 		loadingTimeout = setTimeout(() => {
 			showLoadingBar = false;
