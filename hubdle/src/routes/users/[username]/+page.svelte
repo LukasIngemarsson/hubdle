@@ -41,15 +41,36 @@
 </script>
 
 <PageContainer>
-	<div class="flex items-center gap-4">
-		<Avatar src={data.profile.avatarUrl} username={data.profile.username} size="lg" />
-		<div>
-			<h1 class="text-2xl font-bold">{data.profile.username}</h1>
-			<p class="text-sm opacity-50">Member since {memberSince}</p>
-			{#if data.isOwnProfile}
-				<a href="/profile" class="link text-sm opacity-70">Edit Profile</a>
-			{/if}
+	<div class="flex items-center justify-between gap-4">
+		<div class="flex items-center gap-4">
+			<Avatar src={data.profile.avatarUrl} username={data.profile.username} size="lg" />
+			<div>
+				<h1 class="text-2xl font-bold">{data.profile.username}</h1>
+				<p class="text-sm opacity-50">Member since {memberSince}</p>
+				{#if data.isOwnProfile}
+					<a href="/profile" class="link text-sm opacity-70">Edit Profile</a>
+				{/if}
+			</div>
 		</div>
+		{#if !data.isOwnProfile}
+			<div>
+				{#if data.friendship?.status === 'accepted'}
+					<span class="badge badge-success">Friends</span>
+				{:else if data.friendship?.status === 'pending' && data.friendship.direction === 'outgoing'}
+					<span class="badge">Request Pending</span>
+				{:else if data.friendship?.status === 'pending' && data.friendship.direction === 'incoming'}
+					<form method="POST" action="?/acceptRequest" use:enhance>
+						<input type="hidden" name="friendship_id" value={data.friendship.id} />
+						<button class="btn btn-primary btn-sm">Accept Friend Request</button>
+					</form>
+				{:else}
+					<form method="POST" action="?/sendRequest" use:enhance>
+						<input type="hidden" name="addressee_id" value={data.profile.id} />
+						<button class="btn btn-primary btn-outline btn-sm">Add Friend</button>
+					</form>
+				{/if}
+			</div>
+		{/if}
 	</div>
 
 	{#if form?.error}

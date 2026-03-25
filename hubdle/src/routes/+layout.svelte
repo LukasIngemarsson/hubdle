@@ -54,6 +54,7 @@
 			{#if data.user}
 				<div class="hidden items-center gap-4 sm:flex">
 					<NavLink href="/groups" label="Groups" />
+					<NavLink href="/friends" label="Friends" badge={data.friendRequestCount} />
 				</div>
 			{/if}
 		</div>
@@ -95,6 +96,7 @@
 		<div class="border-b border-base-300 bg-base-200 px-4 py-3 sm:hidden">
 			<div class="flex flex-col gap-3">
 				<a href="/groups" class="text-sm" onclick={() => (menuOpen = false)}>Groups</a>
+				<a href="/friends" class="text-sm" onclick={() => (menuOpen = false)}>Friends{#if data.friendRequestCount > 0}<span class="badge badge-primary badge-xs ml-1">{data.friendRequestCount}</span>{/if}</a>
 				<a href="/users/{data.username ?? ''}" class="text-sm" onclick={() => (menuOpen = false)}>Profile</a>
 				<button class="text-left text-sm opacity-70" onclick={handleLogout}>Log Out</button>
 			</div>
