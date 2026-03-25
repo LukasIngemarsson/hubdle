@@ -23,7 +23,12 @@ export const load: PageServerLoad = async ({ locals }) => {
 		})
 	);
 
-	return { groups };
+	const { data: pendingInvites } = await locals.supabase
+		.from('group_invites')
+		.select('id, group_id, invited_by, created_at, groups(id, name), inviter:profiles!group_invites_invited_by_fkey(username)')
+		.eq('invited_user_id', user.id);
+
+	return { groups, pendingInvites: pendingInvites ?? [] };
 };
 
 export const actions: Actions = {
@@ -55,6 +60,74 @@ export const actions: Actions = {
 		if (memberError) return fail(500, { error: 'Failed to join group.' });
 
 		redirect(303, `/groups/${group.id}`);
+	},
+
+	acceptInvite: async ({ request, locals }) => {
+		const { user } = await locals.safeGetSession();
+		if (!user) redirect(303, '/login');
+
+		const formData = await request.formData();
+		const inviteId = (formData.get('invite_id') as string)?.trim();
+		if (!inviteId) return fail(400, { error: 'Invite ID is required.' });
+
+		const { data: invite } = await locals.supabase
+			.from('group_invites')
+			.select('group_id')
+			.eq('id', inviteId)
+			.eq('invited_user_id', user.id)
+			.single();
+
+		if (!invite) return fail(404, { error: 'Invite not found.' });
+
+		await ensureProfile(locals.supabase, user);
+
+		// Join the group (or rejoin if soft-deleted)
+		const { error: insertError } = await locals.supabase
+			.from('group_members')
+			.insert({ group_id: invite.group_id, user_id: user.id });
+
+		if (insertError) {
+			if (insertError.code === '23505') {
+				const { error: updateError } = await locals.supabase
+					.from('group_members')
+					.update({ left_at: null, joined_at: new Date().toISOString() })
+					.eq('group_id', invite.group_id)
+					.eq('user_id', user.id)
+					.not('left_at', 'is', null)
+					.select();
+
+				if (updateError) return fail(500, { error: 'Failed to join group.' });
+			} else {
+				return fail(500, { error: 'Failed to join group.' });
+			}
+		}
+
+		// Delete the invite
+		await locals.supabase
+			.from('group_invites')
+			.delete()
+			.eq('id', inviteId);
+
+		return { success: true };
+	},
+
+	declineInvite: async ({ request, locals }) => {
+		const { user } = await locals.safeGetSession();
+		if (!user) redirect(303, '/login');
+
+		const formData = await request.formData();
+		const inviteId = (formData.get('invite_id') as string)?.trim();
+		if (!inviteId) return fail(400, { error: 'Invite ID is required.' });
+
+		const { error: deleteError } = await locals.supabase
+			.from('group_invites')
+			.delete()
+			.eq('id', inviteId)
+			.eq('invited_user_id', user.id);
+
+		if (deleteError) return fail(500, { error: 'Failed to decline invite.' });
+
+		return { success: true };
 	},
 
 	join: async ({ request, locals }) => {

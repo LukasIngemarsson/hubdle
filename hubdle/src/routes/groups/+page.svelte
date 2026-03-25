@@ -4,6 +4,7 @@
 	import PageContainer from '$lib/components/PageContainer.svelte';
 	import CopyBadge from '$lib/components/CopyBadge.svelte';
 	import { toasts } from '$lib/stores/toast.svelte';
+	import { toastEnhance } from '$lib/enhance-toast';
 
 	let { data }: { data: PageData } = $props();
 
@@ -71,6 +72,37 @@
 			</div>
 		</form>
 	</div>
+
+	{#if data.pendingInvites.length > 0}
+		<section class="card mt-6 border border-base-300">
+			<div class="card-body">
+				<h2 class="card-title text-base">
+					Group Invites
+					<span class="badge badge-primary badge-sm">{data.pendingInvites.length}</span>
+				</h2>
+				<div class="grid gap-2">
+					{#each data.pendingInvites as invite}
+						<div class="flex items-center justify-between rounded-lg bg-base-200 px-4 py-2">
+							<div>
+								<span class="font-medium">{invite.groups?.name ?? 'Unknown group'}</span>
+								<span class="text-sm opacity-50"> from {(invite.inviter as unknown as { username: string } | null)?.username ?? 'someone'}</span>
+							</div>
+							<div class="flex gap-2">
+								<form method="POST" action="?/acceptInvite" use:enhance={toastEnhance('Invite accepted!')}>
+									<input type="hidden" name="invite_id" value={invite.id} />
+									<button class="btn btn-primary btn-sm">Accept</button>
+								</form>
+								<form method="POST" action="?/declineInvite" use:enhance={toastEnhance('Invite declined.')}>
+									<input type="hidden" name="invite_id" value={invite.id} />
+									<button class="btn btn-ghost btn-sm">Decline</button>
+								</form>
+							</div>
+						</div>
+					{/each}
+				</div>
+			</div>
+		</section>
+	{/if}
 
 	{#if data.groups.length === 0}
 		<div class="mt-12 flex flex-col items-center gap-3 text-center opacity-60">

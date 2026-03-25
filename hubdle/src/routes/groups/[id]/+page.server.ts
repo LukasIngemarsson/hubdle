@@ -53,9 +53,14 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		.filter(([, status]) => status === 'accepted')
 		.map(([id]) => id);
 
-	// Need usernames for the invite dropdown — fetch from members + separate query
-	const memberProfiles = new Map(members.map((m) => [m.user_id, (m.profiles as unknown as { id: string; username: string } | null)?.username ?? '']));
-	const nonMemberFriendIds = acceptedFriendIds.filter((id) => !memberIds.has(id));
+	// Filter out users who already have pending invites
+	const { data: pendingInvites } = await locals.supabase
+		.from('group_invites')
+		.select('invited_user_id')
+		.eq('group_id', params.id);
+	const pendingInviteUserIds = new Set((pendingInvites ?? []).map((i) => i.invited_user_id));
+
+	const nonMemberFriendIds = acceptedFriendIds.filter((id) => !memberIds.has(id) && !pendingInviteUserIds.has(id));
 
 	let invitableFriends: { id: string; username: string }[] = [];
 	if (nonMemberFriendIds.length > 0) {
@@ -341,27 +346,12 @@ export const actions: Actions = {
 		if (!friendId) return fail(400, { error: 'Please select a friend to invite.' });
 
 		const { error: insertError } = await locals.supabase
-			.from('group_members')
-			.insert({ group_id: params.id, user_id: friendId });
+			.from('group_invites')
+			.insert({ group_id: params.id, invited_by: user.id, invited_user_id: friendId });
 
 		if (insertError) {
-			if (insertError.code === '23505') {
-				// Row exists — try to rejoin soft-deleted member
-				const { data: updated, error: updateError } = await locals.supabase
-					.from('group_members')
-					.update({ left_at: null, joined_at: new Date().toISOString() })
-					.eq('group_id', params.id)
-					.eq('user_id', friendId)
-					.not('left_at', 'is', null)
-					.select();
-
-				if (updateError) return fail(500, { error: 'Failed to invite friend.' });
-				if (!updated || updated.length === 0) {
-					return fail(409, { error: 'This user is already in the group.' });
-				}
-			} else {
-				return fail(500, { error: `Failed to invite friend: ${insertError.message}` });
-			}
+			if (insertError.code === '23505') return fail(409, { error: 'An invite has already been sent to this user.' });
+			return fail(500, { error: `Failed to send invite: ${insertError.message}` });
 		}
 
 		return { success: true };

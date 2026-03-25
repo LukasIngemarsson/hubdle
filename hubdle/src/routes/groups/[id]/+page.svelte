@@ -117,7 +117,7 @@
 					<span class="badge badge-sm">{data.members.length}</span>
 				</h2>
 				{#if data.invitableFriends.length > 0}
-					<form method="POST" action="?/inviteFriend" use:enhance={toastEnhance('Friend invited!')} class="flex items-center gap-1.5">
+					<form method="POST" action="?/inviteFriend" use:enhance={toastEnhance('Invite sent!')} class="flex items-center gap-1.5">
 						<select name="friend_id" class="select select-bordered select-xs w-36 truncate" required>
 							<option value="" disabled selected>Invite friend</option>
 							{#each data.invitableFriends as friend}

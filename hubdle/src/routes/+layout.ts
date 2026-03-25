@@ -13,5 +13,5 @@ export const load: LayoutLoad = async ({ data, fetch }) => {
 				cookies: { getAll: () => data.cookies }
 			});
 
-	return { supabase, user: data.user, avatarUrl: data.avatarUrl, username: data.username, friendRequestCount: data.friendRequestCount };
+	return { supabase, user: data.user, avatarUrl: data.avatarUrl, username: data.username, friendRequestCount: data.friendRequestCount, groupInviteCount: data.groupInviteCount };
 };
