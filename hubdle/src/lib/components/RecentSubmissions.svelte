@@ -22,6 +22,8 @@
 	let editingId = $state<string | null>(null);
 	let editScore = $state(0);
 	let deletingId = $state<string | null>(null);
+	let savingId = $state<string | null>(null);
+	let confirmingDeleteId = $state<string | null>(null);
 
 	function startEdit(sub: Submission) {
 		editingId = sub.id;
@@ -84,8 +86,10 @@
 									{#if isOwn}
 										{#if editingId === sub.id}
 											<form method="POST" action="?/editSubmission" use:enhance={() => {
+												savingId = sub.id;
 												return async ({ update }) => {
 													editingId = null;
+													savingId = null;
 													await update();
 												};
 											}}>
@@ -93,20 +97,28 @@
 												<input type="hidden" name="game_id" value={sub.game_id} />
 												<input type="hidden" name="score" value={editScore} />
 												<div class="flex gap-1">
-													<button type="submit" class="btn btn-success btn-xs">Save</button>
+													<button type="submit" class="btn btn-success btn-xs" disabled={savingId === sub.id}>
+														{#if savingId === sub.id}<span class="loading loading-spinner loading-xs"></span>{/if}
+														Save
+													</button>
 													<button type="button" class="btn btn-ghost btn-xs" onclick={cancelEdit}>Cancel</button>
 												</div>
 											</form>
 										{:else if deletingId === sub.id}
 											<form method="POST" action="?/deleteSubmission" use:enhance={() => {
+												confirmingDeleteId = sub.id;
 												return async ({ update }) => {
 													deletingId = null;
+													confirmingDeleteId = null;
 													await update();
 												};
 											}}>
 												<input type="hidden" name="submission_id" value={sub.id} />
 												<div class="flex gap-1">
-													<button type="submit" class="btn btn-error btn-xs">Confirm</button>
+													<button type="submit" class="btn btn-error btn-xs" disabled={confirmingDeleteId === sub.id}>
+														{#if confirmingDeleteId === sub.id}<span class="loading loading-spinner loading-xs"></span>{/if}
+														Confirm
+													</button>
 													<button type="button" class="btn btn-ghost btn-xs" onclick={cancelDelete}>Cancel</button>
 												</div>
 											</form>

@@ -16,6 +16,7 @@
 	let deleteForm = $state<HTMLFormElement>();
 	let transferForm = $state<HTMLFormElement>();
 	let newOwnerId = $state('');
+	let transferring = $state(false);
 
 	// Subscribe to realtime changes on group_members for this group
 	let channel: ReturnType<typeof data.supabase.channel>;
@@ -64,6 +65,7 @@
 	}
 
 	function handleTransferAndLeave() {
+		transferring = true;
 		closeTransferModal();
 		unsubscribeRealtime();
 		transferForm?.requestSubmit();
@@ -147,7 +149,8 @@
 					<form method="POST" action="?/transferAndLeave" use:enhance bind:this={transferForm} class="hidden">
 						<input type="hidden" name="new_owner_id" value={newOwnerId} />
 					</form>
-					<button type="button" class="btn btn-ghost" onclick={openTransferModal}>
+					<button type="button" class="btn btn-ghost" onclick={openTransferModal} disabled={transferring}>
+						{#if transferring}<span class="loading loading-spinner loading-sm"></span>{/if}
 						Leave Group
 					</button>
 
