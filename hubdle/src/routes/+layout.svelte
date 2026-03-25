@@ -50,7 +50,7 @@
 			<div class="h-full bg-primary {loadingDone ? 'loading-bar-done' : 'loading-bar'}"></div>
 		</div>
 	{/if}
-	<nav class="bg-base-200">
+	<nav class="bg-base-200" class:hidden={$page.url.pathname.startsWith('/login')}>
 		<div class="navbar mx-auto max-w-4xl px-6">
 			<div class="flex flex-1 items-center gap-6">
 				<a href="/" class="flex items-center gap-2 text-xl font-bold">
