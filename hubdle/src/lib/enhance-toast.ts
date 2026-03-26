@@ -6,8 +6,19 @@ import { toasts } from '$lib/stores/toast.svelte';
  * Optionally accepts a success message override (defaults to the message from the form result).
  */
 export function toastEnhance(successMessage?: string): SubmitFunction {
-	return () => {
+	return ({ submitter }) => {
+		const btn = submitter instanceof HTMLButtonElement ? submitter : null;
+		if (btn) {
+			btn.disabled = true;
+			const spinner = document.createElement('span');
+			spinner.className = 'loading loading-spinner loading-xs';
+			btn.prepend(spinner);
+		}
 		return async ({ result, update }) => {
+			if (btn) {
+				btn.disabled = false;
+				btn.querySelector('.loading')?.remove();
+			}
 			await update();
 			if (result.type === 'success') {
 				toasts.push('success', successMessage ?? 'Done!');
