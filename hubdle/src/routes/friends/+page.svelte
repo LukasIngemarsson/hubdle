@@ -28,7 +28,7 @@
 					<span class="badge badge-primary badge-sm">{data.incomingRequests.length}</span>
 				</h2>
 				<div class="grid gap-2">
-					{#each data.incomingRequests as request}
+					{#each data.incomingRequests as request (request.friendshipId)}
 						<div class="flex items-center justify-between rounded-lg bg-base-200 px-4 py-2">
 							<a
 								href="/users/{request.username}"
@@ -70,7 +70,7 @@
 			<div class="card-body">
 				<h2 class="card-title text-base">Sent Requests</h2>
 				<div class="grid gap-2">
-					{#each data.outgoingRequests as request}
+					{#each data.outgoingRequests as request (request.friendshipId)}
 						<div class="flex items-center justify-between rounded-lg bg-base-200 px-4 py-2">
 							<a
 								href="/users/{request.username}"
@@ -112,7 +112,7 @@
 				</div>
 			{:else}
 				<div class="grid gap-2">
-					{#each data.friends as friend}
+					{#each data.friends as friend (friend.friendshipId)}
 						{@const formId = `remove-form-${friend.friendshipId}`}
 						<div class="flex items-center justify-between rounded-lg bg-base-200 px-4 py-2">
 							<a
