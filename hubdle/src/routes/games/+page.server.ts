@@ -22,9 +22,24 @@ export const load: PageServerLoad = async ({ locals }) => {
 
 	const playedToday = new Set((todaysSubmissions ?? []).map((s) => s.game_id));
 
+	// Recent submissions for the user
+	const { data: recentSubmissions } = await locals.supabase
+		.from('submissions')
+		.select('id, score, game_id, game_date, games(name)')
+		.eq('user_id', user.id)
+		.order('game_date', { ascending: false })
+		.order('created_at', { ascending: false });
+
 	return {
 		games: games ?? [],
-		playedToday: [...playedToday]
+		playedToday: [...playedToday],
+		recentSubmissions: (recentSubmissions ?? []).map((s) => ({
+			id: s.id,
+			gameId: s.game_id,
+			gameName: s.games?.name ?? s.game_id,
+			score: s.score,
+			gameDate: s.game_date
+		}))
 	};
 };
 
@@ -102,6 +117,55 @@ export const actions: Actions = {
 				return fail(409, { error: 'You already submitted a score for this game on that date.' });
 			return fail(500, { error: `Failed to submit: ${insertError.message}` });
 		}
+
+		return { success: true };
+	},
+
+	editSubmission: async ({ request, locals }) => {
+		const { user } = await locals.safeGetSession();
+		if (!user) redirect(303, '/login');
+
+		const formData = await request.formData();
+		const submissionId = (formData.get('submission_id') as string)?.trim();
+		const scoreStr = (formData.get('score') as string)?.trim();
+		const gameId = (formData.get('game_id') as string)?.trim();
+
+		if (!submissionId || !scoreStr || !gameId)
+			return fail(400, { error: 'All fields are required.' });
+
+		const score = parseInt(scoreStr.replace(/[.,]/g, ''), 10);
+		if (isNaN(score)) return fail(400, { error: 'Score must be a number.' });
+
+		const scoreError = validateScore(gameId, score);
+		if (scoreError) return fail(400, { error: scoreError });
+
+		const { error: updateError } = await locals.supabase
+			.from('submissions')
+			.update({ score, raw_text: `Manual: ${gameId} ${score}` })
+			.eq('id', submissionId)
+			.eq('user_id', user.id);
+
+		if (updateError) return fail(500, { error: `Failed to update: ${updateError.message}` });
+
+		return { success: true };
+	},
+
+	deleteSubmission: async ({ request, locals }) => {
+		const { user } = await locals.safeGetSession();
+		if (!user) redirect(303, '/login');
+
+		const formData = await request.formData();
+		const submissionId = (formData.get('submission_id') as string)?.trim();
+
+		if (!submissionId) return fail(400, { error: 'Submission ID is required.' });
+
+		const { error: deleteError } = await locals.supabase
+			.from('submissions')
+			.delete()
+			.eq('id', submissionId)
+			.eq('user_id', user.id);
+
+		if (deleteError) return fail(500, { error: `Failed to delete: ${deleteError.message}` });
 
 		return { success: true };
 	}

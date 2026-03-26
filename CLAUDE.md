@@ -9,8 +9,9 @@ A social competition app where you and your friends compete at daily games or cr
 ## MVP Scope
 
 1. **Auth** — sign up / log in via Supabase Auth (Google + Microsoft OAuth)
-2. **Leaderboards** — create/join groups with friends
-3. **Daily games** — users play external games (Wordle, Bandle, etc.) and paste/submit their share-text scores; app parses and tracks them on the leaderboard
+2. **Games** — browse supported daily games, play them externally, submit scores (paste share text or manual entry). Scores are global — submit once, compete in all groups.
+3. **Groups** — create/join groups with friends. View score heatmaps and leaderboards to compare performance. Groups are a competitive lens over shared scores, not a container for them.
+4. **Friends** — search users, send/accept friend requests, discover friends-of-friends via profiles.
 
 ## Tech Stack
 
@@ -46,8 +47,9 @@ The SvelteKit app lives in `hubdle/` (not the repo root). The repo root contains
 
 Components are co-located by usage, not grouped in a single folder:
 
-- **`$lib/components/`** — only shared, multi-use components: Avatar, PageContainer, ConfirmModal, CopyBadge, Toast.
+- **`$lib/components/`** — shared, multi-use components: Avatar, PageContainer, ConfirmModal, CopyBadge, Toast, ActivityRow.
 - **`$lib/components/icons/`** — reusable SVG icon components (e.g. `SunIcon`, `PlusIcon`). Each accepts a `class` prop for sizing.
+- **`$lib/game-icons.ts`** — maps game IDs to imported favicon PNGs stored in `$lib/assets/game-icons/`.
 - **Route-local components** — components used by a single page live next to that page (e.g. `routes/groups/[id]/Leaderboard.svelte`). Any `.svelte` file in a route directory that doesn't start with `+` is a regular component, not a route.
 
 **When to extract a component**: Extract when a section has its own state and logic (e.g. search with debounce, edit/delete state machine, modal with transfer flow) or when nesting makes the code hard to follow. Don't extract flat markup that just renders a list with no local state — the props interface would add complexity without reducing it.
@@ -71,7 +73,8 @@ Components are co-located by usage, not grouped in a single folder:
 Defined in `supabase/migrations/`. Key tables: `profiles`, `groups`, `group_members`, `games`, `submissions`. All tables have RLS enabled. The `is_group_member()` helper function (security definer) is used in multiple RLS policies.
 
 - `games.score_direction` is `'asc'` (lower is better) or `'desc'` (higher is better)
-- `submissions` has a unique constraint on `(user_id, group_id, game_id, game_date)` — one score per user per game per day per group
+- `submissions` are global (no `group_id`) with a unique constraint on `(user_id, game_id, game_date)` — one score per user per game per day. Groups query submissions by filtering on member user_ids.
+- Group membership is capped at 20 members (`MAX_GROUP_MEMBERS` in `$lib/constants.ts`), enforced server-side on join, accept invite, and invite friend actions.
 - Group ownership is tracked via `groups.created_by`; the owner must transfer ownership before leaving if other members exist
 
 ## Conventions
@@ -94,7 +97,7 @@ Use these in conditionals (`TimeFilter.All`) instead of raw string literals.
 ### UI Patterns
 
 - **Cards**: Use `bg-base-200` for input/action cards (e.g. Submit Score), `border border-base-300` for display cards (e.g. Leaderboard, Recent Submissions).
-- **Navbar**: Text links with animated centered underline on hover/active. Hamburger menu on mobile. Main nav items (Groups, etc.) on the left; Profile and Log Out on the right.
+- **Navbar**: Text links with animated centered underline on hover/active. Hamburger menu on mobile. Main nav items (Games, Groups, Friends) on the left; Profile and Log Out on the right. Logo links to `/games` for logged-in users.
 - **Destructive actions**: Use `ConfirmModal` component. Separate Leave and Delete with `justify-between`. Delete button uses `btn-error btn-outline btn-sm`.
 - **Copy badge**: Uses inline SVG clipboard/checkmark icons, not text labels.
 - **Notifications**: Use the toast system (`toasts.push()`) for all user feedback (success, error). No inline alerts.
