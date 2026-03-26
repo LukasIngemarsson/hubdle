@@ -102,11 +102,11 @@
 				btn.prepend(spinner);
 			}
 			return async ({ result, update }) => {
+				await update();
 				if (btn) {
 					btn.disabled = false;
 					btn.querySelector('.loading')?.remove();
 				}
-				await update();
 				if (result.type === 'success') {
 					toasts.push('success', successMessage);
 					if (searchQuery.trim().length >= 1) runSearch(searchQuery.trim());
@@ -134,7 +134,7 @@
 			<p class="text-sm opacity-60">No users found for "{searchQuery}".</p>
 		{:else if searchResults.length > 0}
 			<div class="mt-2 grid gap-2">
-				{#each searchResults as result}
+				{#each searchResults as result (result.id)}
 					<div class="flex items-center justify-between rounded-lg bg-base-300 px-4 py-2">
 						<a
 							href="/users/{result.username}"

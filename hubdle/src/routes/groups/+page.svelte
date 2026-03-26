@@ -94,7 +94,7 @@
 					<span class="badge badge-primary badge-sm">{data.pendingInvites.length}</span>
 				</h2>
 				<div class="grid gap-2">
-					{#each data.pendingInvites as invite}
+					{#each data.pendingInvites as invite (invite.id)}
 						{@const inviter = invite.inviter as unknown as {
 							username: string;
 							avatar_url: string | null;

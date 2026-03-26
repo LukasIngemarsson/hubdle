@@ -15,11 +15,11 @@ export function toastEnhance(successMessage?: string): SubmitFunction {
 			btn.prepend(spinner);
 		}
 		return async ({ result, update }) => {
+			await update();
 			if (btn) {
 				btn.disabled = false;
 				btn.querySelector('.loading')?.remove();
 			}
-			await update();
 			if (result.type === 'success') {
 				toasts.push('success', successMessage ?? 'Done!');
 			} else if (result.type === 'failure' && result.data?.error) {
