@@ -30,20 +30,23 @@
 		return map;
 	});
 
-	// Per-game rank info: min and max scores among today's submissions
-	let gameRanges = $derived.by(() => {
-		const ranges = new Map<string, { min: number; max: number }>();
+	// Per-game ranked scores for today (sorted best to worst)
+	let gameRanks = $derived.by(() => {
+		const byGame = new Map<string, number[]>();
 		for (const sub of submissions) {
 			if (sub.game_date !== today) continue;
-			const range = ranges.get(sub.game_id);
-			if (!range) {
-				ranges.set(sub.game_id, { min: sub.score, max: sub.score });
-			} else {
-				range.min = Math.min(range.min, sub.score);
-				range.max = Math.max(range.max, sub.score);
-			}
+			const scores = byGame.get(sub.game_id) ?? [];
+			scores.push(sub.score);
+			byGame.set(sub.game_id, scores);
 		}
-		return ranges;
+		const ranked = new Map<string, number[]>();
+		for (const [gameId, scores] of byGame) {
+			const game = games.find((g) => g.id === gameId);
+			const ascending = game?.score_direction === 'asc';
+			const sorted = [...new Set(scores)].sort((a, b) => (ascending ? a - b : b - a));
+			ranked.set(gameId, sorted);
+		}
+		return ranked;
 	});
 
 	// Sort members: those with more submissions today first, then alphabetically
@@ -61,26 +64,15 @@
 	);
 
 	/**
-	 * Returns a CSS color for a score cell.
-	 * Green = best, red = worst, interpolated between.
-	 * Accounts for score_direction: 'asc' means lower is better.
+	 * Returns a CSS color for a score cell based on discrete rank.
+	 * 1st = green, last = red, evenly spaced between.
 	 */
 	function getCellColor(gameId: string, score: number): string {
-		const range = gameRanges.get(gameId);
-		if (!range || range.min === range.max) return 'oklch(0.75 0.18 142)'; // green if only one score
+		const sorted = gameRanks.get(gameId);
+		if (!sorted || sorted.length <= 1) return 'oklch(0.75 0.18 142)';
 
-		const game = games.find((g) => g.id === gameId);
-		const ascending = game?.score_direction === 'asc';
-
-		// Normalize: 0 = best, 1 = worst
-		let t: number;
-		if (ascending) {
-			// Lower is better: min = best (0), max = worst (1)
-			t = (score - range.min) / (range.max - range.min);
-		} else {
-			// Higher is better: max = best (0), min = worst (1)
-			t = (range.max - score) / (range.max - range.min);
-		}
+		const rank = sorted.indexOf(score);
+		const t = rank / (sorted.length - 1); // 0 = best, 1 = worst
 
 		// Interpolate hue from green (142) to red (25) in oklch
 		const hue = 142 - t * 117;
@@ -105,18 +97,7 @@
 							<tr>
 								<th>Player</th>
 								{#each games as game}
-									<th class="text-center">
-										{#if game.url}
-											<a
-												href={game.url}
-												target="_blank"
-												rel="noopener noreferrer"
-												class="hover:underline">{game.name}</a
-											>
-										{:else}
-											{game.name}
-										{/if}
-									</th>
+									<th class="text-center">{game.name}</th>
 								{/each}
 							</tr>
 						</thead>
