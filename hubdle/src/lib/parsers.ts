@@ -4,14 +4,20 @@ type ParseResult = {
 	gameDate: string;
 } | null;
 
+/** Normalize period-grouped thousands (e.g. "26.270") to comma-grouped ("26,270"). */
+function normalizeNumbers(text: string): string {
+	return text.replace(/\d{1,3}(?:\.\d{3})+/g, (match) => match.replace(/\./g, ','));
+}
+
 export function parseShareText(text: string): ParseResult {
+	const normalized = normalizeNumbers(text);
 	return (
-		parseWordle(text) ??
-		parseBandle(text) ??
-		parseConnections(text) ??
-		parseContexto(text) ??
-		parseScrandle(text) ??
-		parseTimeGuessr(text)
+		parseWordle(normalized) ??
+		parseBandle(normalized) ??
+		parseConnections(normalized) ??
+		parseContexto(normalized) ??
+		parseScrandle(normalized) ??
+		parseTimeGuessr(normalized)
 	);
 }
 
