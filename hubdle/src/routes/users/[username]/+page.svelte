@@ -98,10 +98,7 @@
 					<p class="text-sm opacity-60">Day streak</p>
 				</div>
 			</div>
-			<a
-				href="/users/{data.profile.username}/friends"
-				class="flex items-center justify-center gap-3 rounded-lg bg-base-200 p-4 transition-colors hover:bg-base-300"
-			>
+			<div class="flex items-center justify-center gap-3 rounded-lg bg-base-200 p-4">
 				<svg
 					xmlns="http://www.w3.org/2000/svg"
 					viewBox="0 0 24 24"
@@ -115,9 +112,9 @@
 				>
 				<div class="text-center">
 					<p class="text-3xl font-bold">{data.stats.friendCount}</p>
-					<p class="text-sm opacity-60">{data.stats.friendCount === 1 ? 'Friend' : 'Friends'}</p>
+					<a href="/users/{data.profile.username}/friends" class="link text-sm opacity-60">{data.stats.friendCount === 1 ? 'Friend' : 'Friends'}</a>
 				</div>
-			</a>
+			</div>
 			<div class="flex flex-col items-center justify-center rounded-lg bg-base-200 p-4">
 				<p class="text-xl font-bold">{data.stats.favoriteGame ?? '—'}</p>
 				<p class="text-sm opacity-60">Favorite game</p>
