@@ -81,6 +81,16 @@
 		...games.map((g) => ({ value: g.id, label: g.name }))
 	]);
 
+	type LeaderboardEntry = {
+		userId: string;
+		username: string;
+		avatarUrl: string | null;
+		left: boolean;
+		total: number;
+		games: number;
+		hasPlayed: boolean;
+	};
+
 	let filteredLeaderboard = $derived.by(() => {
 		const now = new Date();
 		const todayStr = now.toISOString().slice(0, 10);
@@ -113,30 +123,16 @@
 			}
 		}
 
-		let entries: {
-			userId: string;
-			username: string;
-			avatarUrl: string | null;
-			left: boolean;
-			total: number;
-			games: number;
-		}[];
+		const scoredEntries = new Map<string, { total: number; games: number }>();
 
 		if (selectedGame !== GameFilter.All) {
-			// Single game: sum raw scores
-			const scores = new Map<string, { total: number; games: number }>();
 			for (const sub of filtered) {
-				const entry = scores.get(sub.user_id) ?? { total: 0, games: 0 };
+				const entry = scoredEntries.get(sub.user_id) ?? { total: 0, games: 0 };
 				entry.total += sub.score;
 				entry.games += 1;
-				scores.set(sub.user_id, entry);
+				scoredEntries.set(sub.user_id, entry);
 			}
-
-			entries = [...scores.entries()]
-				.map(([userId, d]) => ({ userId, ...userInfo.get(userId)!, ...d }))
-				.filter((e) => e.games > 0);
 		} else {
-			// All games: rank players per game, then sum ranks
 			const byGame = new Map<string, Map<string, number>>();
 			for (const sub of filtered) {
 				if (!byGame.has(sub.game_id)) byGame.set(sub.game_id, new Map());
@@ -144,7 +140,6 @@
 				gameScores.set(sub.user_id, (gameScores.get(sub.user_id) ?? 0) + sub.score);
 			}
 
-			const rankSums = new Map<string, { total: number; games: number }>();
 			for (const [gameId, gameScores] of byGame) {
 				const gameData = games.find((g) => g.id === gameId);
 				const ascending = gameData ? gameData.score_direction === 'asc' : true;
@@ -155,26 +150,40 @@
 
 				for (let i = 0; i < sorted.length; i++) {
 					const [userId] = sorted[i];
-					const entry = rankSums.get(userId) ?? { total: 0, games: 0 };
+					const entry = scoredEntries.get(userId) ?? { total: 0, games: 0 };
 					entry.total += i + 1;
 					entry.games += 1;
-					rankSums.set(userId, entry);
+					scoredEntries.set(userId, entry);
 				}
 			}
-
-			entries = [...rankSums.entries()]
-				.map(([userId, d]) => ({ userId, ...userInfo.get(userId)!, ...d }))
-				.filter((e) => e.games > 0);
 		}
 
-		const getValue = (e: (typeof entries)[0]) =>
+		// Build entries: scored members first (sorted), then unscored members
+		const scored: LeaderboardEntry[] = [];
+		const unscored: LeaderboardEntry[] = [];
+
+		for (const [userId, info] of userInfo) {
+			const stats = scoredEntries.get(userId);
+			if (stats && stats.games > 0) {
+				scored.push({ userId, ...info, ...stats, hasPlayed: true });
+			} else {
+				unscored.push({ userId, ...info, total: 0, games: 0, hasPlayed: false });
+			}
+		}
+
+		const getValue = (e: LeaderboardEntry) =>
 			sortColumn === SortColumn.Avg ? e.total / e.games : e.total;
 		const asc = sortDirection === SortDirection.Asc;
 
-		return entries.sort((a, b) => {
+		scored.sort((a, b) => {
 			const diff = getValue(a) - getValue(b);
 			return asc ? diff : -diff;
 		});
+
+		// Unscored sorted alphabetically
+		unscored.sort((a, b) => a.username.localeCompare(b.username));
+
+		return [...scored, ...unscored];
 	});
 </script>
 
@@ -236,14 +245,7 @@
 			)}
 		</div>
 
-		{#if filteredLeaderboard.length === 0}
-			<p class="mt-4 opacity-70">
-				{selectedGame === GameFilter.All && selectedTime === TimeFilter.All
-					? 'No scores yet — submit one above to get started!'
-					: 'No scores for this selection.'}
-			</p>
-		{:else}
-			<div class="mt-4 overflow-x-auto">
+		<div class="mt-4 overflow-x-auto">
 				<table class="table">
 					<thead>
 						<tr>
@@ -262,8 +264,8 @@
 					</thead>
 					<tbody>
 						{#each filteredLeaderboard as entry, i}
-							<tr class={i === 0 ? 'bg-base-300 font-semibold' : ''}>
-								<td>{i + 1}</td>
+							<tr class="{i === 0 && entry.hasPlayed ? 'bg-base-300 font-semibold' : ''} {!entry.hasPlayed ? 'opacity-40' : ''}">
+								<td>{entry.hasPlayed ? i + 1 : ''}</td>
 								<td>
 									<a href="/users/{entry.username}" class="flex items-center gap-2 hover:underline">
 										<Avatar src={entry.avatarUrl} username={entry.username} size="xs" />
@@ -271,14 +273,13 @@
 											<span class="opacity-40 text-xs">(left)</span>{/if}
 									</a>
 								</td>
-								<td>{entry.games}</td>
-								<td>{entry.total}</td>
-								<td>{(entry.total / entry.games).toFixed(1)}</td>
+								<td>{entry.hasPlayed ? entry.games : '—'}</td>
+								<td>{entry.hasPlayed ? entry.total : '—'}</td>
+								<td>{entry.hasPlayed ? (entry.total / entry.games).toFixed(1) : '—'}</td>
 							</tr>
 						{/each}
 					</tbody>
 				</table>
-			</div>
-		{/if}
+		</div>
 	</div>
 </section>
