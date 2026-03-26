@@ -54,5 +54,5 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 		}
 	}
 
-	redirect(303, `/groups/${group.id}`);
+	redirect(303, `/groups/${group.id}?joined=1`);
 };
