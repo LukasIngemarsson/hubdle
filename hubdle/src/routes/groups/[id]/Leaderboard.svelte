@@ -44,6 +44,9 @@
 	let sortColumn = $state<SortColumn>(SortColumn.Avg);
 	let sortDirection = $state<SortDirection>(SortDirection.Asc);
 
+	const PAGE_SIZE = 10;
+	let visibleCount = $state(PAGE_SIZE);
+
 	function toggleSort(column: SortColumn) {
 		if (sortColumn === column) {
 			sortDirection = sortDirection === SortDirection.Asc ? SortDirection.Desc : SortDirection.Asc;
@@ -185,6 +188,9 @@
 
 		return [...scored, ...unscored];
 	});
+
+	let visibleEntries = $derived(filteredLeaderboard.slice(0, visibleCount));
+	let hasMore = $derived(filteredLeaderboard.length > visibleCount);
 </script>
 
 {#snippet sortableHeader(column: SortColumn, label: string)}
@@ -263,7 +269,7 @@
 						</tr>
 					</thead>
 					<tbody>
-						{#each filteredLeaderboard as entry, i}
+						{#each visibleEntries as entry, i}
 							<tr class="{i === 0 && entry.hasPlayed ? 'bg-base-300 font-semibold' : ''} {!entry.hasPlayed ? 'opacity-40' : ''}">
 								<td>{entry.hasPlayed ? i + 1 : ''}</td>
 								<td>
@@ -281,5 +287,13 @@
 					</tbody>
 				</table>
 		</div>
+		{#if hasMore}
+			<button
+				class="btn btn-ghost btn-sm mt-2 w-full"
+				onclick={() => (visibleCount += PAGE_SIZE)}
+			>
+				Show more
+			</button>
+		{/if}
 	</div>
 </section>
