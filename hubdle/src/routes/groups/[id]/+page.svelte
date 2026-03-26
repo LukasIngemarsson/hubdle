@@ -4,7 +4,7 @@
 	import type { ActionData, PageData } from './$types';
 	import PageContainer from '$lib/components/PageContainer.svelte';
 	import ScoreSubmitForm from './ScoreSubmitForm.svelte';
-	import TodaysActivity from './TodaysActivity.svelte';
+	import ScoreHeatmap from './ScoreHeatmap.svelte';
 	import Leaderboard from './Leaderboard.svelte';
 	import RecentSubmissions from './RecentSubmissions.svelte';
 	import MembersSection from './MembersSection.svelte';
@@ -45,9 +45,7 @@
 		new Set(
 			data.submissions
 				.filter(
-					(s) =>
-						s.user_id === data.userId &&
-						s.game_date === new Date().toISOString().slice(0, 10)
+					(s) => s.user_id === data.userId && s.game_date === new Date().toISOString().slice(0, 10)
 				)
 				.map((s) => s.game_id)
 		)
@@ -98,7 +96,7 @@
 		{/each}
 	</section>
 
-	<TodaysActivity submissions={data.submissions} members={data.allMembers} userId={data.userId} />
+	<ScoreHeatmap games={data.games} submissions={data.submissions} members={data.allMembers} />
 	<ScoreSubmitForm {form} games={data.games} />
 	<Leaderboard games={data.games} submissions={data.submissions} members={data.allMembers} />
 	<RecentSubmissions
