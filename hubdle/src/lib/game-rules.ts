@@ -35,6 +35,12 @@ export const GAME_RULES: Record<string, GameRules> = {
 		maxScore: 10,
 		scoreLabel: 'Correct guesses (0–10)',
 		hint: 'Number of rounds where you picked the more popular food.'
+	},
+	timeguessr: {
+		minScore: 0,
+		maxScore: 50000,
+		scoreLabel: 'Points (0–50,000)',
+		hint: 'Total points across 5 rounds (up to 10,000 per round).'
 	}
 };
 

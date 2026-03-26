@@ -10,7 +10,8 @@ export function parseShareText(text: string): ParseResult {
 		parseBandle(text) ??
 		parseConnections(text) ??
 		parseContexto(text) ??
-		parseScrandle(text)
+		parseScrandle(text) ??
+		parseTimeGuessr(text)
 	);
 }
 
@@ -96,4 +97,20 @@ function parseScrandle(text: string): ParseResult {
 	const gameDate = match[2];
 
 	return { gameId: 'scrandle', score, gameDate };
+}
+
+function parseTimeGuessr(text: string): ParseResult {
+	// "TimeGuessr #1030 26,270/50,000"
+	const match = text.match(/TimeGuessr\s+#(\d+)\s+([\d,]+)\/50,000/);
+	if (!match) return null;
+
+	const puzzleNumber = parseInt(match[1], 10);
+	const score = parseInt(match[2].replace(/,/g, ''), 10);
+
+	// TimeGuessr #1 was 2023-06-01
+	const epoch = new Date('2023-05-31');
+	epoch.setDate(epoch.getDate() + puzzleNumber);
+	const gameDate = epoch.toISOString().slice(0, 10);
+
+	return { gameId: 'timeguessr', score, gameDate };
 }
