@@ -20,11 +20,11 @@
 		submissions: Submission[];
 	} = $props();
 
-	// Last 7 days, most recent first
+	// Last 7 days, oldest first (left to right)
 	let days = $derived.by(() => {
 		const result: string[] = [];
 		const now = new Date();
-		for (let i = 0; i < 7; i++) {
+		for (let i = 6; i >= 0; i--) {
 			const d = new Date(now);
 			d.setDate(d.getDate() - i);
 			result.push(d.toISOString().slice(0, 10));
