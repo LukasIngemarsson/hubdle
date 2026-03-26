@@ -24,12 +24,17 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 
 	const members = (allMembers ?? []).filter((m) => m.left_at === null);
 
-	const { data: submissions } = await locals.supabase
-		.from('submissions')
-		.select('id, user_id, score, game_id, game_date, raw_text, games(name, score_direction)')
-		.eq('group_id', params.id)
-		.order('game_date', { ascending: false })
-		.order('created_at', { ascending: false });
+	// Fetch submissions for all members (current + departed) — submissions are global
+	const allMemberIds = (allMembers ?? []).map((m) => m.user_id);
+	const { data: submissions } =
+		allMemberIds.length > 0
+			? await locals.supabase
+					.from('submissions')
+					.select('id, user_id, score, game_id, game_date, raw_text, games(name, score_direction)')
+					.in('user_id', allMemberIds)
+					.order('game_date', { ascending: false })
+					.order('created_at', { ascending: false })
+			: { data: [] };
 
 	const { data: games } = await locals.supabase
 		.from('games')
@@ -115,7 +120,6 @@ export const actions: Actions = {
 
 		const { error: insertError } = await locals.supabase.from('submissions').insert({
 			user_id: user.id,
-			group_id: params.id,
 			game_id: parsed.gameId,
 			score: parsed.score,
 			raw_text: rawText,
@@ -153,7 +157,6 @@ export const actions: Actions = {
 
 		const { error: insertError } = await locals.supabase.from('submissions').insert({
 			user_id: user.id,
-			group_id: params.id,
 			game_id: gameId,
 			score,
 			raw_text: `Manual: ${gameId} ${score}`,

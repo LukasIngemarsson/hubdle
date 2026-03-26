@@ -211,7 +211,6 @@ export type Database = {
 					created_at: string;
 					game_date: string;
 					game_id: string;
-					group_id: string;
 					id: string;
 					raw_text: string;
 					score: number;
@@ -221,7 +220,6 @@ export type Database = {
 					created_at?: string;
 					game_date: string;
 					game_id: string;
-					group_id: string;
 					id?: string;
 					raw_text: string;
 					score: number;
@@ -231,7 +229,6 @@ export type Database = {
 					created_at?: string;
 					game_date?: string;
 					game_id?: string;
-					group_id?: string;
 					id?: string;
 					raw_text?: string;
 					score?: number;
@@ -243,13 +240,6 @@ export type Database = {
 						columns: ['game_id'];
 						isOneToOne: false;
 						referencedRelation: 'games';
-						referencedColumns: ['id'];
-					},
-					{
-						foreignKeyName: 'submissions_group_id_fkey';
-						columns: ['group_id'];
-						isOneToOne: false;
-						referencedRelation: 'groups';
 						referencedColumns: ['id'];
 					},
 					{
