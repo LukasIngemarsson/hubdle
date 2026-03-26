@@ -39,7 +39,7 @@
 						<Avatar src={friend.avatarUrl} username={friend.username} size="xs" />
 						{friend.username}
 					</a>
-					{#if !data.isOwnProfile}
+					{#if !data.isOwnProfile && friend.userId !== data.viewerUserId}
 						{#if viewerFriendIdSet.has(friend.userId)}
 							<span class="badge badge-success badge-sm">Friends</span>
 						{:else}
