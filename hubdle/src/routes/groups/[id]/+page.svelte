@@ -15,6 +15,11 @@
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 
+	const Tab = { Today: 'today', Leaderboard: 'leaderboard', Members: 'members' } as const;
+	type Tab = (typeof Tab)[keyof typeof Tab];
+
+	let activeTab = $state<Tab>(Tab.Today);
+
 	let channel: ReturnType<typeof data.supabase.channel>;
 
 	onMount(() => {
@@ -96,27 +101,57 @@
 		{/each}
 	</section>
 
-	<ScoreHeatmap games={data.games} submissions={data.submissions} members={data.allMembers} />
-	<ScoreSubmitForm {form} games={data.games} />
-	<Leaderboard games={data.games} submissions={data.submissions} members={data.allMembers} />
-	<RecentSubmissions
-		submissions={data.submissions}
-		members={data.allMembers}
-		userId={data.userId}
-	/>
+	<div class="mt-6 flex gap-1 border-b border-base-300">
+		<button
+			class="px-4 py-2 text-sm font-medium transition-colors {activeTab === Tab.Today
+				? 'border-b-2 border-primary text-primary'
+				: 'opacity-60 hover:opacity-100'}"
+			onclick={() => (activeTab = Tab.Today)}
+		>
+			Today
+		</button>
+		<button
+			class="px-4 py-2 text-sm font-medium transition-colors {activeTab === Tab.Leaderboard
+				? 'border-b-2 border-primary text-primary'
+				: 'opacity-60 hover:opacity-100'}"
+			onclick={() => (activeTab = Tab.Leaderboard)}
+		>
+			Leaderboard
+		</button>
+		<button
+			class="px-4 py-2 text-sm font-medium transition-colors {activeTab === Tab.Members
+				? 'border-b-2 border-primary text-primary'
+				: 'opacity-60 hover:opacity-100'}"
+			onclick={() => (activeTab = Tab.Members)}
+		>
+			Members
+			<span class="badge badge-sm ml-1">{data.members.length}</span>
+		</button>
+	</div>
 
-	<MembersSection
-		members={data.members}
-		invitableFriends={data.invitableFriends}
-		friendshipStatusMap={data.friendshipStatusMap}
-		userId={data.userId}
-		ownerId={data.group.created_by}
-	/>
-
-	<GroupActions
-		{isOwner}
-		{isOnlyMember}
-		{otherMembers}
-		onUnsubscribeRealtime={unsubscribeRealtime}
-	/>
+	{#if activeTab === Tab.Today}
+		<ScoreHeatmap games={data.games} submissions={data.submissions} members={data.allMembers} />
+		<ScoreSubmitForm {form} games={data.games} />
+	{:else if activeTab === Tab.Leaderboard}
+		<Leaderboard games={data.games} submissions={data.submissions} members={data.allMembers} />
+		<RecentSubmissions
+			submissions={data.submissions}
+			members={data.allMembers}
+			userId={data.userId}
+		/>
+	{:else if activeTab === Tab.Members}
+		<MembersSection
+			members={data.members}
+			invitableFriends={data.invitableFriends}
+			friendshipStatusMap={data.friendshipStatusMap}
+			userId={data.userId}
+			ownerId={data.group.created_by}
+		/>
+		<GroupActions
+			{isOwner}
+			{isOnlyMember}
+			{otherMembers}
+			onUnsubscribeRealtime={unsubscribeRealtime}
+		/>
+	{/if}
 </PageContainer>
