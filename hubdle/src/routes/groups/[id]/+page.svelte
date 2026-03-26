@@ -15,7 +15,7 @@
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 
-	const Tab = { Scores: 'scores', Submit: 'submit', Members: 'members' } as const;
+	const Tab = { Scores: 'scores', Submissions: 'submissions', Members: 'members' } as const;
 	type Tab = (typeof Tab)[keyof typeof Tab];
 
 	let activeTab = $state<Tab>(Tab.Scores);
@@ -111,12 +111,12 @@
 			Scores
 		</button>
 		<button
-			class="px-4 py-2 text-sm font-medium transition-colors {activeTab === Tab.Submit
+			class="px-4 py-2 text-sm font-medium transition-colors {activeTab === Tab.Submissions
 				? 'border-b-2 border-primary text-primary'
 				: 'opacity-60 hover:opacity-100'}"
-			onclick={() => (activeTab = Tab.Submit)}
+			onclick={() => (activeTab = Tab.Submissions)}
 		>
-			Submit
+			Submissions
 		</button>
 		<button
 			class="px-4 py-2 text-sm font-medium transition-colors {activeTab === Tab.Members
@@ -132,7 +132,7 @@
 	{#if activeTab === Tab.Scores}
 		<ScoreHeatmap games={data.games} submissions={data.submissions} members={data.allMembers} />
 		<Leaderboard games={data.games} submissions={data.submissions} members={data.allMembers} />
-	{:else if activeTab === Tab.Submit}
+	{:else if activeTab === Tab.Submissions}
 		<ScoreSubmitForm {form} games={data.games} />
 		<RecentSubmissions
 			submissions={data.submissions}
