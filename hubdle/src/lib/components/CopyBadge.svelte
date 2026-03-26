@@ -16,6 +16,8 @@
 
 	let copied = $state(false);
 
+	let tooltipText = $derived(copied ? 'Copied!' : text);
+
 	async function handleClick(e: MouseEvent) {
 		onclick?.(e);
 		await navigator.clipboard.writeText(text);
@@ -24,13 +26,15 @@
 	}
 </script>
 
-<button class="flex items-center gap-1 opacity-70 hover:opacity-100" onclick={handleClick}>
-	<span class="badge badge-ghost font-mono {size === 'lg' ? 'text-lg' : 'text-sm'}"
-		>{label ?? text}</span
-	>
-	{#if copied}
-		<CheckmarkIcon class="h-4 w-4 text-success" />
-	{:else}
-		<ClipboardIcon />
-	{/if}
-</button>
+<div class="tooltip" data-tip={tooltipText}>
+	<button class="flex items-center gap-1 opacity-70 hover:opacity-100" onclick={handleClick}>
+		<span class="badge badge-ghost font-mono {size === 'lg' ? 'text-lg' : 'text-sm'}"
+			>{label ?? text}</span
+		>
+		{#if copied}
+			<CheckmarkIcon class="h-4 w-4 text-success" />
+		{:else}
+			<ClipboardIcon />
+		{/if}
+	</button>
+</div>

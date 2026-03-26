@@ -70,7 +70,8 @@
 			<div class="flex items-center gap-2">
 				<CopyBadge
 					text={`${$page.url.origin}/invite/${data.group.invite_code}`}
-					label={`${$page.url.host}/invite/${data.group.invite_code}`}
+					label={data.group.invite_code}
+					size="lg"
 				/>
 			</div>
 		</div>
