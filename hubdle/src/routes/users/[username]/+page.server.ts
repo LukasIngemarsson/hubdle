@@ -98,8 +98,20 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		}
 	}
 
-	// Recent activity (last 15)
-	const recentActivity = allSubs.slice(0, 15).map((sub) => ({
+	// Last 7 days of scores for heatmap
+	const sevenDaysAgo = new Date();
+	sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+	const sevenDaysAgoStr = sevenDaysAgo.toISOString().slice(0, 10);
+	const recentScores = allSubs
+		.filter((sub) => sub.game_date >= sevenDaysAgoStr)
+		.map((sub) => ({
+			gameId: sub.game_id,
+			score: sub.score,
+			gameDate: sub.game_date
+		}));
+
+	// Recent activity
+	const recentActivity = allSubs.map((sub) => ({
 		id: sub.id,
 		gameId: sub.game_id,
 		gameName: sub.games?.name ?? sub.game_id,
@@ -107,7 +119,10 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		gameDate: sub.game_date
 	}));
 
-	// Friendship status (only for other users when logged in)
+	// Favorite game (most played)
+	const favoriteGame = perGameStats.length > 0 ? perGameStats[0].name : null;
+
+	// Friendship status with viewing user (only for other users when logged in)
 	let friendship: { id: string; status: string; direction: 'outgoing' | 'incoming' } | null = null;
 	if (user && !isOwnProfile) {
 		const { data: existing } = await locals.supabase
@@ -127,6 +142,19 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		}
 	}
 
+	// Friend count
+	const { count: friendCountAsReq } = await locals.supabase
+		.from('friendships')
+		.select('id', { count: 'exact', head: true })
+		.eq('requester_id', profile.id)
+		.eq('status', 'accepted');
+	const { count: friendCountAsAddr } = await locals.supabase
+		.from('friendships')
+		.select('id', { count: 'exact', head: true })
+		.eq('addressee_id', profile.id)
+		.eq('status', 'accepted');
+	const friendCount = (friendCountAsReq ?? 0) + (friendCountAsAddr ?? 0);
+
 	return {
 		profile: {
 			id: profile.id,
@@ -137,11 +165,12 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		isOwnProfile,
 		friendship,
 		stats: {
-			totalSubmissions: allSubs.length,
-			totalGroups: totalGroups ?? 0,
-			streak
+			streak,
+			favoriteGame,
+			friendCount
 		},
 		perGameStats,
+		recentScores,
 		recentActivity
 	};
 };

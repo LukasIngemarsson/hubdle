@@ -55,7 +55,7 @@
 
 <section class="card mt-6 border border-base-300">
 	<div class="card-body">
-		<h2 class="card-title text-base">Recent Submissions</h2>
+		<h2 class="card-title text-base">Submissions</h2>
 		{#if submissions.length === 0}
 			<p class="opacity-70">No submissions yet — submit your first score above.</p>
 		{:else}
