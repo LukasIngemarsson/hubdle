@@ -27,7 +27,8 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		.from('submissions')
 		.select('id, user_id, score, game_id, game_date, raw_text, games(name, score_direction)')
 		.eq('group_id', params.id)
-		.order('game_date', { ascending: false });
+		.order('game_date', { ascending: false })
+		.order('created_at', { ascending: false });
 
 	const { data: games } = await locals.supabase
 		.from('games')
