@@ -49,7 +49,6 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 	// Determine which of the profile's friends the viewing user is also friends with
 	let viewerFriendIds = new Set<string>();
 	if (user) {
-		viewerFriendIds.add(user.id); // viewer is "friends" with themselves (don't show Add)
 		const { data: viewerAsReq } = await locals.supabase
 			.from('friendships')
 			.select('addressee_id')
@@ -72,6 +71,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			avatarUrl: profile.avatar_url
 		},
 		isOwnProfile,
+		viewerUserId: user?.id ?? null,
 		friends,
 		viewerFriendIds: [...viewerFriendIds]
 	};
