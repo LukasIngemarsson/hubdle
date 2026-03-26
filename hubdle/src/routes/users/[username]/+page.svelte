@@ -5,6 +5,7 @@
 	import Avatar from '$lib/components/Avatar.svelte';
 	import { toastEnhance } from '$lib/enhance-toast';
 	import ActivityRow from './ActivityRow.svelte';
+	import ProfileHeatmap from './ProfileHeatmap.svelte';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 
@@ -94,34 +95,7 @@
 			</div>
 		</div>
 
-		{#if data.perGameStats.length > 0}
-			<div class="card border border-base-300">
-				<div class="card-body">
-					<h2 class="card-title text-base">Per-Game Breakdown</h2>
-					<div class="mt-2 flex flex-col gap-4">
-						{#each data.perGameStats as game}
-							<div>
-								<div class="flex items-center justify-between text-sm">
-									<span class="font-medium">{game.name}</span>
-									<span class="opacity-60">{game.count} played</span>
-								</div>
-								<div class="mt-1 flex items-center gap-3">
-									<div class="h-2.5 flex-1 rounded-full bg-base-300">
-										<div
-											class="h-full rounded-full bg-primary transition-all"
-											style="width: {game.barPct}%"
-										></div>
-									</div>
-									<span class="w-20 text-right text-xs opacity-70">
-										avg {game.avg} · best {game.best}
-									</span>
-								</div>
-							</div>
-						{/each}
-					</div>
-				</div>
-			</div>
-		{/if}
+		<ProfileHeatmap games={data.perGameStats} submissions={data.recentScores} />
 
 		{#if data.recentActivity.length > 0}
 			<div class="card border border-base-300">

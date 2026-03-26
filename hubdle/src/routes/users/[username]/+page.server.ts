@@ -98,8 +98,20 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		}
 	}
 
-	// Recent activity (last 15)
-	const recentActivity = allSubs.slice(0, 15).map((sub) => ({
+	// Last 7 days of scores for heatmap
+	const sevenDaysAgo = new Date();
+	sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+	const sevenDaysAgoStr = sevenDaysAgo.toISOString().slice(0, 10);
+	const recentScores = allSubs
+		.filter((sub) => sub.game_date >= sevenDaysAgoStr)
+		.map((sub) => ({
+			gameId: sub.game_id,
+			score: sub.score,
+			gameDate: sub.game_date
+		}));
+
+	// Recent activity
+	const recentActivity = allSubs.map((sub) => ({
 		id: sub.id,
 		gameId: sub.game_id,
 		gameName: sub.games?.name ?? sub.game_id,
@@ -142,6 +154,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			streak
 		},
 		perGameStats,
+		recentScores,
 		recentActivity
 	};
 };
