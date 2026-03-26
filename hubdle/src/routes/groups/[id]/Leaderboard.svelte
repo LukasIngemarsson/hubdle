@@ -252,46 +252,47 @@
 		</div>
 
 		<div class="mt-4 overflow-x-auto">
-				<table class="table">
-					<thead>
-						<tr>
-							<th>#</th>
-							<th>Player</th>
-							<th>Games</th>
-							{@render sortableHeader(
-								SortColumn.Total,
-								selectedGame === GameFilter.All ? 'Rank Sum' : 'Total'
-							)}
-							{@render sortableHeader(
-								SortColumn.Avg,
-								selectedGame === GameFilter.All ? 'Avg Rank' : 'Avg'
-							)}
+			<table class="table">
+				<thead>
+					<tr>
+						<th>#</th>
+						<th>Player</th>
+						<th>Games</th>
+						{@render sortableHeader(
+							SortColumn.Total,
+							selectedGame === GameFilter.All ? 'Rank Sum' : 'Total'
+						)}
+						{@render sortableHeader(
+							SortColumn.Avg,
+							selectedGame === GameFilter.All ? 'Avg Rank' : 'Avg'
+						)}
+					</tr>
+				</thead>
+				<tbody>
+					{#each visibleEntries as entry, i}
+						<tr
+							class="{i === 0 && entry.hasPlayed
+								? 'bg-base-300 font-semibold'
+								: ''} {!entry.hasPlayed ? 'opacity-40' : ''}"
+						>
+							<td>{entry.hasPlayed ? i + 1 : ''}</td>
+							<td>
+								<a href="/users/{entry.username}" class="flex items-center gap-2 hover:underline">
+									<Avatar src={entry.avatarUrl} username={entry.username} size="xs" />
+									{entry.username}{#if entry.left}
+										<span class="opacity-40 text-xs">(left)</span>{/if}
+								</a>
+							</td>
+							<td>{entry.hasPlayed ? entry.games : '—'}</td>
+							<td>{entry.hasPlayed ? entry.total : '—'}</td>
+							<td>{entry.hasPlayed ? (entry.total / entry.games).toFixed(1) : '—'}</td>
 						</tr>
-					</thead>
-					<tbody>
-						{#each visibleEntries as entry, i}
-							<tr class="{i === 0 && entry.hasPlayed ? 'bg-base-300 font-semibold' : ''} {!entry.hasPlayed ? 'opacity-40' : ''}">
-								<td>{entry.hasPlayed ? i + 1 : ''}</td>
-								<td>
-									<a href="/users/{entry.username}" class="flex items-center gap-2 hover:underline">
-										<Avatar src={entry.avatarUrl} username={entry.username} size="xs" />
-										{entry.username}{#if entry.left}
-											<span class="opacity-40 text-xs">(left)</span>{/if}
-									</a>
-								</td>
-								<td>{entry.hasPlayed ? entry.games : '—'}</td>
-								<td>{entry.hasPlayed ? entry.total : '—'}</td>
-								<td>{entry.hasPlayed ? (entry.total / entry.games).toFixed(1) : '—'}</td>
-							</tr>
-						{/each}
-					</tbody>
-				</table>
+					{/each}
+				</tbody>
+			</table>
 		</div>
 		{#if hasMore}
-			<button
-				class="btn btn-ghost btn-sm mt-2 w-full"
-				onclick={() => (visibleCount += PAGE_SIZE)}
-			>
+			<button class="btn btn-ghost btn-sm mt-2 w-full" onclick={() => (visibleCount += PAGE_SIZE)}>
 				Show more
 			</button>
 		{/if}
