@@ -27,8 +27,47 @@
 		members
 	}: { games: Game[]; submissions: Submission[]; members: Member[] } = $props();
 
+	const SortColumn = {
+		Total: 'total',
+		Avg: 'avg'
+	} as const;
+	type SortColumn = (typeof SortColumn)[keyof typeof SortColumn];
+
+	const SortDirection = {
+		Asc: 'asc',
+		Desc: 'desc'
+	} as const;
+	type SortDirection = (typeof SortDirection)[keyof typeof SortDirection];
+
 	let selectedGame = $state<string>(GameFilter.All);
 	let selectedTime = $state<TimeFilter>(TimeFilter.All);
+	let sortColumn = $state<SortColumn>(SortColumn.Avg);
+	let sortDirection = $state<SortDirection>(SortDirection.Asc);
+
+	function toggleSort(column: SortColumn) {
+		if (sortColumn === column) {
+			sortDirection = sortDirection === SortDirection.Asc ? SortDirection.Desc : SortDirection.Asc;
+		} else {
+			sortColumn = column;
+			// Default: asc for "All" (rank sum), follow game direction for single game
+			sortDirection =
+				selectedGame === GameFilter.All
+					? SortDirection.Asc
+					: (games.find((g) => g.id === selectedGame)?.score_direction === 'asc'
+						? SortDirection.Asc
+						: SortDirection.Desc);
+		}
+	}
+
+	function resetSort() {
+		sortColumn = SortColumn.Avg;
+		sortDirection =
+			selectedGame === GameFilter.All
+				? SortDirection.Asc
+				: (games.find((g) => g.id === selectedGame)?.score_direction === 'asc'
+					? SortDirection.Asc
+					: SortDirection.Desc);
+	}
 
 	const timeOptions: { value: TimeFilter; label: string }[] = [
 		{ value: TimeFilter.All, label: 'All Time' },
@@ -74,6 +113,8 @@
 			}
 		}
 
+		let entries: { userId: string; username: string; avatarUrl: string | null; left: boolean; total: number; games: number }[];
+
 		if (selectedGame !== GameFilter.All) {
 			// Single game: sum raw scores
 			const scores = new Map<string, { total: number; games: number }>();
@@ -84,45 +125,60 @@
 				scores.set(sub.user_id, entry);
 			}
 
-			const gameData = games.find((g) => g.id === selectedGame);
-			const ascending = gameData ? gameData.score_direction === 'asc' : true;
-
-			return [...scores.entries()]
+			entries = [...scores.entries()]
 				.map(([userId, d]) => ({ userId, ...userInfo.get(userId)!, ...d }))
-				.filter((e) => e.games > 0)
-				.sort((a, b) => (ascending ? a.total - b.total : b.total - a.total));
-		}
-
-		// All games: rank players per game, then sum ranks
-		const byGame = new Map<string, Map<string, number>>();
-		for (const sub of filtered) {
-			if (!byGame.has(sub.game_id)) byGame.set(sub.game_id, new Map());
-			const gameScores = byGame.get(sub.game_id)!;
-			gameScores.set(sub.user_id, (gameScores.get(sub.user_id) ?? 0) + sub.score);
-		}
-
-		const rankSums = new Map<string, { total: number; games: number }>();
-		for (const [gameId, gameScores] of byGame) {
-			const gameData = games.find((g) => g.id === gameId);
-			const ascending = gameData ? gameData.score_direction === 'asc' : true;
-
-			const sorted = [...gameScores.entries()].sort(([, a], [, b]) => (ascending ? a - b : b - a));
-
-			for (let i = 0; i < sorted.length; i++) {
-				const [userId] = sorted[i];
-				const entry = rankSums.get(userId) ?? { total: 0, games: 0 };
-				entry.total += i + 1;
-				entry.games += 1;
-				rankSums.set(userId, entry);
+				.filter((e) => e.games > 0);
+		} else {
+			// All games: rank players per game, then sum ranks
+			const byGame = new Map<string, Map<string, number>>();
+			for (const sub of filtered) {
+				if (!byGame.has(sub.game_id)) byGame.set(sub.game_id, new Map());
+				const gameScores = byGame.get(sub.game_id)!;
+				gameScores.set(sub.user_id, (gameScores.get(sub.user_id) ?? 0) + sub.score);
 			}
+
+			const rankSums = new Map<string, { total: number; games: number }>();
+			for (const [gameId, gameScores] of byGame) {
+				const gameData = games.find((g) => g.id === gameId);
+				const ascending = gameData ? gameData.score_direction === 'asc' : true;
+
+				const sorted = [...gameScores.entries()].sort(([, a], [, b]) => (ascending ? a - b : b - a));
+
+				for (let i = 0; i < sorted.length; i++) {
+					const [userId] = sorted[i];
+					const entry = rankSums.get(userId) ?? { total: 0, games: 0 };
+					entry.total += i + 1;
+					entry.games += 1;
+					rankSums.set(userId, entry);
+				}
+			}
+
+			entries = [...rankSums.entries()]
+				.map(([userId, d]) => ({ userId, ...userInfo.get(userId)!, ...d }))
+				.filter((e) => e.games > 0);
 		}
 
-		return [...rankSums.entries()]
-			.map(([userId, d]) => ({ userId, ...userInfo.get(userId)!, ...d }))
-			.filter((e) => e.games > 0)
-			.sort((a, b) => a.total - b.total);
+		const getValue = (e: (typeof entries)[0]) =>
+			sortColumn === SortColumn.Avg ? e.total / e.games : e.total;
+		const asc = sortDirection === SortDirection.Asc;
+
+		return entries.sort((a, b) => {
+			const diff = getValue(a) - getValue(b);
+			return asc ? diff : -diff;
+		});
 	});
 </script>
+
+{#snippet sortableHeader(column: SortColumn, label: string)}
+	<th>
+		<button class="inline-flex items-center gap-1 hover:opacity-70" onclick={() => toggleSort(column)}>
+			{label}
+			{#if sortColumn === column}
+				<span class="text-xs">{sortDirection === SortDirection.Asc ? '▲' : '▼'}</span>
+			{/if}
+		</button>
+	</th>
+{/snippet}
 
 {#snippet filterGroup(
 	label: string,
@@ -150,7 +206,10 @@
 		<h2 class="card-title text-base">Leaderboard</h2>
 
 		<div class="mt-2 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-6">
-			{@render filterGroup('Game', gameOptions, selectedGame, (v) => (selectedGame = v))}
+			{@render filterGroup('Game', gameOptions, selectedGame, (v) => {
+			selectedGame = v;
+			resetSort();
+		})}
 
 			<div class="hidden sm:block sm:self-stretch">
 				<div class="h-full w-px bg-base-300"></div>
@@ -179,8 +238,8 @@
 							<th>#</th>
 							<th>Player</th>
 							<th>Games</th>
-							<th>{selectedGame === GameFilter.All ? 'Rank Sum' : 'Total'}</th>
-							<th>{selectedGame === GameFilter.All ? 'Avg Rank' : 'Avg'}</th>
+							{@render sortableHeader(SortColumn.Total, selectedGame === GameFilter.All ? 'Rank Sum' : 'Total')}
+							{@render sortableHeader(SortColumn.Avg, selectedGame === GameFilter.All ? 'Avg Rank' : 'Avg')}
 						</tr>
 					</thead>
 					<tbody>
