@@ -140,7 +140,7 @@ export const actions: Actions = {
 
 		if (!gameId || !scoreStr || !gameDate) return fail(400, { error: 'All fields are required.' });
 
-		const score = parseInt(scoreStr, 10);
+		const score = parseInt(scoreStr.replace(/[.,]/g, ''), 10);
 		if (isNaN(score)) return fail(400, { error: 'Score must be a number.' });
 
 		const scoreError = validateScore(gameId, score);
@@ -179,7 +179,7 @@ export const actions: Actions = {
 		if (!submissionId || !scoreStr || !gameId)
 			return fail(400, { error: 'All fields are required.' });
 
-		const score = parseInt(scoreStr, 10);
+		const score = parseInt(scoreStr.replace(/[.,]/g, ''), 10);
 		if (isNaN(score)) return fail(400, { error: 'Score must be a number.' });
 
 		const scoreError = validateScore(gameId, score);
