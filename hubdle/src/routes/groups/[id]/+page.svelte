@@ -9,7 +9,6 @@
 	import MembersSection from './MembersSection.svelte';
 	import GroupActions from './GroupActions.svelte';
 	import CopyBadge from '$lib/components/CopyBadge.svelte';
-	import ExternalLinkIcon from '$lib/components/icons/ExternalLinkIcon.svelte';
 	import { toasts } from '$lib/stores/toast.svelte';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
@@ -69,9 +68,7 @@
 		<div class="mt-1 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
 			<h1 class="text-2xl font-bold">{data.group.name}</h1>
 			<div class="flex items-center gap-2">
-				<span class="flex items-center gap-1 text-xs opacity-50">
-					<ExternalLinkIcon class="h-3 w-3" /> Invite link
-				</span>
+				<span class="text-xs opacity-50">Invite</span>
 				<CopyBadge
 					text={`${$page.url.origin}/invite/${data.group.invite_code}`}
 					label={data.group.invite_code}
