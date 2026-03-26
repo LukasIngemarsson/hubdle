@@ -82,6 +82,7 @@
 					</a>
 					{#if data.user}
 						<div class="hidden items-center gap-4 sm:flex">
+							<NavLink href="/games" label="Games" />
 							<NavLink href="/groups" label="Groups" badge={data.groupInviteCount} />
 							<NavLink href="/friends" label="Friends" badge={data.friendRequestCount} />
 						</div>
@@ -181,6 +182,7 @@
 	{#if menuOpen && data.user}
 		<div class="border-b border-base-300 bg-base-200 sm:hidden">
 			<div class="mx-auto flex max-w-4xl flex-col gap-3 px-6 py-3">
+				<a href="/games" class="text-sm" onclick={() => (menuOpen = false)}>Games</a>
 				<a href="/groups" class="text-sm" onclick={() => (menuOpen = false)}
 					>Groups{#if data.groupInviteCount > 0}<span class="badge badge-primary badge-xs ml-1"
 							>{data.groupInviteCount}</span
