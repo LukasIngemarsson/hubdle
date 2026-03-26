@@ -1,5 +1,6 @@
 import { fail, redirect } from '@sveltejs/kit';
 import { ensureProfile } from '$lib/auth';
+import { MAX_GROUP_MEMBERS } from '$lib/constants';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ locals }) => {
@@ -82,6 +83,14 @@ export const actions: Actions = {
 
 		if (!invite) return fail(404, { error: 'Invite not found.' });
 
+		const { count: memberCount } = await locals.supabase
+			.from('group_members')
+			.select('user_id', { count: 'exact', head: true })
+			.eq('group_id', invite.group_id)
+			.is('left_at', null);
+		if ((memberCount ?? 0) >= MAX_GROUP_MEMBERS)
+			return fail(400, { error: `This group is full (max ${MAX_GROUP_MEMBERS} members).` });
+
 		await ensureProfile(locals.supabase, user);
 
 		// Join the group (or rejoin if soft-deleted)
@@ -150,6 +159,14 @@ export const actions: Actions = {
 			.single();
 
 		if (!group) return fail(404, { error: 'Invalid invite code.' });
+
+		const { count: memberCount } = await locals.supabase
+			.from('group_members')
+			.select('user_id', { count: 'exact', head: true })
+			.eq('group_id', group.id)
+			.is('left_at', null);
+		if ((memberCount ?? 0) >= MAX_GROUP_MEMBERS)
+			return fail(400, { error: `This group is full (max ${MAX_GROUP_MEMBERS} members).` });
 
 		const { error } = await locals.supabase
 			.from('group_members')
