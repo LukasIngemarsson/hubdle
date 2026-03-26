@@ -113,7 +113,7 @@
 											{#if GAME_ICONS[game.gameId]}<img
 													src={GAME_ICONS[game.gameId]}
 													alt=""
-													class="h-4 w-4"
+													class="h-4 w-4 rounded"
 												/>{/if}
 											{game.name}
 										</span>
