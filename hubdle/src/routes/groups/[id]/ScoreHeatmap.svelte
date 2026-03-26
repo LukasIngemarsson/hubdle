@@ -126,7 +126,7 @@
 											<td class="text-center">
 												{#if score !== undefined}
 													<span
-														class="inline-flex h-7 min-w-[2rem] items-center justify-center rounded px-1.5 text-xs font-semibold"
+														class="inline-flex h-7 w-12 items-center justify-center rounded text-xs font-semibold"
 														style="background-color: {getCellColor(
 															game.id,
 															score
