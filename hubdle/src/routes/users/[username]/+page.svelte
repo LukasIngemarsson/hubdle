@@ -12,6 +12,11 @@
 	let editScore = $state(0);
 	let deletingId = $state<string | null>(null);
 
+	const PAGE_SIZE = 20;
+	let visibleCount = $state(PAGE_SIZE);
+	let visibleActivity = $derived(data.recentActivity.slice(0, visibleCount));
+	let hasMore = $derived(data.recentActivity.length > visibleCount);
+
 	const memberSince = $derived(
 		new Date(data.profile.createdAt).toLocaleDateString('en-US', {
 			year: 'numeric',
@@ -133,7 +138,7 @@
 								</tr>
 							</thead>
 							<tbody>
-								{#each data.recentActivity as activity}
+								{#each visibleActivity as activity}
 									<ActivityRow
 										{activity}
 										isOwnProfile={data.isOwnProfile}
@@ -145,6 +150,14 @@
 							</tbody>
 						</table>
 					</div>
+					{#if hasMore}
+						<button
+							class="btn btn-ghost btn-sm mt-2 w-full"
+							onclick={() => (visibleCount += PAGE_SIZE)}
+						>
+							Show more
+						</button>
+					{/if}
 				</div>
 			</div>
 		{:else}

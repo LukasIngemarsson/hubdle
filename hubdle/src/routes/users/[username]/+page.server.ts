@@ -26,7 +26,8 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		.from('submissions')
 		.select('id, score, game_id, game_date, games(name, score_direction)')
 		.eq('user_id', profile.id)
-		.order('game_date', { ascending: false });
+		.order('game_date', { ascending: false })
+		.order('created_at', { ascending: false });
 
 	const allSubs = submissions ?? [];
 
