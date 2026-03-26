@@ -39,17 +39,19 @@
 						<Avatar src={friend.avatarUrl} username={friend.username} size="xs" />
 						{friend.username}
 					</a>
-					{#if viewerFriendIdSet.has(friend.userId)}
-						<span class="badge badge-success badge-sm">Friends</span>
-					{:else}
-						<form
-							method="POST"
-							action="?/sendRequest"
-							use:enhance={toastEnhance('Friend request sent!')}
-						>
-							<input type="hidden" name="addressee_id" value={friend.userId} />
-							<button class="btn btn-primary btn-outline btn-sm">Add Friend</button>
-						</form>
+					{#if !data.isOwnProfile}
+						{#if viewerFriendIdSet.has(friend.userId)}
+							<span class="badge badge-success badge-sm">Friends</span>
+						{:else}
+							<form
+								method="POST"
+								action="?/sendRequest"
+								use:enhance={toastEnhance('Friend request sent!')}
+							>
+								<input type="hidden" name="addressee_id" value={friend.userId} />
+								<button class="btn btn-primary btn-outline btn-sm">Add Friend</button>
+							</form>
+						{/if}
 					{/if}
 				</div>
 			{/each}
