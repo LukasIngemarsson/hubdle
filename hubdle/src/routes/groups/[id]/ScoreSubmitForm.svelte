@@ -35,6 +35,7 @@
 			if (result.type === 'success') {
 				rawText = '';
 				score = '';
+				gameDate = today;
 				toasts.push('success', 'Score submitted!');
 			} else if (result.type === 'failure' && result.data?.error) {
 				toasts.push('error', result.data.error as string);
