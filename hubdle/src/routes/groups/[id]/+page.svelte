@@ -12,6 +12,7 @@
 	import CopyBadge from '$lib/components/CopyBadge.svelte';
 	import CheckIcon from '$lib/components/icons/CheckIcon.svelte';
 	import ExternalLinkIcon from '$lib/components/icons/ExternalLinkIcon.svelte';
+	import { GAME_ICONS } from '$lib/game-icons';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 
@@ -90,6 +91,9 @@
 						? 'btn-success btn-outline'
 						: 'btn-outline'}"
 				>
+					{#if GAME_ICONS[game.id]}
+						<img src={GAME_ICONS[game.id]} alt="" class="h-4 w-4" />
+					{/if}
 					{game.name}
 					{#if playedToday.has(game.id)}
 						<CheckIcon class="h-3.5 w-3.5" />

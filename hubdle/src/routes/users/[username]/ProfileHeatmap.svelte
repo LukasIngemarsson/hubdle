@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { GAME_RULES } from '$lib/game-rules';
+	import { GAME_ICONS } from '$lib/game-icons';
 
 	type GameStat = {
 		gameId: string;
@@ -107,7 +108,16 @@
 							{@const hasAnyScore = days.some((d) => scoreMap.has(`${game.gameId}:${d}`))}
 							{#if hasAnyScore}
 								<tr>
-									<td class="font-medium">{game.name}</td>
+									<td>
+										<span class="inline-flex items-center gap-1.5 font-medium">
+											{#if GAME_ICONS[game.gameId]}<img
+													src={GAME_ICONS[game.gameId]}
+													alt=""
+													class="h-4 w-4"
+												/>{/if}
+											{game.name}
+										</span>
+									</td>
 									{#each days as day}
 										{@const score = scoreMap.get(`${game.gameId}:${day}`)}
 										<td class="text-center">
