@@ -4,9 +4,9 @@ type ParseResult = {
 	gameDate: string;
 } | null;
 
-/** Normalize period-grouped thousands (e.g. "26.270") to comma-grouped ("26,270"). */
+/** Strip thousand separators (commas and periods) from grouped numbers like "26,270" or "50.000". */
 function normalizeNumbers(text: string): string {
-	return text.replace(/\d{1,3}(?:\.\d{3})+/g, (match) => match.replace(/\./g, ','));
+	return text.replace(/\d{1,3}(?:[.,]\d{3})+/g, (match) => match.replace(/[.,]/g, ''));
 }
 
 export function parseShareText(text: string): ParseResult {
@@ -22,11 +22,11 @@ export function parseShareText(text: string): ParseResult {
 }
 
 function parseWordle(text: string): ParseResult {
-	// "Wordle 1,234 3/6" or "Wordle 1,234 X/6"
-	const match = text.match(/Wordle\s+([\d,]+)\s+([X\d])\/6/);
+	// "Wordle 1234 3/6" or "Wordle 1234 X/6" (thousands already stripped)
+	const match = text.match(/Wordle\s+(\d+)\s+([X\d])\/6/);
 	if (!match) return null;
 
-	const puzzleNumber = parseInt(match[1].replace(/,/g, ''), 10);
+	const puzzleNumber = parseInt(match[1], 10);
 	const raw = match[2];
 	const score = raw === 'X' ? 7 : parseInt(raw, 10);
 
@@ -106,12 +106,12 @@ function parseScrandle(text: string): ParseResult {
 }
 
 function parseTimeGuessr(text: string): ParseResult {
-	// "TimeGuessr #1030 26,270/50,000"
-	const match = text.match(/TimeGuessr\s+#(\d+)\s+([\d,]+)\/50,000/);
+	// "TimeGuessr #1030 26270/50000" (thousands already stripped)
+	const match = text.match(/TimeGuessr\s+#(\d+)\s+(\d+)\/50000/);
 	if (!match) return null;
 
 	const puzzleNumber = parseInt(match[1], 10);
-	const score = parseInt(match[2].replace(/,/g, ''), 10);
+	const score = parseInt(match[2], 10);
 
 	// TimeGuessr #1 was 2023-06-01
 	const epoch = new Date('2023-05-31');
