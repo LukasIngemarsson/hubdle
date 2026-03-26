@@ -10,6 +10,7 @@
 	import MembersSection from './MembersSection.svelte';
 	import GroupActions from './GroupActions.svelte';
 	import CopyBadge from '$lib/components/CopyBadge.svelte';
+	import CheckIcon from '$lib/components/icons/CheckIcon.svelte';
 	import ExternalLinkIcon from '$lib/components/icons/ExternalLinkIcon.svelte';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
@@ -39,6 +40,18 @@
 	let isOwner = $derived(data.userId === data.group.created_by);
 	let otherMembers = $derived(data.members.filter((m) => m.user_id !== data.userId));
 	let isOnlyMember = $derived(otherMembers.length === 0);
+
+	let playedToday = $derived(
+		new Set(
+			data.submissions
+				.filter(
+					(s) =>
+						s.user_id === data.userId &&
+						s.game_date === new Date().toISOString().slice(0, 10)
+				)
+				.map((s) => s.game_id)
+		)
+	);
 
 	function unsubscribeRealtime() {
 		if (channel) {
@@ -70,10 +83,16 @@
 					href={game.url}
 					target="_blank"
 					rel="noopener noreferrer"
-					class="btn btn-outline btn-sm gap-1"
+					class="btn btn-sm gap-1 {playedToday.has(game.id)
+						? 'btn-success btn-outline'
+						: 'btn-outline'}"
 				>
 					{game.name}
-					<ExternalLinkIcon />
+					{#if playedToday.has(game.id)}
+						<CheckIcon class="h-3.5 w-3.5" />
+					{:else}
+						<ExternalLinkIcon />
+					{/if}
 				</a>
 			{/if}
 		{/each}
