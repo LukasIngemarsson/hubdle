@@ -1,5 +1,6 @@
 <script lang="ts">
 	import Avatar from '$lib/components/Avatar.svelte';
+	import { GAME_ICONS } from '$lib/game-icons';
 
 	type Game = { id: string; name: string; url: string; score_direction: string };
 	type Submission = { user_id: string; score: number; game_id: string; game_date: string };
@@ -97,7 +98,16 @@
 							<tr>
 								<th>Player</th>
 								{#each games as game}
-									<th class="text-center">{game.name}</th>
+									<th class="text-center">
+										<span class="inline-flex items-center gap-1">
+											{#if GAME_ICONS[game.id]}<img
+													src={GAME_ICONS[game.id]}
+													alt=""
+													class="h-4 w-4"
+												/>{/if}
+											{game.name}
+										</span>
+									</th>
 								{/each}
 							</tr>
 						</thead>

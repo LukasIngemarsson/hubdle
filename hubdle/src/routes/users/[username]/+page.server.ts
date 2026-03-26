@@ -120,7 +120,8 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 	}));
 
 	// Favorite game (most played)
-	const favoriteGame = perGameStats.length > 0 ? perGameStats[0].name : null;
+	const favoriteGame =
+		perGameStats.length > 0 ? { id: perGameStats[0].gameId, name: perGameStats[0].name } : null;
 
 	// Friendship status with viewing user (only for other users when logged in)
 	let friendship: { id: string; status: string; direction: 'outgoing' | 'incoming' } | null = null;

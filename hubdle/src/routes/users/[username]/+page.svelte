@@ -6,6 +6,7 @@
 	import { toastEnhance } from '$lib/enhance-toast';
 	import ActivityRow from './ActivityRow.svelte';
 	import ProfileHeatmap from './ProfileHeatmap.svelte';
+	import { GAME_ICONS } from '$lib/game-icons';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 
@@ -112,12 +113,23 @@
 				>
 				<div class="text-center">
 					<p class="text-3xl font-bold">{data.stats.friendCount}</p>
-					<a href="/users/{data.profile.username}/friends" class="link text-sm opacity-60">{data.stats.friendCount === 1 ? 'Friend' : 'Friends'}</a>
+					<a href="/users/{data.profile.username}/friends" class="link text-sm opacity-60"
+						>{data.stats.friendCount === 1 ? 'Friend' : 'Friends'}</a
+					>
 				</div>
 			</div>
-			<div class="flex flex-col items-center justify-center rounded-lg bg-base-200 p-4">
-				<p class="text-xl font-bold">{data.stats.favoriteGame ?? '—'}</p>
-				<p class="text-sm opacity-60">Favorite game</p>
+			<div class="flex items-center justify-center gap-3 rounded-lg bg-base-200 p-4">
+				{#if data.stats.favoriteGame && GAME_ICONS[data.stats.favoriteGame.id]}
+					<img
+						src={GAME_ICONS[data.stats.favoriteGame.id]}
+						alt=""
+						class="h-8 w-8 shrink-0 rounded"
+					/>
+				{/if}
+				<div class="text-center">
+					<p class="text-xl font-bold">{data.stats.favoriteGame?.name ?? '—'}</p>
+					<p class="text-sm opacity-60">Favorite game</p>
+				</div>
 			</div>
 		</div>
 
