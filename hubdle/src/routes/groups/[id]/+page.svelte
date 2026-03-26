@@ -3,20 +3,15 @@
 	import { onDestroy, onMount } from 'svelte';
 	import type { ActionData, PageData } from './$types';
 	import PageContainer from '$lib/components/PageContainer.svelte';
-	import ScoreSubmitForm from './ScoreSubmitForm.svelte';
 	import ScoreHeatmap from './ScoreHeatmap.svelte';
 	import Leaderboard from './Leaderboard.svelte';
-	import RecentSubmissions from './RecentSubmissions.svelte';
 	import MembersSection from './MembersSection.svelte';
 	import GroupActions from './GroupActions.svelte';
 	import CopyBadge from '$lib/components/CopyBadge.svelte';
-	import CheckIcon from '$lib/components/icons/CheckIcon.svelte';
-	import ExternalLinkIcon from '$lib/components/icons/ExternalLinkIcon.svelte';
-	import { GAME_ICONS } from '$lib/game-icons';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 
-	const Tab = { Scores: 'scores', Submissions: 'submissions', Members: 'members' } as const;
+	const Tab = { Scores: 'scores', Members: 'members' } as const;
 	type Tab = (typeof Tab)[keyof typeof Tab];
 
 	let activeTab = $state<Tab>(Tab.Scores);
@@ -47,16 +42,6 @@
 	let otherMembers = $derived(data.members.filter((m) => m.user_id !== data.userId));
 	let isOnlyMember = $derived(otherMembers.length === 0);
 
-	let playedToday = $derived(
-		new Set(
-			data.submissions
-				.filter(
-					(s) => s.user_id === data.userId && s.game_date === new Date().toISOString().slice(0, 10)
-				)
-				.map((s) => s.game_id)
-		)
-	);
-
 	function unsubscribeRealtime() {
 		if (channel) {
 			data.supabase.removeChannel(channel);
@@ -80,31 +65,6 @@
 		</div>
 	</div>
 
-	<section class="mt-6 flex flex-wrap gap-2">
-		{#each data.games as game}
-			{#if game.url}
-				<a
-					href={game.url}
-					target="_blank"
-					rel="noopener noreferrer"
-					class="btn btn-sm gap-1 {playedToday.has(game.id)
-						? 'btn-success btn-outline'
-						: 'btn-outline'}"
-				>
-					{#if GAME_ICONS[game.id]}
-						<img src={GAME_ICONS[game.id]} alt="" class="h-4 w-4" />
-					{/if}
-					{game.name}
-					{#if playedToday.has(game.id)}
-						<CheckIcon class="h-3.5 w-3.5" />
-					{:else}
-						<ExternalLinkIcon />
-					{/if}
-				</a>
-			{/if}
-		{/each}
-	</section>
-
 	<div class="mt-6 flex gap-1 border-b border-base-300">
 		<button
 			class="px-4 py-2 text-sm font-medium transition-colors {activeTab === Tab.Scores
@@ -113,14 +73,6 @@
 			onclick={() => (activeTab = Tab.Scores)}
 		>
 			Scores
-		</button>
-		<button
-			class="px-4 py-2 text-sm font-medium transition-colors {activeTab === Tab.Submissions
-				? 'border-b-2 border-primary text-primary'
-				: 'opacity-60 hover:opacity-100'}"
-			onclick={() => (activeTab = Tab.Submissions)}
-		>
-			Submissions
 		</button>
 		<button
 			class="px-4 py-2 text-sm font-medium transition-colors {activeTab === Tab.Members
@@ -136,13 +88,6 @@
 	{#if activeTab === Tab.Scores}
 		<ScoreHeatmap games={data.games} submissions={data.submissions} members={data.allMembers} />
 		<Leaderboard games={data.games} submissions={data.submissions} members={data.allMembers} />
-	{:else if activeTab === Tab.Submissions}
-		<ScoreSubmitForm {form} games={data.games} />
-		<RecentSubmissions
-			submissions={data.submissions}
-			members={data.allMembers}
-			userId={data.userId}
-		/>
 	{:else if activeTab === Tab.Members}
 		<MembersSection
 			members={data.members}
