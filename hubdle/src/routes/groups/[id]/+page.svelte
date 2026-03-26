@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { invalidateAll } from '$app/navigation';
+	import { page } from '$app/stores';
 	import { onDestroy, onMount } from 'svelte';
 	import type { ActionData, PageData } from './$types';
 	import PageContainer from '$lib/components/PageContainer.svelte';
@@ -59,8 +60,12 @@
 		<div class="mt-1 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
 			<h1 class="text-2xl font-bold">{data.group.name}</h1>
 			<div class="flex items-center gap-2">
-				<span class="text-xs opacity-50">Invite code</span>
-				<CopyBadge text={data.group.invite_code} size="lg" />
+				<span class="text-xs opacity-50">Invite</span>
+				<CopyBadge
+					text={`${$page.url.origin}/invite/${data.group.invite_code}`}
+					label={data.group.invite_code}
+					size="lg"
+				/>
 			</div>
 		</div>
 	</div>

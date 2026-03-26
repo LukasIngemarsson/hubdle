@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import { page } from '$app/stores';
 	import type { PageData } from './$types';
 	import PageContainer from '$lib/components/PageContainer.svelte';
 	import CopyBadge from '$lib/components/CopyBadge.svelte';
@@ -159,7 +160,8 @@
 							</p>
 						</div>
 						<CopyBadge
-							text={group.invite_code}
+							text={`${$page.url.origin}/invite/${group.invite_code}`}
+							label={group.invite_code}
 							onclick={(e) => {
 								e.preventDefault();
 								e.stopPropagation();

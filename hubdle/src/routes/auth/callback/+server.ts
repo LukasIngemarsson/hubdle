@@ -17,5 +17,6 @@ export const GET: RequestHandler = async ({ url, locals }) => {
 		await ensureProfile(locals.supabase, user);
 	}
 
-	redirect(303, '/');
+	const next = url.searchParams.get('next');
+	redirect(303, next && next.startsWith('/') ? next : '/');
 };
