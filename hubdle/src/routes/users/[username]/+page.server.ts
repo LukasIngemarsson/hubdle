@@ -119,7 +119,10 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		gameDate: sub.game_date
 	}));
 
-	// Friendship status (only for other users when logged in)
+	// Favorite game (most played)
+	const favoriteGame = perGameStats.length > 0 ? perGameStats[0].name : null;
+
+	// Friendship status with viewing user (only for other users when logged in)
 	let friendship: { id: string; status: string; direction: 'outgoing' | 'incoming' } | null = null;
 	if (user && !isOwnProfile) {
 		const { data: existing } = await locals.supabase
@@ -139,6 +142,55 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		}
 	}
 
+	// Profile user's accepted friends
+	const { data: asRequester } = await locals.supabase
+		.from('friendships')
+		.select('id, addressee:profiles!friendships_addressee_id_fkey(id, username, avatar_url)')
+		.eq('requester_id', profile.id)
+		.eq('status', 'accepted');
+
+	const { data: asAddressee } = await locals.supabase
+		.from('friendships')
+		.select('id, requester:profiles!friendships_requester_id_fkey(id, username, avatar_url)')
+		.eq('addressee_id', profile.id)
+		.eq('status', 'accepted');
+
+	const profileFriends: { userId: string; username: string; avatarUrl: string | null }[] = [];
+	for (const row of asRequester ?? []) {
+		const p = row.addressee as unknown as {
+			id: string;
+			username: string;
+			avatar_url: string | null;
+		} | null;
+		if (p) profileFriends.push({ userId: p.id, username: p.username, avatarUrl: p.avatar_url });
+	}
+	for (const row of asAddressee ?? []) {
+		const p = row.requester as unknown as {
+			id: string;
+			username: string;
+			avatar_url: string | null;
+		} | null;
+		if (p) profileFriends.push({ userId: p.id, username: p.username, avatarUrl: p.avatar_url });
+	}
+
+	// Determine which of the profile's friends the viewing user is also friends with
+	let viewerFriendIds = new Set<string>();
+	if (user && !isOwnProfile) {
+		const { data: viewerAsReq } = await locals.supabase
+			.from('friendships')
+			.select('addressee_id')
+			.eq('requester_id', user.id)
+			.eq('status', 'accepted');
+		const { data: viewerAsAddr } = await locals.supabase
+			.from('friendships')
+			.select('requester_id')
+			.eq('addressee_id', user.id)
+			.eq('status', 'accepted');
+
+		for (const r of viewerAsReq ?? []) viewerFriendIds.add(r.addressee_id);
+		for (const r of viewerAsAddr ?? []) viewerFriendIds.add(r.requester_id);
+	}
+
 	return {
 		profile: {
 			id: profile.id,
@@ -147,12 +199,14 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			createdAt: profile.created_at
 		},
 		isOwnProfile,
+		viewerUserId: user?.id ?? null,
 		friendship,
 		stats: {
-			totalSubmissions: allSubs.length,
-			totalGroups: totalGroups ?? 0,
-			streak
+			streak,
+			favoriteGame
 		},
+		profileFriends,
+		viewerFriendIds: [...viewerFriendIds],
 		perGameStats,
 		recentScores,
 		recentActivity

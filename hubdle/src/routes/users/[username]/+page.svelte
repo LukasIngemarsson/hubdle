@@ -18,6 +18,10 @@
 	let visibleActivity = $derived(data.recentActivity.slice(0, visibleCount));
 	let hasMore = $derived(data.recentActivity.length > visibleCount);
 
+	let showFriends = $state(false);
+
+	let viewerFriendIdSet = $derived(new Set(data.viewerFriendIds));
+
 	const memberSince = $derived(
 		new Date(data.profile.createdAt).toLocaleDateString('en-US', {
 			year: 'numeric',
@@ -82,18 +86,71 @@
 	<div class="mt-6 grid gap-6">
 		<div class="grid grid-cols-3 gap-4">
 			<div class="rounded-lg bg-base-200 p-4 text-center">
-				<p class="text-3xl font-bold">{data.stats.totalSubmissions}</p>
-				<p class="text-sm opacity-60">{data.stats.totalSubmissions === 1 ? 'Score' : 'Scores'}</p>
-			</div>
-			<div class="rounded-lg bg-base-200 p-4 text-center">
-				<p class="text-3xl font-bold">{data.stats.totalGroups}</p>
-				<p class="text-sm opacity-60">{data.stats.totalGroups === 1 ? 'Group' : 'Groups'}</p>
-			</div>
-			<div class="rounded-lg bg-base-200 p-4 text-center">
 				<p class="text-3xl font-bold">{data.stats.streak}</p>
 				<p class="text-sm opacity-60">Day streak</p>
 			</div>
+			<button
+				class="rounded-lg bg-base-200 p-4 text-center transition-colors hover:bg-base-300"
+				onclick={() => (showFriends = !showFriends)}
+			>
+				<p class="text-3xl font-bold">{data.profileFriends.length}</p>
+				<p class="text-sm opacity-60">{data.profileFriends.length === 1 ? 'Friend' : 'Friends'}</p>
+			</button>
+			<div class="rounded-lg bg-base-200 p-4 text-center">
+				{#if data.stats.favoriteGame}
+					<p class="text-lg font-bold leading-tight">{data.stats.favoriteGame}</p>
+					<p class="text-sm opacity-60">Favorite game</p>
+				{:else}
+					<p class="text-3xl font-bold">—</p>
+					<p class="text-sm opacity-60">Favorite game</p>
+				{/if}
+			</div>
 		</div>
+
+		{#if showFriends}
+			<div class="card border border-base-300">
+				<div class="card-body">
+					<h2 class="card-title text-base">
+						Friends
+						<span class="badge badge-sm">{data.profileFriends.length}</span>
+					</h2>
+					{#if data.profileFriends.length === 0}
+						<p class="text-sm opacity-60">No friends yet.</p>
+					{:else}
+						<div class="flex flex-wrap gap-2">
+							{#each data.profileFriends as friend}
+								<div
+									class="flex items-center gap-1.5 rounded-full border border-base-content/20 px-3 py-1.5 text-sm"
+								>
+									<a
+										href="/users/{friend.username}"
+										class="flex items-center gap-1.5 hover:underline"
+									>
+										<Avatar src={friend.avatarUrl} username={friend.username} size="xs" />
+										{friend.username}
+									</a>
+									{#if data.viewerUserId && friend.userId !== data.viewerUserId}
+										{#if viewerFriendIdSet.has(friend.userId)}
+											<span class="badge badge-success badge-xs">Friends</span>
+										{:else}
+											<form
+												method="POST"
+												action="?/sendRequest"
+												use:enhance={toastEnhance('Friend request sent!')}
+												class="inline"
+											>
+												<input type="hidden" name="addressee_id" value={friend.userId} />
+												<button class="btn btn-primary btn-outline btn-xs">Add</button>
+											</form>
+										{/if}
+									{/if}
+								</div>
+							{/each}
+						</div>
+					{/if}
+				</div>
+			</div>
+		{/if}
 
 		<ProfileHeatmap games={data.perGameStats} submissions={data.recentScores} />
 
