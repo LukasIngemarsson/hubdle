@@ -100,7 +100,7 @@
 		{#if data.recentActivity.length > 0}
 			<div class="card border border-base-300">
 				<div class="card-body">
-					<h2 class="card-title text-base">Recent Activity</h2>
+					<h2 class="card-title text-base">Submissions</h2>
 					<div class="overflow-x-auto">
 						<table class="table">
 							<thead>
