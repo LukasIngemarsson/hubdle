@@ -7,10 +7,20 @@
 	import PageContainer from '$lib/components/PageContainer.svelte';
 	import ExternalLinkIcon from '$lib/components/icons/ExternalLinkIcon.svelte';
 	import CheckIcon from '$lib/components/icons/CheckIcon.svelte';
+	import ActivityRow from '$lib/components/ActivityRow.svelte';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 
 	let playedSet = $derived(new Set(data.playedToday));
+
+	let editingId = $state<string | null>(null);
+	let editScore = $state(0);
+	let deletingId = $state<string | null>(null);
+
+	const PAGE_SIZE = 20;
+	let visibleCount = $state(PAGE_SIZE);
+	let visibleSubmissions = $derived(data.recentSubmissions.slice(0, visibleCount));
+	let hasMore = $derived(data.recentSubmissions.length > visibleCount);
 
 	const SubmitMode = { Paste: 'paste', Manual: 'manual' } as const;
 	type SubmitMode = (typeof SubmitMode)[keyof typeof SubmitMode];
@@ -157,4 +167,43 @@
 			{/if}
 		</div>
 	</section>
+
+	{#if data.recentSubmissions.length > 0}
+		<div class="card mt-6 border border-base-300">
+			<div class="card-body">
+				<h2 class="card-title text-base">Submissions</h2>
+				<div class="overflow-x-auto">
+					<table class="table">
+						<thead>
+							<tr>
+								<th>Game</th>
+								<th>Score</th>
+								<th>Date</th>
+								<th class="text-right"></th>
+							</tr>
+						</thead>
+						<tbody>
+							{#each visibleSubmissions as activity}
+								<ActivityRow
+									{activity}
+									isOwnProfile={true}
+									bind:editingId
+									bind:editScore
+									bind:deletingId
+								/>
+							{/each}
+						</tbody>
+					</table>
+				</div>
+				{#if hasMore}
+					<button
+						class="btn btn-ghost btn-sm mt-2 w-full"
+						onclick={() => (visibleCount += PAGE_SIZE)}
+					>
+						Show more
+					</button>
+				{/if}
+			</div>
+		</div>
+	{/if}
 </PageContainer>
