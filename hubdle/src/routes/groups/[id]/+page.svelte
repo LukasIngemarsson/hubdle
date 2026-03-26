@@ -15,10 +15,10 @@
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 
-	const Tab = { Today: 'today', Leaderboard: 'leaderboard', Members: 'members' } as const;
+	const Tab = { Scores: 'scores', Submit: 'submit', Members: 'members' } as const;
 	type Tab = (typeof Tab)[keyof typeof Tab];
 
-	let activeTab = $state<Tab>(Tab.Today);
+	let activeTab = $state<Tab>(Tab.Scores);
 
 	let channel: ReturnType<typeof data.supabase.channel>;
 
@@ -103,20 +103,20 @@
 
 	<div class="mt-6 flex gap-1 border-b border-base-300">
 		<button
-			class="px-4 py-2 text-sm font-medium transition-colors {activeTab === Tab.Today
+			class="px-4 py-2 text-sm font-medium transition-colors {activeTab === Tab.Scores
 				? 'border-b-2 border-primary text-primary'
 				: 'opacity-60 hover:opacity-100'}"
-			onclick={() => (activeTab = Tab.Today)}
+			onclick={() => (activeTab = Tab.Scores)}
 		>
-			Today
+			Scores
 		</button>
 		<button
-			class="px-4 py-2 text-sm font-medium transition-colors {activeTab === Tab.Leaderboard
+			class="px-4 py-2 text-sm font-medium transition-colors {activeTab === Tab.Submit
 				? 'border-b-2 border-primary text-primary'
 				: 'opacity-60 hover:opacity-100'}"
-			onclick={() => (activeTab = Tab.Leaderboard)}
+			onclick={() => (activeTab = Tab.Submit)}
 		>
-			Leaderboard
+			Submit
 		</button>
 		<button
 			class="px-4 py-2 text-sm font-medium transition-colors {activeTab === Tab.Members
@@ -129,11 +129,11 @@
 		</button>
 	</div>
 
-	{#if activeTab === Tab.Today}
+	{#if activeTab === Tab.Scores}
 		<ScoreHeatmap games={data.games} submissions={data.submissions} members={data.allMembers} />
-		<ScoreSubmitForm {form} games={data.games} />
-	{:else if activeTab === Tab.Leaderboard}
 		<Leaderboard games={data.games} submissions={data.submissions} members={data.allMembers} />
+	{:else if activeTab === Tab.Submit}
+		<ScoreSubmitForm {form} games={data.games} />
 		<RecentSubmissions
 			submissions={data.submissions}
 			members={data.allMembers}
