@@ -11,10 +11,16 @@
 	async function handleOAuth(provider: 'azure' | 'google') {
 		loading = true;
 
+		const params = new URLSearchParams(window.location.search);
+		const redirectParam = params.get('redirect');
+		const callbackUrl = redirectParam
+			? `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirectParam)}`
+			: `${window.location.origin}/auth/callback`;
+
 		const { error } = await data.supabase.auth.signInWithOAuth({
 			provider,
 			options: {
-				redirectTo: `${window.location.origin}/auth/callback`,
+				redirectTo: callbackUrl,
 				...(provider === 'azure' && { scopes: 'openid email profile' })
 			}
 		});

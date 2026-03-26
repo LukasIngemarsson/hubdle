@@ -4,11 +4,19 @@
 
 	let {
 		text,
+		label,
 		size = 'sm',
 		onclick
-	}: { text: string; size?: 'sm' | 'lg'; onclick?: (e: MouseEvent) => void } = $props();
+	}: {
+		text: string;
+		label?: string;
+		size?: 'sm' | 'lg';
+		onclick?: (e: MouseEvent) => void;
+	} = $props();
 
 	let copied = $state(false);
+
+	let tooltipText = $derived(copied ? 'Copied!' : text);
 
 	async function handleClick(e: MouseEvent) {
 		onclick?.(e);
@@ -18,11 +26,15 @@
 	}
 </script>
 
-<button class="flex items-center gap-1 opacity-70 hover:opacity-100" onclick={handleClick}>
-	<span class="badge badge-ghost font-mono {size === 'lg' ? 'text-lg' : 'text-sm'}">{text}</span>
-	{#if copied}
-		<CheckmarkIcon class="h-4 w-4 text-success" />
-	{:else}
-		<ClipboardIcon />
-	{/if}
-</button>
+<div class="tooltip" data-tip={tooltipText}>
+	<button class="flex items-center gap-1 opacity-70 hover:opacity-100" onclick={handleClick}>
+		<span class="badge badge-ghost font-mono {size === 'lg' ? 'text-lg' : 'text-sm'}"
+			>{label ?? text}</span
+		>
+		{#if copied}
+			<CheckmarkIcon class="h-4 w-4 text-success" />
+		{:else}
+			<ClipboardIcon />
+		{/if}
+	</button>
+</div>
