@@ -30,6 +30,11 @@
 	let savingId = $state<string | null>(null);
 	let confirmingDeleteId = $state<string | null>(null);
 
+	const PAGE_SIZE = 20;
+	let visibleCount = $state(PAGE_SIZE);
+	let visibleSubmissions = $derived(submissions.slice(0, visibleCount));
+	let hasMore = $derived(submissions.length > visibleCount);
+
 	function startEdit(sub: Submission) {
 		editingId = sub.id;
 		editScore = sub.score;
@@ -66,7 +71,7 @@
 						</tr>
 					</thead>
 					<tbody>
-						{#each submissions as sub}
+						{#each visibleSubmissions as sub}
 							{@const member = members.find((m) => m.user_id === sub.user_id)}
 							{@const isOwn = sub.user_id === userId}
 							{@const rules = GAME_RULES[sub.game_id]}
@@ -185,6 +190,14 @@
 					</tbody>
 				</table>
 			</div>
+			{#if hasMore}
+				<button
+					class="btn btn-ghost btn-sm mt-2 w-full"
+					onclick={() => (visibleCount += PAGE_SIZE)}
+				>
+					Show more
+				</button>
+			{/if}
 		{/if}
 	</div>
 </section>
