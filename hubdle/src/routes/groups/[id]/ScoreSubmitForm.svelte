@@ -89,12 +89,11 @@
 				{/if}
 				<input
 					name="score"
-					type="number"
+					type="text"
+					inputmode="numeric"
 					placeholder={selectedRules?.scoreLabel ?? 'Score'}
 					class="input input-bordered w-full"
 					required
-					min={selectedRules?.minScore}
-					max={selectedRules?.maxScore}
 					bind:value={score}
 				/>
 				<input
