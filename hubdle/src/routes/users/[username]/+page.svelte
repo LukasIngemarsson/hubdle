@@ -85,25 +85,25 @@
 
 	<div class="mt-6 grid gap-6">
 		<div class="grid grid-cols-3 gap-4">
-			<div class="rounded-lg bg-base-200 p-4 text-center">
+			<div class="flex flex-col items-center justify-center rounded-lg bg-base-200 p-4">
 				<p class="text-3xl font-bold">{data.stats.streak}</p>
-				<p class="text-sm opacity-60">Day streak</p>
+				<p class="flex items-center gap-1 text-sm opacity-60">
+					<span class="text-base">🔥</span> Day streak
+				</p>
 			</div>
 			<button
-				class="rounded-lg bg-base-200 p-4 text-center transition-colors hover:bg-base-300"
+				class="flex flex-col items-center justify-center rounded-lg bg-base-200 p-4 transition-colors hover:bg-base-300"
 				onclick={() => (showFriends = !showFriends)}
 			>
 				<p class="text-3xl font-bold">{data.profileFriends.length}</p>
-				<p class="text-sm opacity-60">{data.profileFriends.length === 1 ? 'Friend' : 'Friends'}</p>
+				<p class="flex items-center gap-1 text-sm opacity-60">
+					{data.profileFriends.length === 1 ? 'Friend' : 'Friends'}
+					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="h-3 w-3 transition-transform {showFriends ? 'rotate-180' : ''}"><path fill-rule="evenodd" d="M4.22 6.22a.75.75 0 0 1 1.06 0L8 8.94l2.72-2.72a.75.75 0 1 1 1.06 1.06l-3.25 3.25a.75.75 0 0 1-1.06 0L4.22 7.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" /></svg>
+				</p>
 			</button>
-			<div class="rounded-lg bg-base-200 p-4 text-center">
-				{#if data.stats.favoriteGame}
-					<p class="text-lg font-bold leading-tight">{data.stats.favoriteGame}</p>
-					<p class="text-sm opacity-60">Favorite game</p>
-				{:else}
-					<p class="text-3xl font-bold">—</p>
-					<p class="text-sm opacity-60">Favorite game</p>
-				{/if}
+			<div class="flex flex-col items-center justify-center rounded-lg bg-base-200 p-4">
+				<p class="text-xl font-bold">{data.stats.favoriteGame ?? '—'}</p>
+				<p class="text-sm opacity-60">Favorite game</p>
 			</div>
 		</div>
 
@@ -140,7 +140,7 @@
 												class="inline"
 											>
 												<input type="hidden" name="addressee_id" value={friend.userId} />
-												<button class="btn btn-primary btn-outline btn-xs">Add</button>
+												<button class="badge badge-primary badge-outline badge-sm cursor-pointer transition-colors hover:bg-primary hover:text-primary-content">Add</button>
 											</form>
 										{/if}
 									{/if}
