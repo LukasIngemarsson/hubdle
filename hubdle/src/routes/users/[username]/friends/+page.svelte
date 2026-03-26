@@ -16,7 +16,7 @@
 
 <PageContainer>
 	<a href="/users/{data.profile.username}" class="link text-sm opacity-70"
-		>&larr; {data.profile.username}'s profile</a
+		>&larr; {data.isOwnProfile ? 'Your' : `${data.profile.username}'s`} profile</a
 	>
 	<h1 class="mt-1 text-2xl font-bold">
 		{data.isOwnProfile ? 'Your' : `${data.profile.username}'s`} Friends
