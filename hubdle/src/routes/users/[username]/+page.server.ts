@@ -75,15 +75,18 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		})
 		.sort((a, b) => b.count - a.count);
 
-	// Active streak: consecutive days with submissions up to today
+	// Active streak: consecutive days with at least one submission.
+	// The streak stays alive until a full day is missed — if the user
+	// hasn't played today yet the streak still counts from yesterday.
 	let streak = 0;
 	if (allSubs.length > 0) {
 		const uniqueDates = [...new Set(allSubs.map((s) => s.game_date))].sort().reverse();
 		const today = new Date().toISOString().slice(0, 10);
+		const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
 
-		let checkDate = today;
-		if (uniqueDates[0] === checkDate) {
+		if (uniqueDates[0] === today || uniqueDates[0] === yesterday) {
 			streak = 1;
+			let checkDate = uniqueDates[0];
 			for (let i = 1; i < uniqueDates.length; i++) {
 				const prev = new Date(checkDate);
 				prev.setDate(prev.getDate() - 1);
