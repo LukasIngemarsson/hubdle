@@ -136,18 +136,20 @@
 				scoredEntries.set(sub.user_id, entry);
 			}
 		} else {
-			const byGame = new Map<string, Map<string, number>>();
+			// Group by (game_id, game_date) — each day's game is a separate competition
+			const byGameDate = new Map<string, Map<string, number>>();
 			for (const sub of filtered) {
-				if (!byGame.has(sub.game_id)) byGame.set(sub.game_id, new Map());
-				const gameScores = byGame.get(sub.game_id)!;
-				gameScores.set(sub.user_id, (gameScores.get(sub.user_id) ?? 0) + sub.score);
+				const key = `${sub.game_id}::${sub.game_date}`;
+				if (!byGameDate.has(key)) byGameDate.set(key, new Map());
+				byGameDate.get(key)!.set(sub.user_id, sub.score);
 			}
 
-			for (const [gameId, gameScores] of byGame) {
+			for (const [key, scores] of byGameDate) {
+				const gameId = key.split('::')[0];
 				const gameData = games.find((g) => g.id === gameId);
 				const ascending = gameData ? gameData.score_direction === 'asc' : true;
 
-				const sorted = [...gameScores.entries()].sort(([, a], [, b]) =>
+				const sorted = [...scores.entries()].sort(([, a], [, b]) =>
 					ascending ? a - b : b - a
 				);
 
@@ -258,10 +260,9 @@
 						<th>#</th>
 						<th>Player</th>
 						<th>Games</th>
-						{@render sortableHeader(
-							SortColumn.Total,
-							selectedGame === GameFilter.All ? 'Rank Sum' : 'Total'
-						)}
+						{#if selectedGame !== GameFilter.All}
+							{@render sortableHeader(SortColumn.Total, 'Total')}
+						{/if}
 						{@render sortableHeader(
 							SortColumn.Avg,
 							selectedGame === GameFilter.All ? 'Avg Rank' : 'Avg'
@@ -284,7 +285,9 @@
 								</a>
 							</td>
 							<td>{entry.hasPlayed ? entry.games : '—'}</td>
-							<td>{entry.hasPlayed ? entry.total : '—'}</td>
+							{#if selectedGame !== GameFilter.All}
+								<td>{entry.hasPlayed ? entry.total : '—'}</td>
+							{/if}
 							<td>{entry.hasPlayed ? (entry.total / entry.games).toFixed(1) : '—'}</td>
 						</tr>
 					{/each}
