@@ -2,6 +2,8 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+Stack-level conventions (Svelte 5, Supabase, DaisyUI patterns) are in `.claude/rules/sveltekit-supabase.md`. This file covers Hubdle-specific context only.
+
 ## Project — Hubdle
 
 A social competition app where you and your friends compete at daily games or create/track custom challenges.
@@ -43,65 +45,35 @@ There are no test or lint scripts configured.
 
 The SvelteKit app lives in `hubdle/` (not the repo root). The repo root contains only `CLAUDE.md` and the `hubdle/` directory.
 
-### Component Organization
+### Key Modules
 
-Components are co-located by usage, not grouped in a single folder:
-
-- **`$lib/components/`** — shared, multi-use components: Avatar, PageContainer, ConfirmModal, CopyBadge, Toast, ActivityRow.
-- **`$lib/components/icons/`** — reusable SVG icon components (e.g. `SunIcon`, `PlusIcon`). Each accepts a `class` prop for sizing.
+- **`$lib/auth.ts`** — `ensureProfile()` upserts a profile on first sign-in. `generateUsername()` falls back to `user_metadata.email` for Microsoft users.
+- **`$lib/parsers.ts`** — share-text parsers for Wordle, Bandle, Connections, Contexto, Scrandle. `parseShareText()` chains them with nullish coalescing. Each parser extracts `gameId`, `score`, and `gameDate` from the puzzle number using a hardcoded epoch date.
+- **`$lib/game-rules.ts`** — per-game score bounds, labels, and hints. `validateScore()` is used server-side.
 - **`$lib/game-icons.ts`** — maps game IDs to imported favicon PNGs stored in `$lib/assets/game-icons/`.
-- **Route-local components** — components used by a single page live next to that page (e.g. `routes/groups/[id]/Leaderboard.svelte`). Any `.svelte` file in a route directory that doesn't start with `+` is a regular component, not a route.
-
-**When to extract a component**: Extract when a section has its own state and logic (e.g. search with debounce, edit/delete state machine, modal with transfer flow) or when nesting makes the code hard to follow. Don't extract flat markup that just renders a list with no local state — the props interface would add complexity without reducing it.
-
-### Supabase Integration
-
-- **Server hook** (`src/hooks.server.ts`): Creates a per-request Supabase client and exposes `supabase` + `safeGetSession()` on `event.locals`.
-- **Layout data flow**: `+layout.server.ts` calls `safeGetSession()` and passes `user` + `cookies` to the client. `+layout.ts` creates a browser-side Supabase client from that data. All pages receive `supabase` and `user` via layout data.
-- **Auth callback**: `/auth/callback` handles OAuth redirect.
-- **Profile auto-creation**: `ensureProfile()` in `$lib/auth.ts` upserts a profile row on first sign-in. Note: Microsoft (Azure) puts the user's email in `user_metadata.email` rather than the top-level `user.email` field — the code handles this fallback.
-- **Database types**: Auto-generated from the Supabase schema via `npm run db:types`. Run this after any migration to keep types in sync.
-- **Realtime**: `group_members` is added to the `supabase_realtime` publication. The group detail page subscribes via `onMount`/`onDestroy` and calls `invalidateAll()` on changes. **Important**: always call `unsubscribeRealtime()` before submitting forms that navigate away (leave, delete, transfer) to avoid a race condition where `invalidateAll()` re-runs the load function on a deleted/left resource and hits a 404.
-
-### Score Parsing & Validation
-
-- `$lib/parsers.ts` contains share-text parsers for supported games (Wordle, Bandle, Connections, Contexto, Scrandle). `parseShareText()` chains them with nullish coalescing. Each parser extracts `gameId`, `score`, and `gameDate` from the puzzle number using a hardcoded epoch date.
-- `$lib/game-rules.ts` defines per-game score bounds (`minScore`, `maxScore`), labels, and hints as a `Record<string, GameRules>`. The `validateScore()` function is used server-side on both paste and manual submit actions. Future dates are also rejected server-side.
+- **`$lib/constants.ts`** — `MAX_GROUP_MEMBERS` (20).
 
 ### Database Schema
 
-Defined in `supabase/migrations/`. Key tables: `profiles`, `groups`, `group_members`, `games`, `submissions`. All tables have RLS enabled. The `is_group_member()` helper function (security definer) is used in multiple RLS policies.
+Defined in `supabase/migrations/`. Key tables: `profiles`, `groups`, `group_members`, `games`, `submissions`, `friendships`, `group_invites`. All tables have RLS enabled.
 
 - `games.score_direction` is `'asc'` (lower is better) or `'desc'` (higher is better)
 - `submissions` are global (no `group_id`) with a unique constraint on `(user_id, game_id, game_date)` — one score per user per game per day. Groups query submissions by filtering on member user_ids.
-- Group membership is capped at 20 members (`MAX_GROUP_MEMBERS` in `$lib/constants.ts`), enforced server-side on join, accept invite, and invite friend actions.
-- Group ownership is tracked via `groups.created_by`; the owner must transfer ownership before leaving if other members exist
+- Group membership is capped at 20 members, enforced server-side on join, accept invite, and invite friend actions.
+- Group ownership is tracked via `groups.created_by`; the owner must transfer ownership before leaving if other members exist.
+- The `is_group_member()` helper function (security definer) is used in multiple RLS policies.
 
-## Conventions
+### Realtime
 
-### Svelte 5
+`group_members` is added to the `supabase_realtime` publication. The group detail page subscribes via `onMount`/`onDestroy` and calls `invalidateAll()` on changes. **Important**: always call `unsubscribeRealtime()` before submitting forms that navigate away (leave, delete, transfer) to avoid a race condition.
 
-This project uses Svelte 5 with runes mode enforced in `svelte.config.js`. Use `$props()`, `$state()`, `$derived()` — not the legacy Svelte 4 reactive syntax. **Avoid `$effect` for side effects** — use `onMount`/`onDestroy` lifecycle callbacks, `beforeNavigate`/`afterNavigate`, or `use:enhance` callbacks instead. Effects lose control and locality as the program grows; prefer explicit triggers over reactive ones.
+### Invite Links
 
-### Const Enum Pattern
+Groups use invite codes stored in `groups.invite_code`. The `/invite/[code]` route auto-joins the user and redirects to the group. Unauthenticated users are redirected to login with a `?redirect=` param that threads through OAuth.
 
-Svelte doesn't support TS `enum` in `.svelte` files. Use `as const` objects with a derived type instead:
+## UI Details
 
-```ts
-const TimeFilter = { All: 'all', Weekly: 'weekly' } as const;
-type TimeFilter = (typeof TimeFilter)[keyof typeof TimeFilter];
-```
-
-Use these in conditionals (`TimeFilter.All`) instead of raw string literals.
-
-### UI Patterns
-
-- **Cards**: Use `bg-base-200` for input/action cards (e.g. Submit Score), `border border-base-300` for display cards (e.g. Leaderboard, Recent Submissions).
-- **Navbar**: Text links with animated centered underline on hover/active. Hamburger menu on mobile. Main nav items (Games, Groups, Friends) on the left; Profile and Log Out on the right. Logo links to `/games` for logged-in users.
-- **Destructive actions**: Use `ConfirmModal` component. Separate Leave and Delete with `justify-between`. Delete button uses `btn-error btn-outline btn-sm`.
-- **Copy badge**: Uses inline SVG clipboard/checkmark icons, not text labels.
-- **Notifications**: Use the toast system (`toasts.push()`) for all user feedback (success, error). No inline alerts.
-
-### Formatting
-
-Prettier is configured with `prettier-plugin-svelte`. Run `npm run format` to format all source files. Config is in `hubdle/.prettierrc`.
+- **Navbar**: Games, Groups, Friends on the left. Logo links to `/games` for logged-in users.
+- **Group detail page**: Two tabs — Scores (heatmap + leaderboard) and Members.
+- **Games page**: Game cards with favicons, submit form (paste or manual), and submission history with edit/delete.
+- **Profile**: Stat cards (streak, friends count, favorite game), 7-day heatmap, submission history. Friends sub-page at `/users/[username]/friends`.
