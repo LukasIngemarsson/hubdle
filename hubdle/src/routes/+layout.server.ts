@@ -35,7 +35,8 @@ export const load: LayoutServerLoad = async ({ locals, cookies }) => {
 			.select('groups(id, name)')
 			.eq('user_id', user.id)
 			.is('left_at', null)
-			.limit(10);
+			.order('joined_at', { ascending: false })
+			.limit(3);
 		userGroups = (memberships ?? [])
 			.map((m) => m.groups as unknown as { id: string; name: string })
 			.filter(Boolean);

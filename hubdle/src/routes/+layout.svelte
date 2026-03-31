@@ -86,34 +86,27 @@
 					{#if data.user}
 						<div class="hidden items-center gap-4 sm:flex">
 							<NavLink href="/games" label="Games" />
-							<div class="relative flex items-center gap-1">
+							<!-- svelte-ignore a11y_no_static_element_interactions -->
+							<div
+								class="relative"
+								onmouseenter={() => { if (data.userGroups.length > 0) groupsOpen = true; }}
+								onmouseleave={() => (groupsOpen = false)}
+							>
 								<NavLink href="/groups" label="Groups" badge={data.groupInviteCount} />
-								{#if data.userGroups.length > 0}
-									<button
-										class="opacity-50 transition-opacity hover:opacity-100"
-										onclick={(e) => { e.stopPropagation(); groupsOpen = !groupsOpen; }}
-										aria-label="Quick access to groups"
-									>
-										<ChevronDownIcon class="h-3 w-3 transition-transform {groupsOpen ? 'rotate-180' : ''}" />
-									</button>
-								{/if}
 								{#if groupsOpen}
 									<div
-										class="absolute left-0 top-full z-40 mt-2 w-48 rounded-lg border border-base-300 bg-base-100 py-1 shadow-lg"
+										class="absolute left-0 top-full z-40 pt-2"
 									>
-										<a
-											href="/groups"
-											class="block px-4 py-2 text-sm font-medium hover:bg-base-200"
-											onclick={() => (groupsOpen = false)}>Your Groups</a
-										>
-										<div class="my-1 border-t border-base-300"></div>
-										{#each data.userGroups as group}
-											<a
-												href="/groups/{group.id}"
-												class="block truncate px-4 py-2 text-sm hover:bg-base-200"
-												onclick={() => (groupsOpen = false)}>{group.name}</a
-											>
-										{/each}
+										<div class="w-48 rounded-lg border border-base-300 bg-base-100 py-1 shadow-lg">
+											<p class="px-4 py-1.5 text-xs font-medium opacity-50">Frequently visited</p>
+											{#each data.userGroups.slice(0, 3) as group}
+												<a
+													href="/groups/{group.id}"
+													class="block truncate px-4 py-2 text-sm hover:bg-base-200"
+													onclick={() => (groupsOpen = false)}>{group.name}</a
+												>
+											{/each}
+										</div>
 									</div>
 								{/if}
 							</div>
