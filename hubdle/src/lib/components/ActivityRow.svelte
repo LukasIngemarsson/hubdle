@@ -121,7 +121,7 @@
 							editScore = activity.score;
 						}}
 					>
-						<PencilIcon class="h-3.5 w-3.5 opacity-50" />
+						<PencilIcon class="h-3.5 w-3.5" />
 					</button>
 					<button
 						type="button"
