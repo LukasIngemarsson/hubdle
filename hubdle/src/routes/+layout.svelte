@@ -45,19 +45,6 @@
 
 	let profileOpen = $state(false);
 	let groupsOpen = $state(false);
-	let groupsHoverTimeout: ReturnType<typeof setTimeout>;
-
-	function openGroupsDropdown() {
-		clearTimeout(groupsHoverTimeout);
-		if (data.userGroups.length > 0) {
-			groupsHoverTimeout = setTimeout(() => (groupsOpen = true), 200);
-		}
-	}
-
-	function closeGroupsDropdown() {
-		clearTimeout(groupsHoverTimeout);
-		groupsOpen = false;
-	}
 
 	async function handleLogout() {
 		menuOpen = false;
@@ -102,8 +89,8 @@
 							<!-- svelte-ignore a11y_no_static_element_interactions -->
 							<div
 								class="relative"
-								onmouseenter={openGroupsDropdown}
-								onmouseleave={closeGroupsDropdown}
+								onmouseenter={() => { if (data.userGroups.length > 0) groupsOpen = true; }}
+								onmouseleave={() => (groupsOpen = false)}
 							>
 								<NavLink href="/groups" label="Groups" badge={data.groupInviteCount} />
 								{#if groupsOpen}
