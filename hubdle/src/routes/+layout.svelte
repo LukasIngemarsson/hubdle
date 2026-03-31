@@ -243,7 +243,7 @@
 		</div>
 	{/if}
 
-	<main class="h-full overflow-y-auto">
+	<main class="h-full overflow-y-scroll">
 		{@render children()}
 	</main>
 </div>
