@@ -7,6 +7,7 @@ export const load: LayoutServerLoad = async ({ locals, cookies }) => {
 	let username: string | null = null;
 	let friendRequestCount = 0;
 	let groupInviteCount = 0;
+	let userGroups: { id: string; name: string }[] = [];
 	if (user) {
 		const { data: profile } = await locals.supabase
 			.from('profiles')
@@ -28,6 +29,17 @@ export const load: LayoutServerLoad = async ({ locals, cookies }) => {
 			.select('id', { count: 'exact', head: true })
 			.eq('invited_user_id', user.id);
 		groupInviteCount = inviteCount ?? 0;
+
+		const { data: memberships } = await locals.supabase
+			.from('group_members')
+			.select('groups(id, name)')
+			.eq('user_id', user.id)
+			.is('left_at', null)
+			.order('joined_at', { ascending: false })
+			.limit(3);
+		userGroups = (memberships ?? [])
+			.map((m) => m.groups as unknown as { id: string; name: string })
+			.filter(Boolean);
 	}
 
 	return {
@@ -36,6 +48,7 @@ export const load: LayoutServerLoad = async ({ locals, cookies }) => {
 		username,
 		friendRequestCount,
 		groupInviteCount,
+		userGroups,
 		cookies: cookies.getAll()
 	};
 };

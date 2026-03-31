@@ -31,6 +31,7 @@
 		clearTimeout(loadingTimeout);
 		showLoadingBar = true;
 		loadingDone = false;
+		groupsOpen = false;
 	});
 
 	afterNavigate(() => {
@@ -43,6 +44,7 @@
 	});
 
 	let profileOpen = $state(false);
+	let groupsOpen = $state(false);
 
 	async function handleLogout() {
 		menuOpen = false;
@@ -55,6 +57,7 @@
 <svelte:window
 	onclick={() => {
 		if (profileOpen) profileOpen = false;
+		if (groupsOpen) groupsOpen = false;
 	}}
 />
 
@@ -83,7 +86,30 @@
 					{#if data.user}
 						<div class="hidden items-center gap-4 sm:flex">
 							<NavLink href="/games" label="Games" />
-							<NavLink href="/groups" label="Groups" badge={data.groupInviteCount} />
+							<!-- svelte-ignore a11y_no_static_element_interactions -->
+							<div
+								class="relative"
+								onmouseenter={() => { if (data.userGroups.length > 0) groupsOpen = true; }}
+								onmouseleave={() => (groupsOpen = false)}
+							>
+								<NavLink href="/groups" label="Groups" badge={data.groupInviteCount} />
+								{#if groupsOpen}
+									<div
+										class="absolute left-0 top-full z-40 pt-2"
+									>
+										<div class="w-48 rounded-lg border border-base-300 bg-base-100 py-1 shadow-lg">
+											<p class="px-4 py-1.5 text-xs font-medium opacity-50">Frequently visited</p>
+											{#each data.userGroups.slice(0, 3) as group}
+												<a
+													href="/groups/{group.id}"
+													class="block truncate px-4 py-2 text-sm hover:bg-base-200"
+													onclick={() => (groupsOpen = false)}>{group.name}</a
+												>
+											{/each}
+										</div>
+									</div>
+								{/if}
+							</div>
 							<NavLink href="/friends" label="Friends" badge={data.friendRequestCount} />
 						</div>
 					{/if}
@@ -188,6 +214,17 @@
 							>{data.groupInviteCount}</span
 						>{/if}</a
 				>
+				{#if data.userGroups.length > 0}
+					<div class="flex flex-col gap-2 pl-4">
+						{#each data.userGroups as group}
+							<a
+								href="/groups/{group.id}"
+								class="text-sm opacity-70"
+								onclick={() => (menuOpen = false)}>{group.name}</a
+							>
+						{/each}
+					</div>
+				{/if}
 				<a href="/friends" class="text-sm" onclick={() => (menuOpen = false)}
 					>Friends{#if data.friendRequestCount > 0}<span class="badge badge-primary badge-xs ml-1"
 							>{data.friendRequestCount}</span
