@@ -2,6 +2,8 @@
 	import { enhance } from '$app/forms';
 	import { GAME_RULES } from '$lib/game-rules';
 	import { toasts } from '$lib/stores/toast.svelte';
+	import PencilIcon from '$lib/components/icons/PencilIcon.svelte';
+	import TrashIcon from '$lib/components/icons/TrashIcon.svelte';
 
 	let {
 		activity,
@@ -112,17 +114,23 @@
 				<div class="flex justify-end gap-1">
 					<button
 						type="button"
-						class="btn btn-ghost btn-xs"
+						class="btn btn-ghost btn-xs btn-square"
+						aria-label="Edit"
 						onclick={() => {
 							editingId = activity.id;
 							editScore = activity.score;
-						}}>Edit</button
+						}}
 					>
+						<PencilIcon class="h-3.5 w-3.5 opacity-50" />
+					</button>
 					<button
 						type="button"
-						class="btn btn-ghost btn-xs text-error"
-						onclick={() => (deletingId = activity.id)}>Delete</button
+						class="btn btn-ghost btn-xs btn-square text-error"
+						aria-label="Delete"
+						onclick={() => (deletingId = activity.id)}
 					>
+						<TrashIcon class="h-3.5 w-3.5" />
+					</button>
 				</div>
 			{/if}
 		</td>

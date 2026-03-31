@@ -19,6 +19,7 @@ export const load: LayoutLoad = async ({ data, fetch }) => {
 		avatarUrl: data.avatarUrl,
 		username: data.username,
 		friendRequestCount: data.friendRequestCount,
-		groupInviteCount: data.groupInviteCount
+		groupInviteCount: data.groupInviteCount,
+		userGroups: data.userGroups
 	};
 };

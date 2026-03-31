@@ -149,9 +149,7 @@
 				const gameData = games.find((g) => g.id === gameId);
 				const ascending = gameData ? gameData.score_direction === 'asc' : true;
 
-				const sorted = [...scores.entries()].sort(([, a], [, b]) =>
-					ascending ? a - b : b - a
-				);
+				const sorted = [...scores.entries()].sort(([, a], [, b]) => (ascending ? a - b : b - a));
 
 				for (let i = 0; i < sorted.length; i++) {
 					const [userId] = sorted[i];

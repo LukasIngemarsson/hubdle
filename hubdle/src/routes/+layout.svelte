@@ -31,6 +31,7 @@
 		clearTimeout(loadingTimeout);
 		showLoadingBar = true;
 		loadingDone = false;
+		groupsOpen = false;
 	});
 
 	afterNavigate(() => {
@@ -43,6 +44,7 @@
 	});
 
 	let profileOpen = $state(false);
+	let groupsOpen = $state(false);
 
 	async function handleLogout() {
 		menuOpen = false;
@@ -55,6 +57,7 @@
 <svelte:window
 	onclick={() => {
 		if (profileOpen) profileOpen = false;
+		if (groupsOpen) groupsOpen = false;
 	}}
 />
 
@@ -83,7 +86,48 @@
 					{#if data.user}
 						<div class="hidden items-center gap-4 sm:flex">
 							<NavLink href="/games" label="Games" />
-							<NavLink href="/groups" label="Groups" badge={data.groupInviteCount} />
+							<div class="relative">
+								<button
+									class="flex items-center gap-1 opacity-70 transition-colors hover:opacity-100 {$page.url.pathname.startsWith(
+										'/groups'
+									)
+										? 'font-semibold !opacity-100'
+										: ''}"
+									onclick={(e) => {
+										e.stopPropagation();
+										groupsOpen = !groupsOpen;
+									}}
+								>
+									<span class="text-sm">Groups</span>
+									{#if data.groupInviteCount > 0}<span class="badge badge-primary badge-xs"
+											>{data.groupInviteCount}</span
+										>{/if}
+									<ChevronDownIcon
+										class="h-3 w-3 opacity-50 transition-transform {groupsOpen ? 'rotate-180' : ''}"
+									/>
+								</button>
+								{#if groupsOpen}
+									<div
+										class="absolute left-0 top-full z-40 mt-2 w-48 rounded-lg border border-base-300 bg-base-100 py-1 shadow-lg"
+									>
+										<a
+											href="/groups"
+											class="block px-4 py-2 text-sm font-medium hover:bg-base-200"
+											onclick={() => (groupsOpen = false)}>All Groups</a
+										>
+										{#if data.userGroups.length > 0}
+											<div class="my-1 border-t border-base-300"></div>
+											{#each data.userGroups as group}
+												<a
+													href="/groups/{group.id}"
+													class="block truncate px-4 py-2 text-sm hover:bg-base-200"
+													onclick={() => (groupsOpen = false)}>{group.name}</a
+												>
+											{/each}
+										{/if}
+									</div>
+								{/if}
+							</div>
 							<NavLink href="/friends" label="Friends" badge={data.friendRequestCount} />
 						</div>
 					{/if}
@@ -188,6 +232,17 @@
 							>{data.groupInviteCount}</span
 						>{/if}</a
 				>
+				{#if data.userGroups.length > 0}
+					<div class="flex flex-col gap-2 pl-4">
+						{#each data.userGroups as group}
+							<a
+								href="/groups/{group.id}"
+								class="text-sm opacity-70"
+								onclick={() => (menuOpen = false)}>{group.name}</a
+							>
+						{/each}
+					</div>
+				{/if}
 				<a href="/friends" class="text-sm" onclick={() => (menuOpen = false)}
 					>Friends{#if data.friendRequestCount > 0}<span class="badge badge-primary badge-xs ml-1"
 							>{data.friendRequestCount}</span
