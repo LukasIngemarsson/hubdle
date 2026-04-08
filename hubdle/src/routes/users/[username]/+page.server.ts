@@ -16,12 +16,6 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 
 	const isOwnProfile = user?.id === profile.id;
 
-	const { count: totalGroups } = await locals.supabase
-		.from('group_members')
-		.select('group_id', { count: 'exact', head: true })
-		.eq('user_id', profile.id)
-		.is('left_at', null);
-
 	const { data: submissions } = await locals.supabase
 		.from('submissions')
 		.select('id, score, game_id, game_date, games(name, score_direction)')
@@ -147,16 +141,18 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 	}
 
 	// Friend count
-	const { count: friendCountAsReq } = await locals.supabase
-		.from('friendships')
-		.select('id', { count: 'exact', head: true })
-		.eq('requester_id', profile.id)
-		.eq('status', 'accepted');
-	const { count: friendCountAsAddr } = await locals.supabase
-		.from('friendships')
-		.select('id', { count: 'exact', head: true })
-		.eq('addressee_id', profile.id)
-		.eq('status', 'accepted');
+	const [{ count: friendCountAsReq }, { count: friendCountAsAddr }] = await Promise.all([
+		locals.supabase
+			.from('friendships')
+			.select('id', { count: 'exact', head: true })
+			.eq('requester_id', profile.id)
+			.eq('status', 'accepted'),
+		locals.supabase
+			.from('friendships')
+			.select('id', { count: 'exact', head: true })
+			.eq('addressee_id', profile.id)
+			.eq('status', 'accepted')
+	]);
 	const friendCount = (friendCountAsReq ?? 0) + (friendCountAsAddr ?? 0);
 
 	return {

@@ -35,20 +35,18 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 					.order('created_at', { ascending: false })
 			: { data: [] };
 
-	const { data: games } = await locals.supabase
-		.from('games')
-		.select('id, name, url, score_direction');
-
-	// Fetch all friendships (accepted + pending) to show status on member list
-	const { data: friendshipsAsRequester } = await locals.supabase
-		.from('friendships')
-		.select('addressee_id, status')
-		.eq('requester_id', user.id);
-
-	const { data: friendshipsAsAddressee } = await locals.supabase
-		.from('friendships')
-		.select('requester_id, status')
-		.eq('addressee_id', user.id);
+	const [{ data: games }, { data: friendshipsAsRequester }, { data: friendshipsAsAddressee }] =
+		await Promise.all([
+			locals.supabase.from('games').select('id, name, url, score_direction'),
+			locals.supabase
+				.from('friendships')
+				.select('addressee_id, status')
+				.eq('requester_id', user.id),
+			locals.supabase
+				.from('friendships')
+				.select('requester_id, status')
+				.eq('addressee_id', user.id)
+		]);
 
 	// Map of user_id -> friendship status for all members
 	const friendshipStatusMap: Record<string, string> = {};
