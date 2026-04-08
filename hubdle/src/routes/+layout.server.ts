@@ -9,35 +9,36 @@ export const load: LayoutServerLoad = async ({ locals, cookies }) => {
 	let groupInviteCount = 0;
 	let userGroups: { id: string; name: string }[] = [];
 	if (user) {
-		const { data: profile } = await locals.supabase
-			.from('profiles')
-			.select('username, avatar_url')
-			.eq('id', user.id)
-			.single();
-		avatarUrl = profile?.avatar_url ?? null;
-		username = profile?.username ?? null;
+		const [profileResult, friendCountResult, inviteCountResult, membershipsResult] =
+			await Promise.all([
+				locals.supabase
+					.from('profiles')
+					.select('username, avatar_url')
+					.eq('id', user.id)
+					.single(),
+				locals.supabase
+					.from('friendships')
+					.select('id', { count: 'exact', head: true })
+					.eq('addressee_id', user.id)
+					.eq('status', 'pending'),
+				locals.supabase
+					.from('group_invites')
+					.select('id', { count: 'exact', head: true })
+					.eq('invited_user_id', user.id),
+				locals.supabase
+					.from('group_members')
+					.select('groups(id, name)')
+					.eq('user_id', user.id)
+					.is('left_at', null)
+					.order('joined_at', { ascending: false })
+					.limit(3)
+			]);
 
-		const { count } = await locals.supabase
-			.from('friendships')
-			.select('id', { count: 'exact', head: true })
-			.eq('addressee_id', user.id)
-			.eq('status', 'pending');
-		friendRequestCount = count ?? 0;
-
-		const { count: inviteCount } = await locals.supabase
-			.from('group_invites')
-			.select('id', { count: 'exact', head: true })
-			.eq('invited_user_id', user.id);
-		groupInviteCount = inviteCount ?? 0;
-
-		const { data: memberships } = await locals.supabase
-			.from('group_members')
-			.select('groups(id, name)')
-			.eq('user_id', user.id)
-			.is('left_at', null)
-			.order('joined_at', { ascending: false })
-			.limit(3);
-		userGroups = (memberships ?? [])
+		avatarUrl = profileResult.data?.avatar_url ?? null;
+		username = profileResult.data?.username ?? null;
+		friendRequestCount = friendCountResult.count ?? 0;
+		groupInviteCount = inviteCountResult.count ?? 0;
+		userGroups = (membershipsResult.data ?? [])
 			.map((m) => m.groups as unknown as { id: string; name: string })
 			.filter(Boolean);
 	}
